@@ -26,9 +26,21 @@ if (!function_exists('sanitize_text_field')) { function sanitize_text_field($v){
 if (!function_exists('wp_parse_args')) { function wp_parse_args($a,$b){return array_merge($b,$a);} }
 if (!function_exists('get_option')) { function get_option(...$args){return []; } }
 if (!function_exists('esc_attr')) { function esc_attr($v){return $v;} }
+if (!function_exists('esc_html')) { function esc_html($v){return $v;} }
 if (!function_exists('wp_json_encode')) { function wp_json_encode($v){return json_encode($v);} }
 if (!function_exists('wp_remote_post')) { function wp_remote_post(...$args) {} }
 if (!function_exists('wp_unslash')) { function wp_unslash($v){return $v;} }
+if (!function_exists('wp_create_nonce')) { function wp_create_nonce(...$args){return 'nonce';} }
+if (!function_exists('current_user_can')) { function current_user_can(...$args){return true;} }
+if (!function_exists('wp_die')) { function wp_die($msg=''){return; } }
+if (!function_exists('wp_verify_nonce')) { function wp_verify_nonce(...$args){return true;} }
+if (!function_exists('admin_url')) { function admin_url($p=''){return $p;} }
+if (!function_exists('add_query_arg')) { function add_query_arg($args,$url=''){return $url;} }
+if (!function_exists('wp_redirect')) { function wp_redirect($u){return; } }
+if (!function_exists('wp_remote_get')) { function wp_remote_get(...$args){return ['response'=>['code'=>200],'body'=>'{}'];} }
+if (!function_exists('is_wp_error')) { function is_wp_error($thing){return false;} }
+if (!function_exists('wp_remote_retrieve_response_code')) { function wp_remote_retrieve_response_code($resp){return is_array($resp)&&isset($resp['response']['code'])?$resp['response']['code']:200;} }
+if (!function_exists('wp_remote_retrieve_body')) { function wp_remote_retrieve_body($resp){return is_array($resp)&&isset($resp['body'])?$resp['body']:'';} }
 
 if (!class_exists('WPCF7_Submission')) { class WPCF7_Submission { public static function get_instance(){ return null; } public function get_posted_data(){ return []; } } }
 
@@ -38,6 +50,7 @@ class Echo5_Leads_Connector {
     public function __construct() {
         add_action('admin_init', [$this, 'register_settings']);
         add_action('admin_menu', [$this, 'add_settings_page']);
+        add_action('admin_post_e5d_leads_test_connection', [$this, 'handle_test_connection']);
         // Hooks for supported form plugins
         add_action('elementor_pro/forms/new_record', [$this, 'on_elementor_submit'], 10, 2);
         add_action('wpcf7_mail_sent', [$this, 'on_cf7_submit'], 10, 1);
@@ -74,12 +87,75 @@ class Echo5_Leads_Connector {
 
     public function add_settings_page() {
         add_options_page('Echo5 Leads', 'Echo5 Leads', 'manage_options', 'e5d-leads', function() {
-            echo '<div class="wrap"><h1>Echo5 Leads</h1><form method="post" action="options.php">';
+            // Admin notices for test connection
+            if (isset($_GET['e5d_test_result'])) {
+                $class = $_GET['e5d_test_result'] === 'ok' ? 'updated' : 'error';
+                $msg = isset($_GET['e5d_test_message']) ? esc_html($_GET['e5d_test_message']) : ($_GET['e5d_test_result'] === 'ok' ? 'Connection successful.' : 'Connection failed.');
+                echo '<div class="' . $class . ' notice is-dismissible"><p>' . $msg . '</p></div>';
+            }
+
+            echo '<div class="wrap"><h1>Echo5 Leads</h1>';
+            // Test Connection form
+            $action_url = admin_url('admin-post.php');
+            echo '<form method="post" action="' . esc_attr($action_url) . '" style="margin: 0 0 16px 0;">';
+            echo '<input type="hidden" name="action" value="e5d_leads_test_connection" />';
+            echo '<input type="hidden" name="_wpnonce" value="' . esc_attr(wp_create_nonce('e5d_leads_test_connection')) . '" />';
+            echo '<button type="submit" class="button">Test Connection</button>';
+            echo '</form>';
+
+            echo '<form method="post" action="options.php">';
             settings_fields('e5d_leads_group');
             do_settings_sections('e5d_leads');
             submit_button();
             echo '</form></div>';
         });
+    }
+
+    public function handle_test_connection() {
+        if (!current_user_can('manage_options')) {
+            wp_die('Forbidden');
+        }
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'e5d_leads_test_connection')) {
+            wp_die('Invalid nonce');
+        }
+
+        $s = $this->get_settings();
+        $base = isset($s['api_base']) ? trim($s['api_base']) : '';
+        $key  = isset($s['api_key']) ? $s['api_key'] : '';
+
+        $redirect = add_query_arg([], admin_url('options-general.php?page=e5d-leads'));
+
+        if (empty($base) || empty($key)) {
+            wp_redirect(add_query_arg(['e5d_test_result' => 'err', 'e5d_test_message' => rawurlencode('Please save API Base URL and Tenant API Key first.')], $redirect));
+            exit;
+        }
+        if (stripos($base, 'https://') !== 0) {
+            wp_redirect(add_query_arg(['e5d_test_result' => 'err', 'e5d_test_message' => rawurlencode('API Base must use HTTPS.')], $redirect));
+            exit;
+        }
+
+        $url = rtrim($base, '/') . '/api/leads?page=1&limit=1';
+        $resp = wp_remote_get($url, [
+            'timeout' => 5,
+            'headers' => [ 'X-Tenant-Key' => $key ],
+        ]);
+
+        if (is_wp_error($resp)) {
+            $msg = 'Request error: ' . $resp->get_error_message();
+            wp_redirect(add_query_arg(['e5d_test_result' => 'err', 'e5d_test_message' => rawurlencode($msg)], $redirect));
+            exit;
+        }
+
+        $code = wp_remote_retrieve_response_code($resp);
+        if ($code >= 200 && $code < 300) {
+            wp_redirect(add_query_arg(['e5d_test_result' => 'ok', 'e5d_test_message' => rawurlencode('Connection successful.')], $redirect));
+            exit;
+        }
+
+        $body = wp_remote_retrieve_body($resp);
+        $msg = 'HTTP ' . $code . ' ' . substr($body, 0, 200);
+        wp_redirect(add_query_arg(['e5d_test_result' => 'err', 'e5d_test_message' => rawurlencode($msg)], $redirect));
+        exit;
     }
 
     private function fire_and_forget($payload) {
