@@ -20,3 +20,4 @@ wp-plugin/_audit_source/echo5lead/admin/class-oal-leads-list-table.php
 wp-plugin/_audit_source/echo5lead/admin/js/add-lead.js
 wp-plugin/_audit_source/echo5lead/admin/js/dashboard-admin.js
 wp-plugin/_audit_source/echo5lead/admin/js/leads-admin.js
+.vercel
