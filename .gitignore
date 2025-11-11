@@ -1,0 +1,16 @@
+echo5lead.zip
+node_modules/
+dist/
+.env
+.vscode/
+.DS_Store
+.idea/
+*.log
+*.tmp
+wp-plugin/_audit_source/echo5lead/echo5-leads-manager.php
+wp-plugin/_audit_source/echo5lead/facebook-integration-guide.md
+wp-plugin/_audit_source/echo5lead/admin/admin-pages.php
+wp-plugin/_audit_source/echo5lead/admin/class-oal-leads-list-table.php
+wp-plugin/_audit_source/echo5lead/admin/js/add-lead.js
+wp-plugin/_audit_source/echo5lead/admin/js/dashboard-admin.js
+wp-plugin/_audit_source/echo5lead/admin/js/leads-admin.js
