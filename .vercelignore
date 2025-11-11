@@ -2,6 +2,7 @@
 wp-plugin/
 wp-plugin/**
 wp-plugin/_audit_source/**
+*.php
 echo5lead.zip
 *.log
 .DS_Store
