@@ -7,6 +7,12 @@ dist/
 .idea/
 *.log
 *.tmp
+
+# WordPress plugin - keep local but don't track in git (prevents Vercel PHP detection)
+wp-plugin/echo5-leads-connector/*.php
+wp-plugin/echo5-leads-connector/*.txt
+
+# Audit source
 wp-plugin/_audit_source/echo5lead/echo5-leads-manager.php
 wp-plugin/_audit_source/echo5lead/facebook-integration-guide.md
 wp-plugin/_audit_source/echo5lead/admin/admin-pages.php
