@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd vercel-api && npm install",
+  "outputDirectory": "vercel-api",
+  "functions": {
+    "vercel-api/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
