@@ -8,7 +8,9 @@
     "dev": "node --watch index.js",
     "start": "node index.js",
     "seed": "node ./scripts/seed-tenant.js",
-    "test:ingest": "node ./scripts/test-ingest.js"
+    "test:ingest": "node ./scripts/test-ingest.js",
+    "test:meta": "node ./scripts/test-meta.js",
+    "test:google": "node ./scripts/test-google.js"
   },
   "dependencies": {
     "express": "^4.18.2",
