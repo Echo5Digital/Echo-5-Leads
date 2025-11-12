@@ -18,6 +18,8 @@ import createTenantRoute from './src/routes/create-tenant.js';
 import getTenantRoute from './src/routes/get-tenant.js';
 import updateTenantRoute from './src/routes/update-tenant.js';
 import deleteTenantRoute from './src/routes/delete-tenant.js';
+import { verifyWebhook as metaVerifyWebhook, handleWebhook as metaHandleWebhook } from './src/routes/ingest-meta-lead.js';
+import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 
 dotenv.config();
 
@@ -39,6 +41,14 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.post('/api/ingest/lead', ingestLeadRoute);
+
+// Meta (Facebook/Instagram) Lead Ads Webhook
+app.get('/api/ingest/meta-lead', metaVerifyWebhook);
+app.post('/api/ingest/meta-lead', metaHandleWebhook);
+
+// Google Ads Lead Form Webhook
+app.post('/api/ingest/google-lead', handleGoogleLead);
+
 app.get('/api/leads', leadsRoute);
 app.get('/api/leads/:id', leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
