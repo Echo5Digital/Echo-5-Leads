@@ -8,6 +8,16 @@ import ingestLeadRoute from './src/routes/ingest-lead.js';
 import leadsRoute from './src/routes/leads.js';
 import leadDetailRoute from './src/routes/lead-detail.js';
 import leadActivityRoute from './src/routes/lead-activity.js';
+import dashboardStatsRoute from './src/routes/dashboard-stats.js';
+import updateLeadRoute from './src/routes/update-lead.js';
+import exportLeadsRoute from './src/routes/export-leads.js';
+import tenantConfigRoute from './src/routes/tenant-config.js';
+import updateTenantConfigRoute from './src/routes/update-tenant-config.js';
+import listTenantsRoute from './src/routes/list-tenants.js';
+import createTenantRoute from './src/routes/create-tenant.js';
+import getTenantRoute from './src/routes/get-tenant.js';
+import updateTenantRoute from './src/routes/update-tenant.js';
+import deleteTenantRoute from './src/routes/delete-tenant.js';
 
 dotenv.config();
 
@@ -32,6 +42,18 @@ app.post('/api/ingest/lead', ingestLeadRoute);
 app.get('/api/leads', leadsRoute);
 app.get('/api/leads/:id', leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
+app.put('/api/leads/:id', updateLeadRoute);
+app.get('/api/dashboard/stats', dashboardStatsRoute);
+app.get('/api/leads/export/csv', exportLeadsRoute);
+app.get('/api/tenant/config', tenantConfigRoute);
+app.put('/api/tenant/config', updateTenantConfigRoute);
+
+// Tenant Management (Admin)
+app.get('/api/tenants', listTenantsRoute);
+app.post('/api/tenants', createTenantRoute);
+app.get('/api/tenants/:id', getTenantRoute);
+app.put('/api/tenants/:id', updateTenantRoute);
+app.delete('/api/tenants/:id', deleteTenantRoute);
 
 // Error handling
 app.use((err, req, res, next) => {

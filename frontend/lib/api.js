@@ -39,6 +39,14 @@ export const leadsApi = {
     return apiRequest(`/api/leads/${id}`);
   },
 
+  // Update lead
+  async updateLead(id, data) {
+    return apiRequest(`/api/leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   // Add activity to lead
   async addActivity(leadId, data) {
     return apiRequest(`/api/leads/${leadId}/activity`, {
@@ -47,15 +55,82 @@ export const leadsApi = {
     });
   },
 
-  // Ingest lead (for testing)
+  // Ingest lead (for testing or manual add)
   async ingestLead(data) {
     return apiRequest('/api/ingest/lead', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
+
+  // Get dashboard stats
+  async getDashboardStats() {
+    return apiRequest('/api/dashboard/stats');
+  },
+
+  // Export leads as CSV
+  exportLeadsUrl(params = {}) {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    });
+    const query = queryParams.toString();
+    return `${API_URL}/api/leads/export/csv${query ? `?${query}` : ''}`;
+  },
+
+  // Get tenant configuration
+  async getTenantConfig() {
+    return apiRequest('/api/tenant/config');
+  },
+
+  // Update tenant configuration
+  async updateTenantConfig(data) {
+    return apiRequest('/api/tenant/config', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
+// Tenant Management API (Admin)
+export const tenantsApi = {
+  // List all tenants
+  async listTenants() {
+    return apiRequest('/api/tenants');
+  },
+
+  // Get specific tenant
+  async getTenant(id) {
+    return apiRequest(`/api/tenants/${id}`);
+  },
+
+  // Create new tenant
+  async createTenant(data) {
+    return apiRequest('/api/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Update tenant
+  async updateTenant(id, data) {
+    return apiRequest(`/api/tenants/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete tenant
+  async deleteTenant(id) {
+    return apiRequest(`/api/tenants/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// Default stages (fallback if tenant config not loaded)
 export const STAGES = [
   'new',
   'contacted',
