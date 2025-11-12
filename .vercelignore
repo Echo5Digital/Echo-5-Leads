@@ -1,8 +1,0 @@
-# Exclude WordPress plugin and local artifacts from Vercel deployments
-wp-plugin/
-wp-plugin/**
-wp-plugin/_audit_source/**
-*.php
-echo5lead.zip
-*.log
-.DS_Store
