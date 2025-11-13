@@ -199,10 +199,14 @@ export default function ClientDetailPage() {
             </Link>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Created</div>
-            <div className="text-lg font-bold text-gray-900">
-              {new Date(client.createdAt).toLocaleDateString()}
-            </div>
+            <div className="text-sm text-gray-600">Configuration</div>
+            <div className="text-2xl font-bold text-gray-900">{formData.stages?.length || 0} Stages</div>
+            <Link 
+              href={`/clients/${params.id}/settings`}
+              className="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block"
+            >
+              Edit Settings →
+            </Link>
           </div>
         </div>
 
