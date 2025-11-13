@@ -11,15 +11,5 @@
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/sla-check",
-      "schedule": "0 */4 * * *"
-    },
-    {
-      "path": "/api/cron/meta-fetch",
-      "schedule": "*/10 * * * *"
-    }
   ]
 }

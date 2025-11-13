@@ -380,16 +380,71 @@ class Echo5_Leads_Connector {
         $raw_fields = $record->get('fields');
         $fields = [];
         
+        // Extract field values with their IDs
         foreach ($raw_fields as $id => $field) {
             $fields[$id] = $field['value'];
         }
         
+        // Smart field detection - search for email/name patterns
+        $first_name = '';
+        $last_name = '';
+        $email = '';
+        $phone = '';
+        
+        foreach ($raw_fields as $id => $field) {
+            $field_type = $field['type'] ?? '';
+            $field_title = strtolower($field['title'] ?? '');
+            $field_id_lower = strtolower($id);
+            $value = $field['value'] ?? '';
+            
+            // Detect email
+            if ($field_type === 'email' || 
+                strpos($field_id_lower, 'email') !== false || 
+                strpos($field_title, 'email') !== false) {
+                $email = $value;
+            }
+            
+            // Detect phone
+            if ($field_type === 'tel' || 
+                strpos($field_id_lower, 'phone') !== false || 
+                strpos($field_title, 'phone') !== false) {
+                $phone = $value;
+            }
+            
+            // Detect first name
+            if (strpos($field_id_lower, 'first') !== false || 
+                strpos($field_title, 'first') !== false ||
+                $field_id_lower === 'name') {
+                $first_name = $value;
+            }
+            
+            // Detect last name
+            if (strpos($field_id_lower, 'last') !== false || 
+                strpos($field_title, 'last') !== false) {
+                $last_name = $value;
+            }
+        }
+        
+        // Fallback: use direct field IDs if smart detection didn't work
+        if (empty($first_name)) {
+            $first_name = $fields['first_name'] ?? $fields['name'] ?? '';
+        }
+        if (empty($last_name)) {
+            $last_name = $fields['last_name'] ?? '';
+        }
+        if (empty($email)) {
+            $email = $fields['email'] ?? '';
+        }
+        if (empty($phone)) {
+            $phone = $fields['phone'] ?? '';
+        }
+        
         // Build payload
         $payload = [
-            'first_name' => $fields['first_name'] ?? $fields['name'] ?? '',
-            'last_name' => $fields['last_name'] ?? '',
-            'email' => $fields['email'] ?? '',
-            'phone' => $fields['phone'] ?? '',
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $email,
+            'phone' => $phone,
             'city' => $fields['city'] ?? '',
             'interest' => $fields['interest'] ?? '',
             'have_children' => $fields['have_children'] ?? '',
@@ -397,6 +452,9 @@ class Echo5_Leads_Connector {
             'source' => 'website-elementor',
             'form_id' => $record->get('form_settings')['form_id'] ?? 'unknown',
         ];
+        
+        // Log for debugging (will only show if WP_DEBUG_LOG is enabled)
+        error_log('[Echo5 Leads] Elementor form captured: ' . json_encode($payload));
         
         $this->send_to_api($payload);
     }
