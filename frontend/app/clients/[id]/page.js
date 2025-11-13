@@ -191,6 +191,12 @@ export default function ClientDetailPage() {
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600">Active API Keys</div>
             <div className="text-2xl font-bold text-gray-900">{client.apiKeys?.filter(k => k.active).length || 0}</div>
+            <Link 
+              href={`/clients/${params.id}/api-keys`}
+              className="text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block"
+            >
+              Manage Keys →
+            </Link>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600">Created</div>

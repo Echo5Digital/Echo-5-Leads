@@ -6,11 +6,16 @@ import Link from 'next/link';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [overdueData, setOverdueData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
   useEffect(() => {
     loadStats();
+    loadOverdueLeads();
   }, []);
 
   async function loadStats() {
@@ -23,6 +28,18 @@ export default function Dashboard() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadOverdueLeads() {
+    try {
+      const response = await fetch(`${API_URL}/api/sla/overdue`, {
+        headers: { 'X-Tenant-Key': API_KEY },
+      });
+      const data = await response.json();
+      setOverdueData(data);
+    } catch (err) {
+      console.error('Failed to load overdue leads:', err);
     }
   }
 
@@ -85,9 +102,16 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm font-medium text-gray-500 mb-2">% Within SLA</div>
-            <div className="text-4xl font-bold text-gray-900">{stats.pctWithinSLA.toFixed(1)}%</div>
+          <div className={`bg-white rounded-lg shadow p-6 ${overdueData?.totalOverdue > 0 ? 'border-2 border-red-400' : ''}`}>
+            <div className="text-sm font-medium text-gray-500 mb-2">
+              {overdueData?.totalOverdue > 0 ? '⚠️ Overdue Leads' : '% Within SLA'}
+            </div>
+            <div className={`text-4xl font-bold ${overdueData?.totalOverdue > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              {overdueData?.totalOverdue > 0 ? overdueData.totalOverdue : `${stats.pctWithinSLA.toFixed(1)}%`}
+            </div>
+            {overdueData?.totalOverdue > 0 && (
+              <p className="text-sm text-red-600 mt-2">Require immediate attention</p>
+            )}
           </div>
         </div>
 
