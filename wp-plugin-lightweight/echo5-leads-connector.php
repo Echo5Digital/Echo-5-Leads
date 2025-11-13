@@ -375,86 +375,128 @@ class Echo5_Leads_Connector {
     /**
      * Capture Elementor form submission and send to Echo5 API
      */
+    /**
+     * Universal field detector - works with any form structure
+     * Uses multi-layer detection: type, label, id, placeholder, pattern matching
+     */
+    private function detect_field_type($field, $id) {
+        $field_type = strtolower($field['type'] ?? '');
+        $field_title = strtolower($field['title'] ?? '');
+        $field_id = strtolower($id);
+        $field_placeholder = strtolower($field['placeholder'] ?? '');
+        $value = $field['value'] ?? '';
+        
+        // Combine all searchable text
+        $search_text = $field_title . ' ' . $field_id . ' ' . $field_placeholder;
+        
+        // EMAIL Detection
+        if ($field_type === 'email' || 
+            $this->contains_any($search_text, ['email', 'e-mail', 'mail', 'correo'])) {
+            return ['type' => 'email', 'value' => $value];
+        }
+        
+        // PHONE Detection
+        if ($field_type === 'tel' || 
+            $this->contains_any($search_text, ['phone', 'mobile', 'cell', 'telephone', 'tel', 'contact number', 'número'])) {
+            return ['type' => 'phone', 'value' => $value];
+        }
+        
+        // Detect phone from 'number' type fields (only if context suggests phone)
+        if ($field_type === 'number' && 
+            $this->contains_any($search_text, ['phone', 'mobile', 'cell', 'tel'])) {
+            return ['type' => 'phone', 'value' => $value];
+        }
+        
+        // FIRST NAME Detection
+        if ($this->contains_any($search_text, ['first name', 'firstname', 'first_name', 'fname', 'given name', 'nombre', 'prénom'])) {
+            return ['type' => 'first_name', 'value' => $value];
+        }
+        
+        // LAST NAME Detection
+        if ($this->contains_any($search_text, ['last name', 'lastname', 'last_name', 'lname', 'surname', 'family name', 'apellido', 'nom de famille'])) {
+            return ['type' => 'last_name', 'value' => $value];
+        }
+        
+        // FULL NAME Detection (if not first/last)
+        if ($this->contains_any($search_text, ['full name', 'fullname', 'name', 'your name', 'nombre completo', 'nom complet']) &&
+            !$this->contains_any($search_text, ['first', 'last', 'company', 'business'])) {
+            return ['type' => 'full_name', 'value' => $value];
+        }
+        
+        // CITY Detection
+        if ($this->contains_any($search_text, ['city', 'ciudad', 'ville'])) {
+            return ['type' => 'city', 'value' => $value];
+        }
+        
+        return null; // Not a field we recognize
+    }
+    
+    /**
+     * Helper: Check if text contains any of the keywords
+     */
+    private function contains_any($text, $keywords) {
+        foreach ($keywords as $keyword) {
+            if (strpos($text, $keyword) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public function capture_elementor_form($record, $handler) {
         // Get form fields
         $raw_fields = $record->get('fields');
-        $fields = [];
         
-        // Extract field values with their IDs
+        // Debug: Log raw field structure (only if WP_DEBUG_LOG enabled)
+        error_log('[Echo5 Leads] Elementor RAW fields: ' . json_encode($raw_fields));
+        
+        // Use universal field detector
+        $detected_fields = [
+            'first_name' => '',
+            'last_name' => '',
+            'email' => '',
+            'phone' => '',
+            'city' => '',
+            'full_name' => '' // For forms with single name field
+        ];
+        
         foreach ($raw_fields as $id => $field) {
-            $fields[$id] = $field['value'];
-        }
-        
-        // Smart field detection - search for email/name patterns
-        $first_name = '';
-        $last_name = '';
-        $email = '';
-        $phone = '';
-        
-        foreach ($raw_fields as $id => $field) {
-            $field_type = $field['type'] ?? '';
-            $field_title = strtolower($field['title'] ?? '');
-            $field_id_lower = strtolower($id);
-            $value = $field['value'] ?? '';
+            $value = trim($field['value'] ?? '');
             
-            // Detect email
-            if ($field_type === 'email' || 
-                strpos($field_id_lower, 'email') !== false || 
-                strpos($field_title, 'email') !== false) {
-                $email = $value;
+            // Skip empty values
+            if (empty($value)) {
+                continue;
             }
             
-            // Detect phone
-            if ($field_type === 'tel' || 
-                strpos($field_id_lower, 'phone') !== false || 
-                strpos($field_title, 'phone') !== false) {
-                $phone = $value;
-            }
+            $detected = $this->detect_field_type($field, $id);
             
-            // Detect first name
-            if (strpos($field_id_lower, 'first') !== false || 
-                strpos($field_title, 'first') !== false ||
-                $field_id_lower === 'name') {
-                $first_name = $value;
-            }
-            
-            // Detect last name
-            if (strpos($field_id_lower, 'last') !== false || 
-                strpos($field_title, 'last') !== false) {
-                $last_name = $value;
+            if ($detected) {
+                $detected_fields[$detected['type']] = $detected['value'];
             }
         }
         
-        // Fallback: use direct field IDs if smart detection didn't work
-        if (empty($first_name)) {
-            $first_name = $fields['first_name'] ?? $fields['name'] ?? '';
+        // Handle full name split (if no first/last name but we have full name)
+        if (empty($detected_fields['first_name']) && !empty($detected_fields['full_name'])) {
+            $parts = explode(' ', $detected_fields['full_name'], 2);
+            $detected_fields['first_name'] = $parts[0];
+            $detected_fields['last_name'] = $parts[1] ?? '';
         }
-        if (empty($last_name)) {
-            $last_name = $fields['last_name'] ?? '';
-        }
-        if (empty($email)) {
-            $email = $fields['email'] ?? '';
-        }
-        if (empty($phone)) {
-            $phone = $fields['phone'] ?? '';
-        }
+        
         
         // Build payload
         $payload = [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'email' => $email,
-            'phone' => $phone,
-            'city' => $fields['city'] ?? '',
-            'interest' => $fields['interest'] ?? '',
-            'have_children' => $fields['have_children'] ?? '',
-            'planning_to_foster' => $fields['planning_to_foster'] ?? '',
+            'first_name' => $detected_fields['first_name'],
+            'last_name' => $detected_fields['last_name'],
+            'email' => $detected_fields['email'],
+            'phone' => $detected_fields['phone'],
+            'city' => $detected_fields['city'],
             'source' => 'website-elementor',
             'form_id' => $record->get('form_settings')['form_id'] ?? 'unknown',
         ];
         
         // Log for debugging (will only show if WP_DEBUG_LOG is enabled)
-        error_log('[Echo5 Leads] Elementor form captured: ' . json_encode($payload));
+        error_log('[Echo5 Leads] Elementor DETECTED fields: ' . json_encode($detected_fields));
+        error_log('[Echo5 Leads] Elementor PAYLOAD: ' . json_encode($payload));
         
         $this->send_to_api($payload);
     }
@@ -470,34 +512,56 @@ class Echo5_Leads_Connector {
         
         $fields = $submission->get_posted_data();
         
-        // Handle name variations
-        $first_name = $fields['first_name'] ?? $fields['first-name'] ?? '';
-        $last_name = $fields['last_name'] ?? $fields['last-name'] ?? '';
-
-        if (empty($first_name) && isset($fields['your-name'])) {
-            $parts = explode(' ', $fields['your-name'], 2);
-            $first_name = $parts[0];
-            $last_name = $parts[1] ?? '';
-        } elseif (empty($first_name) && isset($fields['name'])) {
-            $parts = explode(' ', $fields['name'], 2);
-            $first_name = $parts[0];
-            $last_name = $parts[1] ?? '';
+        // Use universal detector on CF7 fields
+        $detected_fields = [
+            'first_name' => '',
+            'last_name' => '',
+            'email' => '',
+            'phone' => '',
+            'city' => '',
+            'full_name' => ''
+        ];
+        
+        foreach ($fields as $field_name => $field_value) {
+            if (empty($field_value)) {
+                continue;
+            }
+            
+            // Create pseudo-field structure for detector
+            $pseudo_field = [
+                'type' => '',
+                'title' => $field_name, // CF7 uses field names like "your-name", "your-email"
+                'placeholder' => '',
+                'value' => $field_value
+            ];
+            
+            $detected = $this->detect_field_type($pseudo_field, $field_name);
+            
+            if ($detected) {
+                $detected_fields[$detected['type']] = $detected['value'];
+            }
+        }
+        
+        // Handle full name split
+        if (empty($detected_fields['first_name']) && !empty($detected_fields['full_name'])) {
+            $parts = explode(' ', $detected_fields['full_name'], 2);
+            $detected_fields['first_name'] = $parts[0];
+            $detected_fields['last_name'] = $parts[1] ?? '';
         }
 
         // Build payload
         $payload = [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'email' => $fields['your-email'] ?? $fields['email'] ?? '',
-            'phone' => $fields['your-phone'] ?? $fields['phone'] ?? '',
-            'city' => $fields['city'] ?? '',
-            'interest' => $fields['interest'] ?? '',
-            'have_children' => $fields['have_children'] ?? '',
-            'planning_to_foster' => $fields['planning_to_foster'] ?? '',
+            'first_name' => $detected_fields['first_name'],
+            'last_name' => $detected_fields['last_name'],
+            'email' => $detected_fields['email'],
+            'phone' => $detected_fields['phone'],
+            'city' => $detected_fields['city'],
             'source' => 'website-cf7',
             'form_id' => $contact_form->id(),
         ];
-
+        
+        error_log('[Echo5 Leads] CF7 DETECTED: ' . json_encode($detected_fields));
+        
         $this->send_to_api($payload);
     }
 
