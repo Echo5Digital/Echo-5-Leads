@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const tenantId = await resolveTenantId(db, apiKey);
     if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
 
-    const { stages, users, spamKeywords, slaHours } = req.body;
+    const { stages, users, spamKeywords, slaHours, metaAccessToken } = req.body;
 
     // Build update object
     const updates = {};
@@ -35,6 +35,9 @@ export default async function handler(req, res) {
     }
     if (slaHours && typeof slaHours === 'number' && slaHours > 0) {
       updates['config.slaHours'] = slaHours;
+    }
+    if (metaAccessToken && typeof metaAccessToken === 'string') {
+      updates['config.metaAccessToken'] = metaAccessToken;
     }
 
     if (Object.keys(updates).length === 0) {

@@ -11,6 +11,7 @@
 
 import { getDb, resolveTenantId, normPhone } from '../lib/mongo.js';
 import { ObjectId } from 'mongodb';
+import fetch from 'node-fetch';
 
 /**
  * GET /api/ingest/meta-lead - Webhook verification
@@ -82,6 +83,16 @@ async function handleWebhook(req, res) {
       return res.status(401).json({ error: 'Invalid or missing API key' });
     }
 
+    // Get tenant config for access token
+    const tenant = await db.collection('tenants').findOne({ _id: tenantId });
+    const accessToken = tenant?.config?.metaAccessToken;
+
+    if (!accessToken) {
+      console.error('[Meta Webhook] Missing metaAccessToken for tenant:', tenantId);
+      // Still return 200 to Facebook, but log the error
+      return res.status(200).json({ success: false, error: 'Missing access token configuration' });
+    }
+
     // Facebook sends webhook data in specific format
     const body = req.body;
     
@@ -105,25 +116,9 @@ async function handleWebhook(req, res) {
 
         const leadData = change.value;
         
-        // In production, you would fetch full lead data from Graph API here:
-        // GET https://graph.facebook.com/v18.0/{leadgen_id}?access_token={token}
-        // For now, we'll work with the webhook data
-        
         console.log('[Meta Webhook] Processing lead:', leadData.leadgen_id);
         
-        // Store the raw webhook data for future Graph API fetch
-        const webhookPayload = {
-          leadgen_id: leadData.leadgen_id,
-          form_id: leadData.form_id,
-          ad_id: leadData.ad_id,
-          adgroup_id: leadData.adgroup_id,
-          page_id: leadData.page_id,
-          created_time: leadData.created_time,
-          received_at: new Date().toISOString()
-        };
-
         // Create a placeholder lead record
-        // In production, replace this with Graph API fetch to get actual field data
         const lead = {
           tenantId,
           source: 'facebook',
@@ -133,21 +128,38 @@ async function handleWebhook(req, res) {
           consent: true,
           createdAt: new Date(leadData.created_time * 1000),
           latestActivityAt: new Date(leadData.created_time * 1000),
-          originalPayload: webhookPayload,
-          notes: `Meta Lead ID: ${leadData.leadgen_id}. Full data pending Graph API fetch.`
+          originalPayload: leadData,
+          notes: `Meta Lead ID: ${leadData.leadgen_id}. Pending Graph API fetch.`
         };
 
-        // Insert into leads collection
         const leadsCollection = db.collection('leads');
         const result = await leadsCollection.insertOne(lead);
+        const newLeadId = result.insertedId.toString();
 
-        console.log('[Meta Webhook] Lead placeholder created:', result.insertedId);
+        console.log('[Meta Webhook] Lead placeholder created:', newLeadId);
 
-        results.push({
-          leadgen_id: leadData.leadgen_id,
-          lead_id: result.insertedId.toString(),
-          status: 'pending_graph_api_fetch'
-        });
+        try {
+          // Fetch full lead data from Graph API
+          const graphData = await fetchLeadFromGraphAPI(leadData.leadgen_id, accessToken);
+          
+          // Update the lead with the full data
+          await updateLeadWithGraphData(tenantId, newLeadId, graphData);
+
+          results.push({
+            leadgen_id: leadData.leadgen_id,
+            lead_id: newLeadId,
+            status: 'processed'
+          });
+
+        } catch (graphError) {
+          console.error('[Meta Webhook] Error processing Graph API for lead:', newLeadId, graphError);
+          results.push({
+            leadgen_id: leadData.leadgen_id,
+            lead_id: newLeadId,
+            status: 'graph_api_failed',
+            error: graphError.message
+          });
+        }
       }
     }
 
@@ -174,8 +186,6 @@ async function handleWebhook(req, res) {
  * @returns {Object} Full lead data with fields
  */
 async function fetchLeadFromGraphAPI(leadgenId, accessToken) {
-  const fetch = require('node-fetch');
-  
   const url = `https://graph.facebook.com/v18.0/${leadgenId}?access_token=${accessToken}`;
   
   try {
@@ -185,18 +195,6 @@ async function fetchLeadFromGraphAPI(leadgenId, accessToken) {
     if (data.error) {
       throw new Error(data.error.message);
     }
-
-    // Example response:
-    // {
-    //   "id": "345678",
-    //   "created_time": "2024-01-15T10:30:00+0000",
-    //   "field_data": [
-    //     { "name": "first_name", "values": ["John"] },
-    //     { "name": "last_name", "values": ["Doe"] },
-    //     { "name": "email", "values": ["john@example.com"] },
-    //     { "name": "phone_number", "values": ["+13105551234"] }
-    //   ]
-    // }
 
     return data;
   } catch (error) {

@@ -42,6 +42,15 @@ class Echo5_Leads_Connector {
         // Elementor form hook
         add_action('elementor_pro/forms/new_record', [$this, 'capture_elementor_form'], 10, 2);
         
+        // Contact Form 7 hook
+        add_action('wpcf7_before_send_mail', [$this, 'capture_cf7_form'], 10, 1);
+
+        // WPForms hook
+        add_action('wpforms_process_complete', [$this, 'capture_wpforms_form'], 10, 4);
+
+        // MetForms hook
+        add_action('metform_before_store_form_data', [$this, 'capture_metforms_form'], 10, 2);
+        
         // Add settings link on plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'add_settings_link']);
     }
@@ -141,26 +150,26 @@ class Echo5_Leads_Connector {
             
             <h2>How It Works</h2>
             <ol>
-                <li><strong>Capture:</strong> Hooks into Elementor Pro form submissions automatically</li>
-                <li><strong>Send:</strong> Posts form data to Echo5 API endpoint</li>
-                <li><strong>Done:</strong> No database, no admin UI - keeps WordPress fast</li>
+                <li><strong>Capture:</strong> Hooks into Elementor Pro, Contact Form 7, WPForms, and MetForms submissions automatically.</li>
+                <li><strong>Send:</strong> Posts form data to Echo5 API endpoint.</li>
+                <li><strong>Done:</strong> No database, no admin UI - keeps WordPress fast.</li>
             </ol>
             
             <p><strong>To view/manage leads:</strong> Use the Echo5 admin dashboard (provided by Echo5 team)</p>
             
             <h3>Supported Form Fields</h3>
+            <p>Use these field names in your forms for automatic mapping.</p>
             <ul>
-                <li><code>first_name</code> - First name</li>
-                <li><code>last_name</code> - Last name</li>
-                <li><code>email</code> - Email address</li>
-                <li><code>phone</code> - Phone number</li>
-                <li><code>city</code> - City</li>
-                <li><code>interest</code> - Interest type</li>
-                <li><code>have_children</code> - Have children (yes/no)</li>
-                <li><code>planning_to_foster</code> - Planning to foster (yes/no)</li>
+                <li><code>first_name</code>, <code>last_name</code> (or a single <code>name</code> field)</li>
+                <li><code>email</code></li>
+                <li><code>phone</code></li>
+                <li><code>city</code></li>
+                <li><code>interest</code></li>
+                <li><code>have_children</code></li>
+                <li><code>planning_to_foster</code></li>
             </ul>
             
-            <p class="description">UTM parameters and referrer are captured automatically</p>
+            <p class="description">UTM parameters and referrer are captured automatically.</p>
         </div>
         <?php
     }
@@ -178,15 +187,6 @@ class Echo5_Leads_Connector {
      * Capture Elementor form submission and send to Echo5 API
      */
     public function capture_elementor_form($record, $handler) {
-        $api_url = get_option('echo5_api_url');
-        $api_key = get_option('echo5_api_key');
-        
-        // Validate settings
-        if (empty($api_url) || empty($api_key)) {
-            $this->log_error('Echo5 API URL or API Key not configured');
-            return;
-        }
-        
         // Get form fields
         $raw_fields = $record->get('fields');
         $fields = [];
@@ -205,10 +205,136 @@ class Echo5_Leads_Connector {
             'interest' => $fields['interest'] ?? '',
             'have_children' => $fields['have_children'] ?? '',
             'planning_to_foster' => $fields['planning_to_foster'] ?? '',
-            'source' => 'website',
+            'source' => 'website-elementor',
             'form_id' => $record->get('form_settings')['form_id'] ?? 'unknown',
         ];
         
+        $this->send_to_api($payload);
+    }
+
+    /**
+     * Capture Contact Form 7 submission and send to Echo5 API
+     */
+    public function capture_cf7_form($contact_form) {
+        $submission = WPCF7_Submission::get_instance();
+        if (!$submission) {
+            return;
+        }
+        
+        $fields = $submission->get_posted_data();
+        
+        // Handle name variations
+        $first_name = $fields['first_name'] ?? $fields['first-name'] ?? '';
+        $last_name = $fields['last_name'] ?? $fields['last-name'] ?? '';
+
+        if (empty($first_name) && isset($fields['your-name'])) {
+            $parts = explode(' ', $fields['your-name'], 2);
+            $first_name = $parts[0];
+            $last_name = $parts[1] ?? '';
+        } elseif (empty($first_name) && isset($fields['name'])) {
+            $parts = explode(' ', $fields['name'], 2);
+            $first_name = $parts[0];
+            $last_name = $parts[1] ?? '';
+        }
+
+        // Build payload
+        $payload = [
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $fields['your-email'] ?? $fields['email'] ?? '',
+            'phone' => $fields['your-phone'] ?? $fields['phone'] ?? '',
+            'city' => $fields['city'] ?? '',
+            'interest' => $fields['interest'] ?? '',
+            'have_children' => $fields['have_children'] ?? '',
+            'planning_to_foster' => $fields['planning_to_foster'] ?? '',
+            'source' => 'website-cf7',
+            'form_id' => $contact_form->id(),
+        ];
+
+        $this->send_to_api($payload);
+    }
+
+    /**
+     * Capture WPForms submission and send to Echo5 API
+     */
+    public function capture_wpforms_form($fields, $entry, $form_data, $entry_id) {
+        $mapped_fields = [];
+        foreach ($fields as $field) {
+            $name = strtolower($field['name']);
+            // Simple fields
+            if ($field['type'] === 'email') $mapped_fields['email'] = $field['value'];
+            if ($field['type'] === 'phone') $mapped_fields['phone'] = $field['value'];
+            if (strpos($name, 'city') !== false) $mapped_fields['city'] = $field['value'];
+            if (strpos($name, 'interest') !== false) $mapped_fields['interest'] = $field['value'];
+            if (strpos($name, 'children') !== false) $mapped_fields['have_children'] = $field['value'];
+            if (strpos($name, 'foster') !== false) $mapped_fields['planning_to_foster'] = $field['value'];
+
+            // Name field
+            if ($field['type'] === 'name') {
+                $mapped_fields['first_name'] = $field['first'] ?? '';
+                $mapped_fields['last_name'] = $field['last'] ?? '';
+            } elseif (strpos($name, 'first name') !== false) {
+                $mapped_fields['first_name'] = $field['value'];
+            } elseif (strpos($name, 'last name') !== false) {
+                $mapped_fields['last_name'] = $field['value'];
+            } elseif (strpos($name, 'name') !== false) {
+                $parts = explode(' ', $field['value'], 2);
+                $mapped_fields['first_name'] = $parts[0];
+                $mapped_fields['last_name'] = $parts[1] ?? '';
+            }
+        }
+
+        // Build payload
+        $payload = [
+            'first_name' => $mapped_fields['first_name'] ?? '',
+            'last_name' => $mapped_fields['last_name'] ?? '',
+            'email' => $mapped_fields['email'] ?? '',
+            'phone' => $mapped_fields['phone'] ?? '',
+            'city' => $mapped_fields['city'] ?? '',
+            'interest' => $mapped_fields['interest'] ?? '',
+            'have_children' => $mapped_fields['have_children'] ?? '',
+            'planning_to_foster' => $mapped_fields['planning_to_foster'] ?? '',
+            'source' => 'website-wpforms',
+            'form_id' => $form_data['id'],
+        ];
+
+        $this->send_to_api($payload);
+    }
+
+    /**
+     * Capture MetForms submission and send to Echo5 API
+     */
+    public function capture_metforms_form($data, $form_id) {
+        // Build payload
+        $payload = [
+            'first_name' => $data['first_name'] ?? $data['name'] ?? '',
+            'last_name' => $data['last_name'] ?? '',
+            'email' => $data['email'] ?? '',
+            'phone' => $data['phone'] ?? '',
+            'city' => $data['city'] ?? '',
+            'interest' => $data['interest'] ?? '',
+            'have_children' => $data['have_children'] ?? '',
+            'planning_to_foster' => $data['planning_to_foster'] ?? '',
+            'source' => 'website-metforms',
+            'form_id' => $form_id,
+        ];
+
+        $this->send_to_api($payload);
+    }
+
+    /**
+     * Send payload to the Echo5 API
+     */
+    private function send_to_api($payload) {
+        $api_url = get_option('echo5_api_url');
+        $api_key = get_option('echo5_api_key');
+        
+        // Validate settings
+        if (empty($api_url) || empty($api_key)) {
+            $this->log_error('Echo5 API URL or API Key not configured');
+            return;
+        }
+
         // Add UTM parameters from session/cookies if available
         $utm_params = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
         foreach ($utm_params as $param) {

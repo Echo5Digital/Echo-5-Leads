@@ -1,150 +1,101 @@
-#!/usr/bin/env node
 /**
- * Test script for Meta (Facebook) Lead Ads webhook
+ * test-meta.js
+ * 
+ * Simulates a webhook call from Facebook to the /api/ingest/meta-lead endpoint.
+ * 
+ * This script requires a REAL leadgen_id from a test lead you create in your
+ * Facebook page's testing tool.
+ * 
+ * How to get a test lead:
+ * 1. Go to: https://developers.facebook.com/tools/lead-ads-testing/
+ * 2. Select your Page and Form.
+ * 3. Create a new lead. This will give you a leadgen_id.
+ * 4. Use that leadgen_id with this script.
+ * 
+ * You also need to:
+ * 1. Have a tenant created with a valid API key.
+ * 2. Have configured the `metaAccessToken` for that tenant via the API. 
  * 
  * Usage:
- *   export TEST_TENANT_KEY=your_api_key
- *   npm run test:meta
+ * node scripts/test-meta.js <leadgen_id> <tenant_api_key>
  */
 
-const TEST_API_KEY = process.env.TEST_TENANT_KEY;
-const API_URL = process.env.API_URL || 'http://localhost:3001';
+const http = require('http');
 
-if (!TEST_API_KEY) {
-  console.error('❌ Error: TEST_TENANT_KEY environment variable not set');
-  console.log('Usage: export TEST_TENANT_KEY=oa_e7f1365581ec1a236049347aeccd5d39');
-  process.exit(1);
-}
+async function testMetaWebhook() {
+  const [,, leadgenId, apiKey] = process.argv;
 
-// Test 1: Webhook Verification
-async function testWebhookVerification() {
-  console.log('\n🔵 Test 1: Meta Webhook Verification\n');
-  
-  const verifyUrl = `${API_URL}/api/ingest/meta-lead?hub.mode=subscribe&hub.challenge=test_challenge_123&hub.verify_token=echo5_meta_webhook_verify`;
-  
-  try {
-    const response = await fetch(verifyUrl);
-    const text = await response.text();
-    
-    if (response.status === 200 && text === 'test_challenge_123') {
-      console.log('✅ Webhook verification successful');
-      console.log('   Response:', text);
-    } else {
-      console.log('❌ Webhook verification failed');
-      console.log('   Status:', response.status);
-      console.log('   Response:', text);
-    }
-  } catch (error) {
-    console.error('❌ Request failed:', error.message);
+  if (!leadgenId || !apiKey) {
+    console.error('Usage: node scripts/test-meta.js <leadgen_id> <tenant_api_key>');
+    process.exit(1);
   }
-}
 
-// Test 2: Lead Webhook (Simulated Facebook payload)
-async function testLeadWebhook() {
-  console.log('\n🔵 Test 2: Meta Lead Webhook\n');
-  
-  const webhookPayload = {
+  // Simulate the payload Facebook sends
+  const payload = {
     object: 'page',
-    entry: [{
-      id: '123456789',
-      time: Math.floor(Date.now() / 1000),
-      changes: [{
-        field: 'leadgen',
-        value: {
-          leadgen_id: 'test_leadgen_' + Date.now(),
-          form_id: 'test_form_123',
-          ad_id: 'test_ad_456',
-          adgroup_id: 'test_adgroup_789',
-          page_id: '123456789',
-          created_time: Math.floor(Date.now() / 1000)
-        }
-      }]
-    }]
-  };
-  
-  try {
-    const response = await fetch(`${API_URL}/api/ingest/meta-lead`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Tenant-Key': TEST_API_KEY
+    entry: [
+      {
+        id: '123456789012345', // Your page ID
+        time: Math.floor(Date.now() / 1000),
+        changes: [
+          {
+            field: 'leadgen',
+            value: {
+              ad_id: '987654321',
+              form_id: '543219876',
+              leadgen_id: leadgenId,
+              created_time: Math.floor(Date.now() / 1000),
+              page_id: '123456789012345',
+              adgroup_id: '1122334455',
+            },
+          },
+        ],
       },
-      body: JSON.stringify(webhookPayload)
+    ],
+  };
+
+  const postData = JSON.stringify(payload);
+
+  const options = {
+    hostname: 'localhost',
+    port: 3001,
+    path: '/api/ingest/meta-lead',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Tenant-Key': apiKey,
+      'Content-Length': Buffer.byteLength(postData),
+    },
+  };
+
+  console.log('Sending simulated Meta webhook:');
+  console.log('  - Endpoint: http://localhost:3001/api/ingest/meta-lead');
+  console.log('  - Leadgen ID:', leadgenId);
+  console.log('  - Tenant Key:', apiKey);
+  console.log('  - Payload:', postData);
+
+  const req = http.request(options, (res) => {
+    let data = '';
+    res.on('data', (chunk) => {
+      data += chunk;
     });
-    
-    const data = await response.json();
-    
-    console.log('Status:', response.status);
-    console.log('Response:', JSON.stringify(data, null, 2));
-    
-    if (response.status === 200 && data.success) {
-      console.log('\n✅ Lead webhook successful');
-      console.log('   Processed:', data.processed, 'lead(s)');
-      if (data.results && data.results.length > 0) {
-        console.log('   Lead ID:', data.results[0].lead_id);
-        console.log('   Status:', data.results[0].status);
+    res.on('end', () => {
+      console.log('\nResponse from server:');
+      console.log('  - Status:', res.statusCode);
+      try {
+        console.log('  - Body:', JSON.parse(data));
+      } catch (e) {
+        console.log('  - Body (raw):', data);
       }
-    } else {
-      console.log('\n❌ Lead webhook failed');
-    }
-  } catch (error) {
-    console.error('❌ Request failed:', error.message);
-  }
-}
-
-// Test 3: Invalid API Key
-async function testInvalidApiKey() {
-  console.log('\n🔵 Test 3: Invalid API Key (should fail)\n');
-  
-  const webhookPayload = {
-    object: 'page',
-    entry: [{
-      changes: [{
-        field: 'leadgen',
-        value: { leadgen_id: 'test_123' }
-      }]
-    }]
-  };
-  
-  try {
-    const response = await fetch(`${API_URL}/api/ingest/meta-lead`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Tenant-Key': 'invalid_key_12345'
-      },
-      body: JSON.stringify(webhookPayload)
     });
-    
-    const data = await response.json();
-    
-    if (response.status === 401) {
-      console.log('✅ Invalid API key correctly rejected');
-    } else {
-      console.log('❌ Invalid API key should return 401');
-      console.log('   Status:', response.status);
-      console.log('   Response:', data);
-    }
-  } catch (error) {
-    console.error('❌ Request failed:', error.message);
-  }
+  });
+
+  req.on('error', (e) => {
+    console.error('\nError sending request:', e.message);
+  });
+
+  req.write(postData);
+  req.end();
 }
 
-// Run all tests
-async function runTests() {
-  console.log('='.repeat(60));
-  console.log('Meta (Facebook) Lead Ads Integration Tests');
-  console.log('='.repeat(60));
-  console.log('API URL:', API_URL);
-  console.log('Tenant Key:', TEST_API_KEY.substring(0, 10) + '...');
-  
-  await testWebhookVerification();
-  await testLeadWebhook();
-  await testInvalidApiKey();
-  
-  console.log('\n' + '='.repeat(60));
-  console.log('Tests complete!');
-  console.log('='.repeat(60) + '\n');
-}
-
-runTests().catch(console.error);
+testMetaWebhook();
