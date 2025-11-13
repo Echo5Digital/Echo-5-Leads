@@ -10,17 +10,25 @@ export default async function handler(req, res) {
     const db = await getDb();
     const { id } = req.params;
 
-    // Fetch API keys for this tenant (exclude keyHash for security)
-    const apiKeys = await db.collection('api_keys').find(
-      { tenantId: id },
-      { 
-        projection: { 
-          keyHash: 0  // Never expose key hash
-        } 
-      }
-    ).sort({ createdAt: -1 }).toArray();
+    // Fetch API keys for this tenant
+    const apiKeys = await db.collection('api_keys')
+      .find({ tenantId: id })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-    res.status(200).json(apiKeys);
+    // Transform keys to include a hint but exclude full keyHash
+    const keysWithHints = apiKeys.map(key => ({
+      _id: key._id,
+      tenantId: key.tenantId,
+      name: key.name,
+      active: key.active,
+      createdAt: key.createdAt,
+      lastUsedAt: key.lastUsedAt,
+      revokedAt: key.revokedAt,
+      keyHint: key.keyHash ? key.keyHash.substring(0, 8) : null // First 8 chars as hint
+    }));
+
+    res.status(200).json(keysWithHints);
   } catch (err) {
     console.error('Error fetching API keys:', err);
     res.status(500).json({ error: 'Server error' });

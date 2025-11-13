@@ -21,6 +21,7 @@ import deleteTenantRoute from './src/routes/delete-tenant.js';
 import listApiKeysRoute from './src/routes/list-api-keys.js';
 import createApiKeyRoute from './src/routes/create-api-key.js';
 import revokeApiKeyRoute from './src/routes/revoke-api-key.js';
+import revealApiKeyRoute from './src/routes/reveal-api-key.js';
 import slaOverdueRoute from './src/routes/sla-overdue.js';
 import analyticsOverviewRoute from './src/routes/analytics-overview.js';
 import { verifyWebhook as metaVerifyWebhook, handleWebhook as metaHandleWebhook } from './src/routes/ingest-meta-lead.js';
@@ -73,6 +74,7 @@ app.delete('/api/tenants/:id', deleteTenantRoute);
 // API Key Management
 app.get('/api/tenants/:id/api-keys', listApiKeysRoute);
 app.post('/api/tenants/:id/api-keys', createApiKeyRoute);
+app.get('/api/tenants/:tenantId/api-keys/:keyId/reveal', revealApiKeyRoute);
 app.delete('/api/tenants/:tenantId/api-keys/:keyId', revokeApiKeyRoute);
 
 // SLA Monitoring

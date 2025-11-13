@@ -10,7 +10,10 @@
     "seed": "node ./scripts/seed-tenant.js",
     "test:ingest": "node ./scripts/test-ingest.js",
     "test:meta": "node ./scripts/test-meta.js",
-    "test:google": "node ./scripts/test-google.js"
+    "test:google": "node ./scripts/test-google.js",
+    "create-clients": "node ./scripts/create-test-clients.js",
+    "list-keys": "node ./scripts/list-api-keys.js",
+    "migrate-keys": "node ./scripts/migrate-encrypt-keys.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

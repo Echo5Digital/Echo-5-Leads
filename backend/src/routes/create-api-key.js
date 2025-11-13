@@ -1,5 +1,5 @@
 // POST /api/tenants/:id/api-keys - Create new API key for a tenant
-import { getDb, sha256WithPepper } from '../lib/mongo.js';
+import { getDb, sha256WithPepper, encryptApiKey } from '../lib/mongo.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
@@ -27,13 +27,17 @@ export default async function handler(req, res) {
     const randomHex = crypto.randomBytes(16).toString('hex');
     const rawKey = `${prefix}_${randomHex}`;
 
-    // Hash the key for storage
+    // Hash the key for authentication
     const keyHash = sha256WithPepper(rawKey);
+
+    // Encrypt the key for secure storage (can be decrypted for viewing)
+    const encryptedKey = encryptApiKey(rawKey);
 
     // Insert into api_keys collection
     const apiKey = {
       tenantId,
       keyHash,
+      encryptedKey,  // Store encrypted version
       name,
       active: true,
       createdAt: new Date(),

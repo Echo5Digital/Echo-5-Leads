@@ -14,6 +14,9 @@ export default function ApiKeysPage() {
   const [newKeyResult, setNewKeyResult] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [revealedKeys, setRevealedKeys] = useState({}); // Track which keys are revealed
+  const [revealedFullKeys, setRevealedFullKeys] = useState({}); // Store decrypted full keys
+  const [revealing, setRevealing] = useState({}); // Track loading state
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -113,6 +116,68 @@ export default function ApiKeysPage() {
     setTimeout(() => setSuccess(''), 2000);
   }
 
+  function toggleKeyVisibility(keyId) {
+    setRevealedKeys(prev => ({
+      ...prev,
+      [keyId]: !prev[keyId]
+    }));
+  }
+
+  async function revealFullKey(keyId) {
+    if (revealedFullKeys[keyId]) {
+      // Already revealed, just toggle visibility
+      toggleKeyVisibility(keyId);
+      return;
+    }
+
+    // Fetch the full key from backend
+    setRevealing(prev => ({ ...prev, [keyId]: true }));
+    try {
+      const response = await fetch(`${API_URL}/api/tenants/${params.id}/api-keys/${keyId}/reveal`, {
+        headers: { 'X-Tenant-Key': API_KEY },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reveal key');
+      }
+
+      const data = await response.json();
+      setRevealedFullKeys(prev => ({ ...prev, [keyId]: data.rawKey }));
+      setRevealedKeys(prev => ({ ...prev, [keyId]: true }));
+      setSuccess('Full API key revealed');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError('Failed to reveal API key');
+      console.error(err);
+    } finally {
+      setRevealing(prev => ({ ...prev, [keyId]: false }));
+    }
+  }
+
+  function getKeyDisplay(key) {
+    // If full key is revealed, show it
+    if (revealedFullKeys[key._id] && revealedKeys[key._id]) {
+      return revealedFullKeys[key._id];
+    }
+
+    // Otherwise show hint
+    if (!key.keyHint) {
+      return '••••••••••••••••••••••••';
+    }
+    // Show hint when revealed, masked when hidden
+    return revealedKeys[key._id] 
+      ? `${key.keyHint}••••••••••••••••••••••••` 
+      : '••••••••' + key.keyHint.substring(key.keyHint.length - 4);
+  }
+
+  function copyCurlCommand(keyId) {
+    const key = apiKeys.find(k => k._id === keyId);
+    if (!key) return;
+    
+    const curlCmd = `curl -H "X-Tenant-Key: YOUR_API_KEY_HERE" ${API_URL}/api/leads`;
+    copyToClipboard(curlCmd);
+  }
+
   if (loading) {
     return (
       <div className="p-8">
@@ -209,6 +274,7 @@ export default function ApiKeysPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Key Hash Preview</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Used</th>
@@ -218,7 +284,7 @@ export default function ApiKeysPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {apiKeys.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No API keys found. Create one above.
                   </td>
                 </tr>
@@ -227,6 +293,50 @@ export default function ApiKeysPage() {
                   <tr key={key._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{key.name}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <code className="text-xs font-mono text-gray-600 bg-gray-50 px-2 py-1 rounded break-all max-w-md">
+                          {getKeyDisplay(key)}
+                        </code>
+                        <button
+                          onClick={() => revealFullKey(key._id)}
+                          disabled={revealing[key._id]}
+                          className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                          title={revealedFullKeys[key._id] ? (revealedKeys[key._id] ? 'Hide full key' : 'Show full key') : 'Reveal full API key'}
+                        >
+                          {revealing[key._id] ? (
+                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          ) : revealedKeys[key._id] ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          )}
+                        </button>
+                        {revealedFullKeys[key._id] && (
+                          <button
+                            onClick={() => copyToClipboard(revealedFullKeys[key._id])}
+                            className="text-blue-500 hover:text-blue-700"
+                            title="Copy full API key"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {revealedFullKeys[key._id] 
+                          ? (revealedKeys[key._id] ? '� Full key visible - Keep it secure!' : '🔒 Full key loaded - Click eye to show')
+                          : (revealedKeys[key._id] ? '👁️ Showing key hint' : '🔒 Click eye to reveal full key')}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {key.active ? (

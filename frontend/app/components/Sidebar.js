@@ -21,11 +21,12 @@ export default function Sidebar() {
           },
         });
         const data = await response.json();
-        setTenants(data);
+        const tenantsList = data.tenants || [];
+        setTenants(tenantsList);
         
         // Auto-select first tenant if none selected
-        if (!selectedTenant && data.length > 0) {
-          switchTenant(data[0]);
+        if (!selectedTenant && tenantsList.length > 0) {
+          switchTenant(tenantsList[0]);
         }
       } catch (error) {
         console.error('Failed to fetch tenants:', error);

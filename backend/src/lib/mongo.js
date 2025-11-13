@@ -38,6 +38,35 @@ export function sha256WithPepper(value) {
   return crypto.createHash('sha256').update(value + pepper).digest('hex');
 }
 
+// Encrypt API key for secure storage (can be decrypted later)
+export function encryptApiKey(rawKey) {
+  const secret = process.env.E5D_API_KEY_PEPPER || '';
+  const key = crypto.createHash('sha256').update(secret).digest();
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encrypted = cipher.update(rawKey, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return iv.toString('hex') + ':' + encrypted;
+}
+
+// Decrypt API key for viewing
+export function decryptApiKey(encryptedKey) {
+  if (!encryptedKey) return null;
+  try {
+    const secret = process.env.E5D_API_KEY_PEPPER || '';
+    const key = crypto.createHash('sha256').update(secret).digest();
+    const [ivHex, encrypted] = encryptedKey.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error('Error decrypting API key:', err);
+    return null;
+  }
+}
+
 export async function resolveTenantId(db, apiKey) {
   if (!apiKey) return undefined;
   const keyHash = sha256WithPepper(apiKey);
