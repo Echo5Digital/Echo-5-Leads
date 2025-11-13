@@ -72,7 +72,7 @@ async function verifyWebhook(req, res) {
  */
 async function handleWebhook(req, res) {
   try {
-    const db = getDb();
+    const db = await getDb();
     
     // Extract tenant API key from header
     const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
@@ -213,7 +213,7 @@ async function fetchLeadFromGraphAPI(leadgenId, accessToken) {
  * @param {Object} graphData - Full lead data from Graph API
  */
 async function updateLeadWithGraphData(tenantId, leadId, graphData) {
-  const db = getDb();
+  const db = await getDb();
   
   // Convert field_data array to object
   const fields = {};

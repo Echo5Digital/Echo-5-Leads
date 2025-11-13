@@ -40,31 +40,35 @@ export default async function ingestLead(req, res) {
       ]
     });
 
-    let sourceToSet;
-    if (!existing) {
-      if (providedSource) sourceToSet = providedSource;
-      else if (utm.utm_source) sourceToSet = utm.utm_source;
-      else sourceToSet = 'website';
+    const isNewLead = !existing;
+
+    const leadData = {
+      firstName,
+      lastName,
+      city,
+      campaignName,
+      ...(email && { email }),
+      ...(phoneE164 && { phoneE164 }),
+    };
+
+    if (isNewLead) {
+      if (providedSource) leadData.source = providedSource;
+      else if (utm.utm_source) leadData.source = utm.utm_source;
+      else leadData.source = 'website';
     }
 
     const payloadStr = JSON.stringify(body).toLowerCase();
     const spamFlag = spamKeywords.some(kw => kw && payloadStr.includes(kw));
+    leadData.spamFlag = spamFlag;
 
     let leadId;
-    if (!existing) {
+    if (isNewLead) {
       const doc = {
         tenantId,
-        firstName,
-        lastName,
-        email,
-        phoneE164,
-        city,
-        source: sourceToSet,
-        campaignName,
+        ...leadData,
         stage: stageDefault,
         assignedUserId: null,
         office: null,
-        spamFlag,
         createdAt: now,
         latestActivityAt: now,
         originalPayload: body,
@@ -81,11 +85,7 @@ export default async function ingestLead(req, res) {
       });
     } else {
       leadId = existing._id.toString();
-      const update = { $set: { firstName, lastName, city, campaignName } };
-      if (email) update.$set.email = email;
-      if (phoneE164) update.$set.phoneE164 = phoneE164;
-      update.$set.spamFlag = spamFlag;
-      await leads.updateOne({ _id: existing._id }, update);
+      await leads.updateOne({ _id: existing._id }, { $set: leadData });
     }
 
     if (Object.keys(utm).length > 0) {
