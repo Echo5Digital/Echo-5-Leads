@@ -165,6 +165,53 @@ export default function LeadDetail() {
           </div>
         </div>
 
+        {/* All Form Fields */}
+        {lead.originalPayload && Object.keys(lead.originalPayload).length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">All Form Fields</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(lead.originalPayload)
+                .filter(([key]) => !['original_payload', '_id', 'tenantId'].includes(key))
+                .map(([key, value]) => {
+                  // Try to get friendly label from pro_field_label_* keys
+                  const labelKey = `pro_field_label_${key.replace('pro_field_', '')}`;
+                  const friendlyLabel = lead.originalPayload[labelKey] || 
+                                       key.replace(/_/g, ' ')
+                                          .replace(/pro field /g, '')
+                                          .replace(/elementor field /g, '')
+                                          .replace(/cf7 /g, '')
+                                          .split(' ')
+                                          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                                          .join(' ');
+                  
+                  // Skip label keys (they're used above)
+                  if (key.includes('_label_')) return null;
+                  
+                  // Format value
+                  let displayValue = value;
+                  if (typeof value === 'object') {
+                    displayValue = JSON.stringify(value, null, 2);
+                  } else if (value === null || value === undefined || value === '') {
+                    return null; // Skip empty values
+                  }
+                  
+                  return (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-gray-500">
+                        {friendlyLabel}
+                      </label>
+                      <p className="mt-1 text-gray-900 break-words">
+                        {typeof displayValue === 'string' && displayValue.length > 100 
+                          ? displayValue.substring(0, 100) + '...' 
+                          : String(displayValue)}
+                      </p>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {/* Activities */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">

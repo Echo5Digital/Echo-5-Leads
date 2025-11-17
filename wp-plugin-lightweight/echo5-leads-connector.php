@@ -616,16 +616,18 @@ class Echo5_Leads_Connector {
             }
         }
         
-        // Only proceed if we have minimum required data
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Elementor: No name found in submission');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Elementor: No email or phone found in submission');
+                error_log('Elementor: No data found in submission');
             }
             return;
         }
@@ -633,6 +635,7 @@ class Echo5_Leads_Connector {
         // Debug logging
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Elementor Mapped Params: ' . print_r($params, true));
+            error_log('Elementor: Sending lead to API with ' . count($params) . ' fields');
         }
         
         // Send to API
@@ -752,16 +755,18 @@ class Echo5_Leads_Connector {
             }
         }
         
-        // Only proceed if we have minimum required data
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('CF7: No name found in submission');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('CF7: No email or phone found in submission');
+                error_log('CF7: No data found in submission');
             }
             return;
         }
@@ -769,6 +774,7 @@ class Echo5_Leads_Connector {
         // Debug logging
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('CF7 Mapped Params: ' . print_r($params, true));
+            error_log('CF7: Sending lead to API with ' . count($params) . ' fields');
         }
         
         // Send to API
@@ -849,22 +855,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'wpforms_' . ($form_data['id'] ?? 'unknown');
         $params['referrer'] = wp_get_referer();
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('WPForms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('WPForms: No email or phone found');
+                error_log('WPForms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('WPForms Mapped Params: ' . print_r($params, true));
+            error_log('WPForms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
@@ -949,22 +958,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'metform_' . $form_id;
         $params['referrer'] = wp_get_referer();
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MetForms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MetForms: No email or phone found');
+                error_log('MetForms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('MetForms Mapped Params: ' . print_r($params, true));
+            error_log('MetForms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
@@ -1047,22 +1059,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'gravityforms_' . ($form['id'] ?? 'unknown');
         $params['referrer'] = isset($entry['source_url']) ? $entry['source_url'] : '';
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Gravity Forms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Gravity Forms: No email or phone found');
+                error_log('Gravity Forms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Gravity Forms Mapped Params: ' . print_r($params, true));
+            error_log('Gravity Forms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
@@ -1152,22 +1167,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'ninjaforms_' . ($form_data['form_id'] ?? 'unknown');
         $params['referrer'] = wp_get_referer();
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Ninja Forms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Ninja Forms: No email or phone found');
+                error_log('Ninja Forms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Ninja Forms Mapped Params: ' . print_r($params, true));
+            error_log('Ninja Forms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
@@ -1246,22 +1264,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'formidable_' . $form_id;
         $params['referrer'] = wp_get_referer();
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Formidable Forms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Formidable Forms: No email or phone found');
+                error_log('Formidable Forms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Formidable Forms Mapped Params: ' . print_r($params, true));
+            error_log('Formidable Forms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
@@ -1332,22 +1353,25 @@ class Echo5_Leads_Connector {
         $params['form_id'] = 'fluentforms_' . (isset($form->id) ? $form->id : 'unknown');
         $params['referrer'] = wp_get_referer();
         
-        // Validation
-        if (empty($params['first_name']) && empty($params['last_name'])) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Fluent Forms: No name found');
+        // Validation - relaxed to allow any submission with at least one non-empty field
+        $has_any_data = false;
+        foreach ($params as $key => $value) {
+            if (!empty($value) && $key !== 'form_id' && $key !== 'source') {
+                $has_any_data = true;
+                break;
             }
-            return;
         }
-        if (empty($params['email']) && empty($params['phone'])) {
+        
+        if (!$has_any_data) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Fluent Forms: No email or phone found');
+                error_log('Fluent Forms: No data found');
             }
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('Fluent Forms Mapped Params: ' . print_r($params, true));
+            error_log('Fluent Forms: Sending lead to API with ' . count($params) . ' fields');
         }
         
         $this->send_to_api($params);
