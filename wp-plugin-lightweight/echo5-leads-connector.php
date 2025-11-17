@@ -2,12 +2,15 @@
 /**
  * Plugin Name: Echo5 Leads Connector
  * Plugin URI: https://echo5digital.com
- * Description: Lightweight connector that sends Elementor form submissions to Echo5 Leads API. No admin UI - just form capture.
+ * Description: Lightweight connector that captures submissions from major WordPress form plugins (Elementor Pro, Contact Form 7, WPForms, MetForm, Gravity Forms, Ninja Forms, Formidable, Fluent Forms) and fire-and-forgets them to the Echo5 Leads API for multi-tenant lead management.
  * Version: 2.0.0
  * Author: Echo5 Digital
  * Author URI: https://echo5digital.com
  * License: GPL v2 or later
  * Text Domain: echo5-leads
+ * Requires at least: 6.0
+ * Tested up to: 6.6
+ * Requires PHP: 7.4
  */
 
 // Exit if accessed directly
@@ -54,28 +57,14 @@ class Echo5_Leads_Connector {
         add_action('update_option_echo5_api_url', ['Echo5_Settings_Cache', 'clear_cache']);
         add_action('update_option_echo5_api_key', ['Echo5_Settings_Cache', 'clear_cache']);
         
-        // Elementor form hook
+        // Form capture hooks (using proven logic from full plugin)
         add_action('elementor_pro/forms/new_record', [$this, 'capture_elementor_form'], 10, 2);
-        
-        // Contact Form 7 hook
         add_action('wpcf7_before_send_mail', [$this, 'capture_cf7_form'], 10, 1);
-
-        // WPForms hook
         add_action('wpforms_process_complete', [$this, 'capture_wpforms_form'], 10, 4);
-
-        // MetForms hook
         add_action('metform_before_store_form_data', [$this, 'capture_metforms_form'], 10, 2);
-        
-        // Gravity Forms hook
         add_action('gform_after_submission', [$this, 'capture_gravity_form'], 10, 2);
-        
-        // Ninja Forms hook
         add_action('ninja_forms_after_submission', [$this, 'capture_ninja_form'], 10, 1);
-        
-        // Formidable Forms hook
         add_action('frm_after_create_entry', [$this, 'capture_formidable_form'], 30, 2);
-        
-        // Fluent Forms hook
         add_action('fluentform/submission_inserted', [$this, 'capture_fluent_form'], 10, 3);
         
         // Add settings link on plugins page
@@ -115,6 +104,16 @@ class Echo5_Leads_Connector {
         register_setting('echo5_leads_settings', 'echo5_api_url');
         register_setting('echo5_leads_settings', 'echo5_api_key');
         register_setting('echo5_leads_settings', 'echo5_enable_logging');
+        
+        // Form integration toggles
+        register_setting('echo5_leads_settings', 'echo5_enable_elementor');
+        register_setting('echo5_leads_settings', 'echo5_enable_cf7');
+        register_setting('echo5_leads_settings', 'echo5_enable_wpforms');
+        register_setting('echo5_leads_settings', 'echo5_enable_metforms');
+        register_setting('echo5_leads_settings', 'echo5_enable_gravity');
+        register_setting('echo5_leads_settings', 'echo5_enable_ninja');
+        register_setting('echo5_leads_settings', 'echo5_enable_formidable');
+        register_setting('echo5_leads_settings', 'echo5_enable_fluent');
     }
     
     /**
@@ -183,6 +182,91 @@ class Echo5_Leads_Connector {
                                    value="1" 
                                    <?php checked(get_option('echo5_enable_logging'), 1); ?>>
                             <p class="description">Log failed API submissions to debug.log</p>
+                        </td>
+                    </tr>
+                </table>
+                
+                <h2>📋 Form Integrations</h2>
+                <p>Select which form plugins to capture submissions from. Only enable the ones you use to avoid unnecessary processing.</p>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">Elementor Pro Forms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_elementor" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_elementor', 1), 1); ?>>
+                            <span class="description">Capture submissions from Elementor Pro form widget</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Contact Form 7</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_cf7" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_cf7', 1), 1); ?>>
+                            <span class="description">Capture submissions from Contact Form 7</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">WPForms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_wpforms" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_wpforms', 1), 1); ?>>
+                            <span class="description">Capture submissions from WPForms</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">MetForm</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_metforms" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_metforms', 1), 1); ?>>
+                            <span class="description">Capture submissions from MetForm (Elementor addon)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Gravity Forms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_gravity" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_gravity', 1), 1); ?>>
+                            <span class="description">Capture submissions from Gravity Forms</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Ninja Forms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_ninja" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_ninja', 1), 1); ?>>
+                            <span class="description">Capture submissions from Ninja Forms</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Formidable Forms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_formidable" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_formidable', 1), 1); ?>>
+                            <span class="description">Capture submissions from Formidable Forms</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Fluent Forms</th>
+                        <td>
+                            <input type="checkbox" 
+                                   name="echo5_enable_fluent" 
+                                   value="1" 
+                                   <?php checked(get_option('echo5_enable_fluent', 1), 1); ?>>
+                            <span class="description">Capture submissions from Fluent Forms</span>
                         </td>
                     </tr>
                 </table>
@@ -443,298 +527,823 @@ class Echo5_Leads_Connector {
         return false;
     }
     
+    /**
+     * Capture Elementor Pro form submission
+     * PROVEN LOGIC from full plugin - do not modify field mapping!
+     */
     public function capture_elementor_form($record, $handler) {
+        // Check if Elementor integration is enabled
+        if (!get_option('echo5_enable_elementor', 1)) {
+            return;
+        }
+        
+        // Check if Elementor Pro is active
+        if (!class_exists('\ElementorPro\Plugin')) {
+            return;
+        }
+        
         // Get form fields
+        $form_fields = $record->get('fields');
+        if (empty($form_fields)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Elementor: No form fields found');
+            }
+            return;
+        }
+        
+        // Debug logging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Elementor Form Submission Data: ' . print_r($form_fields, true));
+        }
+        
+        // Map Elementor fields to our lead fields
+        $params = [];
+        
+        // Required fields - try common Elementor field names and IDs
+        $params['first_name'] = $this->get_elementor_field_value($form_fields, ['first_name', 'firstname', 'fname', 'name']);
+        $params['last_name'] = $this->get_elementor_field_value($form_fields, ['last_name', 'lastname', 'lname', 'surname']);
+        $params['email'] = $this->get_elementor_field_value($form_fields, ['email', 'email_address', 'mail']);
+        $params['phone'] = $this->get_elementor_field_value($form_fields, ['phone', 'telephone', 'phone_number', 'mobile']);
+        
+        // Optional fields
+        $params['city'] = $this->get_elementor_field_value($form_fields, ['city', 'location', 'town']);
+        $params['interest'] = $this->get_elementor_field_value($form_fields, ['interest', 'interests', 'service', 'program']);
+        $params['notes'] = $this->get_elementor_field_value($form_fields, ['message', 'notes', 'comments', 'additional_info']);
+        
+        // Boolean fields
+        $have_children = $this->get_elementor_field_value($form_fields, ['have_children', 'children', 'has_children']);
+        if ($have_children) {
+            $params['have_children'] = in_array(strtolower($have_children), ['yes', '1', 'true', 'on']) ? 1 : 0;
+        }
+        
+        $planning_to_foster = $this->get_elementor_field_value($form_fields, ['planning_to_foster', 'foster', 'fostering']);
+        if ($planning_to_foster) {
+            $params['planning_to_foster'] = in_array(strtolower($planning_to_foster), ['yes', '1', 'true', 'on']) ? 1 : 0;
+        }
+        
+        // UTM and tracking parameters
+        $params['utm_source'] = $this->get_elementor_field_value($form_fields, ['utm_source']);
+        $params['utm_medium'] = $this->get_elementor_field_value($form_fields, ['utm_medium']);
+        $params['utm_campaign'] = $this->get_elementor_field_value($form_fields, ['utm_campaign']);
+        $params['utm_term'] = $this->get_elementor_field_value($form_fields, ['utm_term']);
+        $params['utm_content'] = $this->get_elementor_field_value($form_fields, ['utm_content']);
+        $params['gclid'] = $this->get_elementor_field_value($form_fields, ['gclid']);
+        $params['fbclid'] = $this->get_elementor_field_value($form_fields, ['fbclid']);
+        $params['source'] = $this->get_elementor_field_value($form_fields, ['source']);
+        
+        // Set default source if none provided
+        if (empty($params['source']) && empty($params['utm_source'])) {
+            $params['source'] = 'website';
+        }
+        
+        // Add form reference
+        $form_name = $record->get_form_settings('form_name');
+        $params['form_id'] = 'elementor_' . ($form_name ? sanitize_title($form_name) : 'form');
+        $params['referrer'] = wp_get_referer();
+
+        // Preserve all raw Elementor field id => value and label => value pairs for dynamic storage
         $raw_fields = $record->get('fields');
-        
-        // Debug: Log raw field structure (only if WP_DEBUG_LOG enabled)
-        error_log('[Echo5 Leads] Elementor RAW fields: ' . json_encode($raw_fields));
-        
-        // Use universal field detector
-        $detected_fields = [
-            'first_name' => '',
-            'last_name' => '',
-            'email' => '',
-            'phone' => '',
-            'city' => '',
-            'full_name' => '' // For forms with single name field
-        ];
-        
-        foreach ($raw_fields as $id => $field) {
-            $value = trim($field['value'] ?? '');
-            
-            // Skip empty values
-            if (empty($value)) {
-                continue;
-            }
-            
-            $detected = $this->detect_field_type($field, $id);
-            
-            if ($detected) {
-                $detected_fields[$detected['type']] = $detected['value'];
+        if (!empty($raw_fields) && is_array($raw_fields)) {
+            foreach ($raw_fields as $fid => $fdata) {
+                $field_id_key = 'elementor_field_' . sanitize_key((string) $fid);
+                $params[$field_id_key] = isset($fdata['value']) ? $fdata['value'] : '';
+
+                // store label for this field (linked to field id) instead of duplicating the value
+                if (isset($fdata['title']) && $fdata['title']) {
+                    $label_key = 'elementor_field_label_' . sanitize_key((string) $fid);
+                    $params[$label_key] = $fdata['title'];
+                }
             }
         }
         
-        // Handle full name split (if no first/last name but we have full name)
-        if (empty($detected_fields['first_name']) && !empty($detected_fields['full_name'])) {
-            $parts = explode(' ', $detected_fields['full_name'], 2);
-            $detected_fields['first_name'] = $parts[0];
-            $detected_fields['last_name'] = $parts[1] ?? '';
+        // Only proceed if we have minimum required data
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Elementor: No name found in submission');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Elementor: No email or phone found in submission');
+            }
+            return;
         }
         
+        // Debug logging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Elementor Mapped Params: ' . print_r($params, true));
+        }
         
-        // Build payload
-        $payload = [
-            'first_name' => $detected_fields['first_name'],
-            'last_name' => $detected_fields['last_name'],
-            'email' => $detected_fields['email'],
-            'phone' => $detected_fields['phone'],
-            'city' => $detected_fields['city'],
-            'source' => 'website-elementor',
-            'form_id' => $record->get('form_settings')['form_id'] ?? 'unknown',
-        ];
+        // Send to API
+        $this->send_to_api($params);
+    }
+    
+    /**
+     * Helper function to get field value from Elementor form fields
+     * 
+     * @param array $form_fields The form fields array from Elementor
+     * @param array $field_names Array of possible field names to check
+     * @return string|null The field value or null if not found
+     */
+    private function get_elementor_field_value($form_fields, $field_names) {
+        foreach ($field_names as $field_name) {
+            // Check by field ID
+            if (isset($form_fields[$field_name]) && !empty($form_fields[$field_name]['value'])) {
+                return sanitize_text_field($form_fields[$field_name]['value']);
+            }
+            
+            // Check by field title/label (case insensitive)
+            foreach ($form_fields as $field_id => $field_data) {
+                if (isset($field_data['title']) && 
+                     strcasecmp($field_data['title'], $field_name) === 0 && 
+                     !empty($field_data['value'])) {
+                    return sanitize_text_field($field_data['value']);
+                }
+            }
+        }
         
-        // Log for debugging (will only show if WP_DEBUG_LOG is enabled)
-        error_log('[Echo5 Leads] Elementor DETECTED fields: ' . json_encode($detected_fields));
-        error_log('[Echo5 Leads] Elementor PAYLOAD: ' . json_encode($payload));
-        
-        $this->send_to_api($payload);
+        return null;
     }
 
     /**
-     * Capture Contact Form 7 submission and send to Echo5 API
+     * Capture Contact Form 7 submission
+     * PROVEN LOGIC from full plugin - explicit field mapping
      */
     public function capture_cf7_form($contact_form) {
+        // Check if CF7 integration is enabled
+        if (!get_option('echo5_enable_cf7', 1)) {
+            return;
+        }
+        
         $submission = WPCF7_Submission::get_instance();
         if (!$submission) {
             return;
         }
         
-        $fields = $submission->get_posted_data();
+        $posted_data = $submission->get_posted_data();
         
-        // Use universal detector on CF7 fields
-        $detected_fields = [
-            'first_name' => '',
-            'last_name' => '',
-            'email' => '',
-            'phone' => '',
-            'city' => '',
-            'full_name' => ''
-        ];
-        
-        foreach ($fields as $field_name => $field_value) {
-            if (empty($field_value)) {
-                continue;
-            }
-            
-            // Create pseudo-field structure for detector
-            $pseudo_field = [
-                'type' => '',
-                'title' => $field_name, // CF7 uses field names like "your-name", "your-email"
-                'placeholder' => '',
-                'value' => $field_value
-            ];
-            
-            $detected = $this->detect_field_type($pseudo_field, $field_name);
-            
-            if ($detected) {
-                $detected_fields[$detected['type']] = $detected['value'];
-            }
+        // Debug logging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('CF7 Submission Data: ' . print_r($posted_data, true));
         }
         
-        // Handle full name split
-        if (empty($detected_fields['first_name']) && !empty($detected_fields['full_name'])) {
-            $parts = explode(' ', $detected_fields['full_name'], 2);
-            $detected_fields['first_name'] = $parts[0];
-            $detected_fields['last_name'] = $parts[1] ?? '';
+        // Map CF7 fields to our lead fields
+        $params = [];
+        
+        // Required fields - try common CF7 field names
+        if (isset($posted_data['your-name'])) {
+            $name_parts = explode(' ', trim($posted_data['your-name']), 2);
+            $params['first_name'] = $name_parts[0] ?? '';
+            $params['last_name'] = $name_parts[1] ?? '';
         }
+        if (isset($posted_data['first-name'])) $params['first_name'] = $posted_data['first-name'];
+        if (isset($posted_data['last-name'])) $params['last_name'] = $posted_data['last-name'];
+        if (isset($posted_data['your-email'])) $params['email'] = $posted_data['your-email'];
+        if (isset($posted_data['email'])) $params['email'] = $posted_data['email'];
+        if (isset($posted_data['your-phone'])) $params['phone'] = $posted_data['your-phone'];
+        if (isset($posted_data['phone'])) $params['phone'] = $posted_data['phone'];
+        
+        // Optional fields
+        if (isset($posted_data['your-city'])) $params['city'] = $posted_data['your-city'];
+        if (isset($posted_data['city'])) $params['city'] = $posted_data['city'];
+        if (isset($posted_data['your-message'])) $params['notes'] = $posted_data['your-message'];
+        if (isset($posted_data['message'])) $params['notes'] = $posted_data['message'];
+        if (isset($posted_data['your-subject'])) $params['interest'] = $posted_data['your-subject'];
+        if (isset($posted_data['interest'])) $params['interest'] = $posted_data['interest'];
+        
+        // Checkboxes
+        if (isset($posted_data['have-children'])) $params['have_children'] = !empty($posted_data['have-children']);
+        if (isset($posted_data['planning-to-foster'])) $params['planning_to_foster'] = !empty($posted_data['planning-to-foster']);
+        
+        // UTM parameters from URL or hidden fields
+        if (isset($_GET['utm_source'])) $params['utm_source'] = $_GET['utm_source'];
+        if (isset($_GET['utm_medium'])) $params['utm_medium'] = $_GET['utm_medium'];
+        if (isset($_GET['utm_campaign'])) $params['utm_campaign'] = $_GET['utm_campaign'];
+        if (isset($_GET['utm_term'])) $params['utm_term'] = $_GET['utm_term'];
+        if (isset($_GET['utm_content'])) $params['utm_content'] = $_GET['utm_content'];
+        if (isset($_GET['gclid'])) $params['gclid'] = $_GET['gclid'];
+        if (isset($_GET['fbclid'])) $params['fbclid'] = $_GET['fbclid'];
+        
+        // Hidden fields from form
+        if (isset($posted_data['utm_source'])) $params['utm_source'] = $posted_data['utm_source'];
+        if (isset($posted_data['utm_medium'])) $params['utm_medium'] = $posted_data['utm_medium'];
+        if (isset($posted_data['utm_campaign'])) $params['utm_campaign'] = $posted_data['utm_campaign'];
+        if (isset($posted_data['utm_term'])) $params['utm_term'] = $posted_data['utm_term'];
+        if (isset($posted_data['utm_content'])) $params['utm_content'] = $posted_data['utm_content'];
+        if (isset($posted_data['gclid'])) $params['gclid'] = $posted_data['gclid'];
+        if (isset($posted_data['fbclid'])) $params['fbclid'] = $posted_data['fbclid'];
+        if (isset($posted_data['source'])) $params['source'] = $posted_data['source'];
+        
+        // Set default source if none provided
+        if (empty($params['source']) && empty($params['utm_source'])) {
+            $params['source'] = 'website';
+        }
+        
+        // Add form reference
+        $params['form_id'] = 'cf7_' . $contact_form->id();
+        $params['referrer'] = wp_get_referer();
 
-        // Build payload
-        $payload = [
-            'first_name' => $detected_fields['first_name'],
-            'last_name' => $detected_fields['last_name'],
-            'email' => $detected_fields['email'],
-            'phone' => $detected_fields['phone'],
-            'city' => $detected_fields['city'],
-            'source' => 'website-cf7',
-            'form_id' => $contact_form->id(),
-        ];
+        // Preserve all raw CF7 posted fields (prefix keys to avoid collisions)
+        foreach ($posted_data as $k => $v) {
+            $safe_k = 'cf7_' . sanitize_key((string) $k);
+            if (!isset($params[$safe_k])) {
+                $params[$safe_k] = is_array($v) ? wp_json_encode($v) : $v;
+            }
+        }
         
-        error_log('[Echo5 Leads] CF7 DETECTED: ' . json_encode($detected_fields));
+        // Only proceed if we have minimum required data
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('CF7: No name found in submission');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('CF7: No email or phone found in submission');
+            }
+            return;
+        }
         
-        $this->send_to_api($payload);
+        // Debug logging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('CF7 Mapped Params: ' . print_r($params, true));
+        }
+        
+        // Send to API
+        $this->send_to_api($params);
     }
 
     /**
-     * Capture WPForms submission and send to Echo5 API
+     * Capture WPForms submission
+     * PROVEN LOGIC - explicit field checking
      */
     public function capture_wpforms_form($fields, $entry, $form_data, $entry_id) {
-        $mapped_fields = [];
-        foreach ($fields as $field) {
-            $name = strtolower($field['name']);
-            // Simple fields
-            if ($field['type'] === 'email') $mapped_fields['email'] = $field['value'];
-            if ($field['type'] === 'phone') $mapped_fields['phone'] = $field['value'];
-            if (strpos($name, 'city') !== false) $mapped_fields['city'] = $field['value'];
-            if (strpos($name, 'interest') !== false) $mapped_fields['interest'] = $field['value'];
-            if (strpos($name, 'children') !== false) $mapped_fields['have_children'] = $field['value'];
-            if (strpos($name, 'foster') !== false) $mapped_fields['planning_to_foster'] = $field['value'];
-
-            // Name field
-            if ($field['type'] === 'name') {
-                $mapped_fields['first_name'] = $field['first'] ?? '';
-                $mapped_fields['last_name'] = $field['last'] ?? '';
-            } elseif (strpos($name, 'first name') !== false) {
-                $mapped_fields['first_name'] = $field['value'];
-            } elseif (strpos($name, 'last name') !== false) {
-                $mapped_fields['last_name'] = $field['value'];
-            } elseif (strpos($name, 'name') !== false) {
-                $parts = explode(' ', $field['value'], 2);
-                $mapped_fields['first_name'] = $parts[0];
-                $mapped_fields['last_name'] = $parts[1] ?? '';
-            }
+        // Check if WPForms integration is enabled
+        if (!get_option('echo5_enable_wpforms', 1)) {
+            return;
         }
-
-        // Build payload
-        $payload = [
-            'first_name' => $mapped_fields['first_name'] ?? '',
-            'last_name' => $mapped_fields['last_name'] ?? '',
-            'email' => $mapped_fields['email'] ?? '',
-            'phone' => $mapped_fields['phone'] ?? '',
-            'city' => $mapped_fields['city'] ?? '',
-            'interest' => $mapped_fields['interest'] ?? '',
-            'have_children' => $mapped_fields['have_children'] ?? '',
-            'planning_to_foster' => $mapped_fields['planning_to_foster'] ?? '',
-            'source' => 'website-wpforms',
-            'form_id' => $form_data['id'],
-        ];
-
-        $this->send_to_api($payload);
+        
+        if (empty($fields)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('WPForms: No fields found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('WPForms Submission Data: ' . print_r($fields, true));
+        }
+        
+        $params = [];
+        
+        foreach ($fields as $field_id => $field) {
+            $name = isset($field['name']) ? strtolower(trim($field['name'])) : '';
+            $value = isset($field['value']) ? trim($field['value']) : '';
+            $type = isset($field['type']) ? $field['type'] : '';
+            
+            // Name field (compound)
+            if ($type === 'name') {
+                if (isset($field['first'])) $params['first_name'] = trim($field['first']);
+                if (isset($field['last'])) $params['last_name'] = trim($field['last']);
+            }
+            // Email field
+            elseif ($type === 'email' && !empty($value)) {
+                $params['email'] = $value;
+            }
+            // Phone field
+            elseif ($type === 'phone' && !empty($value)) {
+                $params['phone'] = $value;
+            }
+            // Check by field name
+            elseif (!empty($name) && !empty($value)) {
+                if (strpos($name, 'first') !== false || $name === 'fname') {
+                    $params['first_name'] = $value;
+                } elseif (strpos($name, 'last') !== false || $name === 'lname') {
+                    $params['last_name'] = $value;
+                } elseif (strpos($name, 'email') !== false) {
+                    $params['email'] = $value;
+                } elseif (strpos($name, 'phone') !== false || strpos($name, 'mobile') !== false) {
+                    $params['phone'] = $value;
+                } elseif (strpos($name, 'city') !== false) {
+                    $params['city'] = $value;
+                } elseif (strpos($name, 'message') !== false || strpos($name, 'comment') !== false) {
+                    $params['notes'] = $value;
+                } elseif (strpos($name, 'interest') !== false) {
+                    $params['interest'] = $value;
+                } elseif (strpos($name, 'children') !== false) {
+                    $params['have_children'] = !empty($value);
+                } elseif (strpos($name, 'foster') !== false) {
+                    $params['planning_to_foster'] = !empty($value);
+                }
+            }
+            
+            // Preserve all fields
+            $safe_key = 'wpforms_field_' . sanitize_key((string) $field_id);
+            $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
+        }
+        
+        // Set source and form ID
+        $params['source'] = 'website';
+        $params['form_id'] = 'wpforms_' . ($form_data['id'] ?? 'unknown');
+        $params['referrer'] = wp_get_referer();
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('WPForms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('WPForms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('WPForms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
-     * Capture MetForms submission and send to Echo5 API
+     * Capture MetForms submission
+     * PROVEN LOGIC - MetForms passes data as associative array
      */
-    public function capture_metforms_form($data, $form_id) {
-        // Build payload
-        $payload = [
-            'first_name' => $data['first_name'] ?? $data['name'] ?? '',
-            'last_name' => $data['last_name'] ?? '',
-            'email' => $data['email'] ?? '',
-            'phone' => $data['phone'] ?? '',
-            'city' => $data['city'] ?? '',
-            'interest' => $data['interest'] ?? '',
-            'have_children' => $data['have_children'] ?? '',
-            'planning_to_foster' => $data['planning_to_foster'] ?? '',
-            'source' => 'website-metforms',
-            'form_id' => $form_id,
-        ];
-
-        $this->send_to_api($payload);
+    public function capture_metforms_form($form_data, $form_id) {
+        // Check if MetForm integration is enabled
+        if (!get_option('echo5_enable_metforms', 1)) {
+            return;
+        }
+        
+        if (empty($form_data)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MetForms: No form data');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MetForms Submission Data: ' . print_r($form_data, true));
+        }
+        
+        $params = [];
+        
+        // MetForms typically uses keys like 'mf-first-name', 'mf-email', etc.
+        foreach ($form_data as $key => $value) {
+            $key_lower = strtolower($key);
+            $value_trimmed = is_string($value) ? trim($value) : $value;
+            
+            if (empty($value_trimmed)) continue;
+            
+            // Check for common field patterns
+            if (strpos($key_lower, 'first') !== false || strpos($key_lower, 'fname') !== false) {
+                $params['first_name'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'last') !== false || strpos($key_lower, 'lname') !== false) {
+                $params['last_name'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'email') !== false) {
+                $params['email'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'phone') !== false || strpos($key_lower, 'mobile') !== false) {
+                $params['phone'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'city') !== false) {
+                $params['city'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'message') !== false || strpos($key_lower, 'comment') !== false) {
+                $params['notes'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'interest') !== false) {
+                $params['interest'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'children') !== false) {
+                $params['have_children'] = !empty($value_trimmed);
+            } elseif (strpos($key_lower, 'foster') !== false) {
+                $params['planning_to_foster'] = !empty($value_trimmed);
+            }
+            
+            // Preserve all fields
+            $safe_key = 'metform_' . sanitize_key($key);
+            $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
+        }
+        
+        // Handle full name field if separate first/last not found
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            foreach ($form_data as $key => $value) {
+                if (stripos($key, 'name') !== false && !empty($value)) {
+                    $parts = explode(' ', trim($value), 2);
+                    $params['first_name'] = $parts[0] ?? '';
+                    $params['last_name'] = $parts[1] ?? '';
+                    break;
+                }
+            }
+        }
+        
+        $params['source'] = 'website';
+        $params['form_id'] = 'metform_' . $form_id;
+        $params['referrer'] = wp_get_referer();
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MetForms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MetForms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MetForms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
      * Capture Gravity Forms submission
+     * PROVEN LOGIC - Gravity Forms uses field IDs and rgar() helper
      */
     public function capture_gravity_form($entry, $form) {
-        $payload = [
-            'first_name' => rgar($entry, '1.3') ?: rgar($entry, 'first_name') ?: '',
-            'last_name' => rgar($entry, '1.6') ?: rgar($entry, 'last_name') ?: '',
-            'email' => rgar($entry, 'email') ?: '',
-            'phone' => rgar($entry, 'phone') ?: '',
-            'city' => rgar($entry, 'city') ?: '',
-            'source' => 'website-gravityforms',
-            'form_id' => $form['id'],
-        ];
-
-        $this->send_to_api($payload);
+        // Check if Gravity Forms integration is enabled
+        if (!get_option('echo5_enable_gravity', 1)) {
+            return;
+        }
+        
+        if (empty($entry) || empty($form)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Gravity Forms: No entry or form data');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Gravity Forms Submission Data: ' . print_r($entry, true));
+        }
+        
+        $params = [];
+        
+        // Gravity Forms has dynamic field IDs, so we need to search by field type and label
+        if (!empty($form['fields'])) {
+            foreach ($form['fields'] as $field) {
+                $field_id = $field->id;
+                $field_type = $field->type;
+                $field_label = isset($field->label) ? strtolower($field->label) : '';
+                
+                // Get the value
+                $value = isset($entry[$field_id]) ? trim($entry[$field_id]) : '';
+                
+                if (empty($value)) continue;
+                
+                // Name field (compound)
+                if ($field_type === 'name') {
+                    if (isset($entry[$field_id . '.3'])) $params['first_name'] = trim($entry[$field_id . '.3']);
+                    if (isset($entry[$field_id . '.6'])) $params['last_name'] = trim($entry[$field_id . '.6']);
+                }
+                // Email field
+                elseif ($field_type === 'email') {
+                    $params['email'] = $value;
+                }
+                // Phone field
+                elseif ($field_type === 'phone') {
+                    $params['phone'] = $value;
+                }
+                // Text/textarea fields - check by label
+                elseif (in_array($field_type, ['text', 'textarea', 'select', 'radio', 'checkbox'])) {
+                    if (strpos($field_label, 'first') !== false) {
+                        $params['first_name'] = $value;
+                    } elseif (strpos($field_label, 'last') !== false) {
+                        $params['last_name'] = $value;
+                    } elseif (strpos($field_label, 'city') !== false) {
+                        $params['city'] = $value;
+                    } elseif (strpos($field_label, 'message') !== false || strpos($field_label, 'comment') !== false) {
+                        $params['notes'] = $value;
+                    } elseif (strpos($field_label, 'interest') !== false) {
+                        $params['interest'] = $value;
+                    } elseif (strpos($field_label, 'children') !== false) {
+                        $params['have_children'] = !empty($value);
+                    } elseif (strpos($field_label, 'foster') !== false) {
+                        $params['planning_to_foster'] = !empty($value);
+                    }
+                }
+                
+                // Preserve all fields
+                $safe_key = 'gf_field_' . sanitize_key((string) $field_id);
+                $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
+            }
+        }
+        
+        $params['source'] = 'website';
+        $params['form_id'] = 'gravityforms_' . ($form['id'] ?? 'unknown');
+        $params['referrer'] = isset($entry['source_url']) ? $entry['source_url'] : '';
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Gravity Forms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Gravity Forms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Gravity Forms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
      * Capture Ninja Forms submission
+     * PROVEN LOGIC - Ninja Forms passes fields array
      */
     public function capture_ninja_form($form_data) {
+        // Check if Ninja Forms integration is enabled
+        if (!get_option('echo5_enable_ninja', 1)) {
+            return;
+        }
+        
+        if (empty($form_data) || empty($form_data['fields'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Ninja Forms: No form data or fields');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Ninja Forms Submission Data: ' . print_r($form_data, true));
+        }
+        
+        $params = [];
         $fields = $form_data['fields'];
         
-        $payload = [
-            'first_name' => '',
-            'last_name' => '',
-            'email' => '',
-            'phone' => '',
-            'city' => '',
-            'source' => 'website-ninjaforms',
-            'form_id' => $form_data['form_id'],
-        ];
-
         foreach ($fields as $field) {
-            $key = strtolower($field['key']);
+            $key = isset($field['key']) ? strtolower($field['key']) : '';
+            $value = isset($field['value']) ? trim($field['value']) : '';
+            
+            if (empty($value)) continue;
+            
+            // Check field key for common patterns
             if (strpos($key, 'first') !== false || strpos($key, 'fname') !== false) {
-                $payload['first_name'] = $field['value'];
+                $params['first_name'] = $value;
             } elseif (strpos($key, 'last') !== false || strpos($key, 'lname') !== false) {
-                $payload['last_name'] = $field['value'];
+                $params['last_name'] = $value;
             } elseif (strpos($key, 'email') !== false) {
-                $payload['email'] = $field['value'];
-            } elseif (strpos($key, 'phone') !== false) {
-                $payload['phone'] = $field['value'];
+                $params['email'] = $value;
+            } elseif (strpos($key, 'phone') !== false || strpos($key, 'mobile') !== false) {
+                $params['phone'] = $value;
             } elseif (strpos($key, 'city') !== false) {
-                $payload['city'] = $field['value'];
+                $params['city'] = $value;
+            } elseif (strpos($key, 'message') !== false || strpos($key, 'comment') !== false) {
+                $params['notes'] = $value;
+            } elseif (strpos($key, 'interest') !== false) {
+                $params['interest'] = $value;
+            } elseif (strpos($key, 'children') !== false) {
+                $params['have_children'] = !empty($value);
+            } elseif (strpos($key, 'foster') !== false) {
+                $params['planning_to_foster'] = !empty($value);
+            }
+            
+            // Also check by field label
+            if (isset($field['label'])) {
+                $label = strtolower($field['label']);
+                if (empty($params['first_name']) && strpos($label, 'first') !== false) {
+                    $params['first_name'] = $value;
+                } elseif (empty($params['last_name']) && strpos($label, 'last') !== false) {
+                    $params['last_name'] = $value;
+                }
+            }
+            
+            // Preserve all fields
+            $field_id = isset($field['id']) ? $field['id'] : $key;
+            $safe_key = 'ninja_field_' . sanitize_key((string) $field_id);
+            $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
+        }
+        
+        // Handle full name if no separate first/last
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            foreach ($fields as $field) {
+                $key = isset($field['key']) ? strtolower($field['key']) : '';
+                if (strpos($key, 'name') !== false && !empty($field['value'])) {
+                    $parts = explode(' ', trim($field['value']), 2);
+                    $params['first_name'] = $parts[0] ?? '';
+                    $params['last_name'] = $parts[1] ?? '';
+                    break;
+                }
             }
         }
-
-        $this->send_to_api($payload);
+        
+        $params['source'] = 'website';
+        $params['form_id'] = 'ninjaforms_' . ($form_data['form_id'] ?? 'unknown');
+        $params['referrer'] = wp_get_referer();
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Ninja Forms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Ninja Forms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Ninja Forms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
      * Capture Formidable Forms submission
+     * PROVEN LOGIC - Formidable uses entry metas
      */
     public function capture_formidable_form($entry_id, $form_id) {
-        $entry = FrmEntry::getOne($entry_id, true);
+        // Check if Formidable Forms integration is enabled
+        if (!get_option('echo5_enable_formidable', 1)) {
+            return;
+        }
         
-        $payload = [
-            'first_name' => '',
-            'last_name' => '',
-            'email' => '',
-            'phone' => '',
-            'city' => '',
-            'source' => 'website-formidable',
-            'form_id' => $form_id,
-        ];
-
-        foreach ($entry->metas as $field_id => $value) {
-            $field = FrmField::getOne($field_id);
-            $name = strtolower($field->name);
-            
-            if (strpos($name, 'first') !== false) {
-                $payload['first_name'] = $value;
-            } elseif (strpos($name, 'last') !== false) {
-                $payload['last_name'] = $value;
-            } elseif (strpos($name, 'email') !== false) {
-                $payload['email'] = $value;
-            } elseif (strpos($name, 'phone') !== false) {
-                $payload['phone'] = $value;
-            } elseif (strpos($name, 'city') !== false) {
-                $payload['city'] = $value;
+        if (!class_exists('FrmEntry') || !class_exists('FrmField')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Formidable Forms: Classes not available');
+            }
+            return;
+        }
+        
+        $entry = FrmEntry::getOne($entry_id, true);
+        if (!$entry) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Formidable Forms: Entry not found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Formidable Forms Entry Data: ' . print_r($entry, true));
+        }
+        
+        $params = [];
+        
+        if (!empty($entry->metas)) {
+            foreach ($entry->metas as $field_id => $value) {
+                $field = FrmField::getOne($field_id);
+                if (!$field) continue;
+                
+                $name = isset($field->name) ? strtolower($field->name) : '';
+                $label = isset($field->label) ? strtolower($field->label) : '';
+                $value_trimmed = is_string($value) ? trim($value) : $value;
+                
+                if (empty($value_trimmed)) continue;
+                
+                // Check by field name or label
+                if (strpos($name, 'first') !== false || strpos($label, 'first') !== false) {
+                    $params['first_name'] = $value_trimmed;
+                } elseif (strpos($name, 'last') !== false || strpos($label, 'last') !== false) {
+                    $params['last_name'] = $value_trimmed;
+                } elseif (strpos($name, 'email') !== false || strpos($label, 'email') !== false) {
+                    $params['email'] = $value_trimmed;
+                } elseif (strpos($name, 'phone') !== false || strpos($label, 'phone') !== false) {
+                    $params['phone'] = $value_trimmed;
+                } elseif (strpos($name, 'city') !== false || strpos($label, 'city') !== false) {
+                    $params['city'] = $value_trimmed;
+                } elseif (strpos($name, 'message') !== false || strpos($label, 'message') !== false) {
+                    $params['notes'] = $value_trimmed;
+                } elseif (strpos($name, 'interest') !== false || strpos($label, 'interest') !== false) {
+                    $params['interest'] = $value_trimmed;
+                } elseif (strpos($name, 'children') !== false || strpos($label, 'children') !== false) {
+                    $params['have_children'] = !empty($value_trimmed);
+                } elseif (strpos($name, 'foster') !== false || strpos($label, 'foster') !== false) {
+                    $params['planning_to_foster'] = !empty($value_trimmed);
+                }
+                
+                // Preserve all fields
+                $safe_key = 'formidable_field_' . sanitize_key((string) $field_id);
+                $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
             }
         }
-
-        $this->send_to_api($payload);
+        
+        $params['source'] = 'website';
+        $params['form_id'] = 'formidable_' . $form_id;
+        $params['referrer'] = wp_get_referer();
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Formidable Forms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Formidable Forms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Formidable Forms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
      * Capture Fluent Forms submission
+     * PROVEN LOGIC - Fluent Forms passes form_data array
      */
     public function capture_fluent_form($entry_id, $form_data, $form) {
-        $payload = [
-            'first_name' => $form_data['names']['first_name'] ?? $form_data['first_name'] ?? '',
-            'last_name' => $form_data['names']['last_name'] ?? $form_data['last_name'] ?? '',
-            'email' => $form_data['email'] ?? '',
-            'phone' => $form_data['phone'] ?? '',
-            'city' => $form_data['city'] ?? '',
-            'source' => 'website-fluentforms',
-            'form_id' => $form->id,
-        ];
-
-        $this->send_to_api($payload);
+        // Check if Fluent Forms integration is enabled
+        if (!get_option('echo5_enable_fluent', 1)) {
+            return;
+        }
+        
+        if (empty($form_data)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Fluent Forms: No form data');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Fluent Forms Submission Data: ' . print_r($form_data, true));
+        }
+        
+        $params = [];
+        
+        // Fluent Forms can have nested names array
+        if (isset($form_data['names']) && is_array($form_data['names'])) {
+            if (!empty($form_data['names']['first_name'])) $params['first_name'] = trim($form_data['names']['first_name']);
+            if (!empty($form_data['names']['last_name'])) $params['last_name'] = trim($form_data['names']['last_name']);
+        }
+        
+        // Check top-level fields
+        foreach ($form_data as $key => $value) {
+            $key_lower = strtolower($key);
+            $value_trimmed = is_string($value) ? trim($value) : $value;
+            
+            if (empty($value_trimmed)) continue;
+            
+            if ($key_lower === 'email' || strpos($key_lower, 'email') !== false) {
+                $params['email'] = $value_trimmed;
+            } elseif ($key_lower === 'phone' || strpos($key_lower, 'phone') !== false) {
+                $params['phone'] = $value_trimmed;
+            } elseif ($key_lower === 'first_name' && empty($params['first_name'])) {
+                $params['first_name'] = $value_trimmed;
+            } elseif ($key_lower === 'last_name' && empty($params['last_name'])) {
+                $params['last_name'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'city') !== false) {
+                $params['city'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'message') !== false || strpos($key_lower, 'comment') !== false) {
+                $params['notes'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'interest') !== false) {
+                $params['interest'] = $value_trimmed;
+            } elseif (strpos($key_lower, 'children') !== false) {
+                $params['have_children'] = !empty($value_trimmed);
+            } elseif (strpos($key_lower, 'foster') !== false) {
+                $params['planning_to_foster'] = !empty($value_trimmed);
+            }
+            
+            // Preserve all fields
+            $safe_key = 'fluent_' . sanitize_key($key);
+            $params[$safe_key] = is_array($value) ? wp_json_encode($value) : $value;
+        }
+        
+        $params['source'] = 'website';
+        $params['form_id'] = 'fluentforms_' . (isset($form->id) ? $form->id : 'unknown');
+        $params['referrer'] = wp_get_referer();
+        
+        // Validation
+        if (empty($params['first_name']) && empty($params['last_name'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Fluent Forms: No name found');
+            }
+            return;
+        }
+        if (empty($params['email']) && empty($params['phone'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Fluent Forms: No email or phone found');
+            }
+            return;
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Fluent Forms Mapped Params: ' . print_r($params, true));
+        }
+        
+        $this->send_to_api($params);
     }
 
     /**
