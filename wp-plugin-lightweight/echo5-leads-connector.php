@@ -880,6 +880,13 @@ class Echo5_Leads_Connector {
             return;
         }
         
+        // MetForm hook typically passes ($form_id, $form_data). Support both orders defensively.
+        if (is_numeric($form_data) && is_array($form_id)) {
+            $tmp = $form_data;
+            $form_data = $form_id;
+            $form_id = $tmp;
+        }
+        
         if (empty($form_data)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MetForms: No form data');
