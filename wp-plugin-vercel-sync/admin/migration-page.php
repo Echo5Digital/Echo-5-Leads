@@ -10,7 +10,7 @@ add_action('admin_menu', 'oal_add_migration_menu');
 
 function oal_add_migration_menu() {
     add_submenu_page(
-        'oal-leads',
+        'oal-settings',
         'Migrate to Vercel',
         'Migrate to Vercel',
         'manage_options',

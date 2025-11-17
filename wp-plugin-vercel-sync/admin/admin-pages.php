@@ -10,18 +10,20 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action( 'admin_menu', 'oal_add_admin_menu' );
 
 function oal_add_admin_menu() {
+    // Main menu page is Settings (no separate "All Leads" page)
     add_menu_page(
         'Echo5 Leads Manager',
         'Echo5 Leads',
         'manage_options',
-        'oal-leads',
-        'oal_leads_page',
+        'oal-settings',
+        'oal_settings_page',
         'dashicons-groups',
         30
     );
     
+    // Settings submenu (same as main page)
     add_submenu_page(
-        'oal-leads',
+        'oal-settings',
         'Settings',
         'Settings',
         'manage_options',
@@ -201,86 +203,20 @@ function oal_settings_page() {
         <h2>Integration Info</h2>
         <p><strong>REST API Endpoint:</strong> <code><?php echo rest_url( 'echo5-leads/v1/lead' ); ?></code></p>
         <p><strong>Facebook Webhook URL:</strong> <code><?php echo rest_url( 'oal/v1/fb-webhook' ); ?></code></p>
-    </div>
-    <?php
-}
-
-// Leads page (simple list)
-function oal_leads_page() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'openarms_leads';
-    
-    // Get search query
-    $search = isset( $_GET['s'] ) ? sanitize_text_field( $_GET['s'] ) : '';
-    
-    // Build query
-    $query = "SELECT * FROM $table_name";
-    if ( $search ) {
-        $query .= $wpdb->prepare( " WHERE first_name LIKE %s OR last_name LIKE %s OR email LIKE %s", 
-            '%' . $wpdb->esc_like( $search ) . '%',
-            '%' . $wpdb->esc_like( $search ) . '%',
-            '%' . $wpdb->esc_like( $search ) . '%'
-        );
-    }
-    $query .= " ORDER BY created_at DESC LIMIT 50";
-    
-    $leads = $wpdb->get_results( $query );
-    ?>
-    <div class="wrap">
-        <h1>Leads</h1>
         
-        <form method="get" action="">
-            <input type="hidden" name="page" value="oal-leads">
-            <p class="search-box">
-                <input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="Search leads...">
-                <button type="submit" class="button">Search</button>
-            </p>
-        </form>
+        <hr>
         
-        <table class="wp-list-table widefat fixed striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>City</th>
-                    <th>Source</th>
-                    <th>Stage</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ( empty( $leads ) ): ?>
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px;">
-                            No leads found. <?php if ( $search ): ?>
-                                <a href="?page=oal-leads">Clear search</a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ( $leads as $lead ): ?>
-                        <tr>
-                            <td><?php echo esc_html( $lead->id ); ?></td>
-                            <td><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></td>
-                            <td><?php echo esc_html( $lead->email ); ?></td>
-                            <td><?php echo esc_html( $lead->phone_e164 ); ?></td>
-                            <td><?php echo esc_html( $lead->city ); ?></td>
-                            <td><?php echo esc_html( $lead->source ); ?></td>
-                            <td><?php echo esc_html( $lead->stage ); ?></td>
-                            <td><?php echo esc_html( $lead->created_at ); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        
-        <?php if ( count( $leads ) >= 50 ): ?>
-            <p style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-left: 4px solid #0073aa;">
-                <strong>Note:</strong> Showing first 50 results. Use search to find specific leads.
-            </p>
-        <?php endif; ?>
+        <h2>View Leads</h2>
+        <p>
+            All leads are now managed in your Vercel dashboard:<br>
+            <a href="https://echo5-leads-fe.vercel.app/leads" target="_blank" class="button button-primary">
+                Open Vercel Leads Dashboard
+            </a>
+        </p>
+        <p class="description">
+            New form submissions from this WordPress site are automatically synced to Vercel in real-time.<br>
+            To migrate existing historical leads, go to <strong>Echo5 Leads → Migrate to Vercel</strong>.
+        </p>
     </div>
     <?php
 }
