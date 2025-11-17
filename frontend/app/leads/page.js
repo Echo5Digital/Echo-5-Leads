@@ -8,6 +8,7 @@ export default function LeadsListPage() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedLeads, setSelectedLeads] = useState([]);
   const [filters, setFilters] = useState({
     stage: '',
     source: '',
@@ -68,6 +69,57 @@ export default function LeadsListPage() {
       loadLeads(); // Reload
     } catch (err) {
       alert('Error updating stage: ' + err.message);
+    }
+  }
+
+  async function handleDeleteLead(leadId, leadName) {
+    if (!confirm(`Are you sure you want to delete ${leadName}? This cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await leadsApi.deleteLead(leadId);
+      alert('Lead deleted successfully');
+      loadLeads(); // Reload
+    } catch (err) {
+      alert('Error deleting lead: ' + err.message);
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (selectedLeads.length === 0) {
+      alert('Please select leads to delete');
+      return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete ${selectedLeads.length} lead(s)? This cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      // Delete all selected leads
+      await Promise.all(selectedLeads.map(id => leadsApi.deleteLead(id)));
+      alert(`Successfully deleted ${selectedLeads.length} lead(s)`);
+      setSelectedLeads([]);
+      loadLeads(); // Reload
+    } catch (err) {
+      alert('Error deleting leads: ' + err.message);
+    }
+  }
+
+  function toggleSelectAll() {
+    if (selectedLeads.length === leads.length) {
+      setSelectedLeads([]);
+    } else {
+      setSelectedLeads(leads.map(l => l._id));
+    }
+  }
+
+  function toggleSelectLead(leadId) {
+    if (selectedLeads.includes(leadId)) {
+      setSelectedLeads(selectedLeads.filter(id => id !== leadId));
+    } else {
+      setSelectedLeads([...selectedLeads, leadId]);
     }
   }
 
@@ -186,8 +238,23 @@ export default function LeadsListPage() {
         </div>
 
         {/* Results Info */}
-        <div className="mb-4 text-sm text-gray-600">
-          Showing {leads.length} of {total} leads
+        <div className="mb-4 flex justify-between items-center">
+          <div className="text-sm text-gray-600">
+            Showing {leads.length} of {total} leads
+            {selectedLeads.length > 0 && (
+              <span className="ml-4 text-blue-600 font-medium">
+                ({selectedLeads.length} selected)
+              </span>
+            )}
+          </div>
+          {selectedLeads.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+            >
+              Delete Selected ({selectedLeads.length})
+            </button>
+          )}
         </div>
 
         {/* Error Message */}
@@ -218,6 +285,14 @@ export default function LeadsListPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.length === leads.length && leads.length > 0}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
@@ -242,11 +317,22 @@ export default function LeadsListPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {leads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedLeads.includes(lead._id)}
+                          onChange={() => toggleSelectLead(lead._id)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/leads/${lead._id}`}
@@ -290,6 +376,15 @@ export default function LeadsListPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(lead.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
+                          className="text-red-600 hover:text-red-900 font-medium"
+                          title="Delete lead"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

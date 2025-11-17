@@ -10,6 +10,8 @@ export default async function ingestLead(req, res) {
     const body = req.body || {};
 
     const now = new Date();
+    // Allow override of createdAt for historical data migration
+    const createdAt = body.created_at ? new Date(body.created_at) : now;
     const firstName = body.first_name?.toString().trim() || undefined;
     const lastName  = body.last_name?.toString().trim() || undefined;
     const email     = body.email?.toString().trim().toLowerCase() || undefined;
@@ -69,7 +71,7 @@ export default async function ingestLead(req, res) {
         stage: stageDefault,
         assignedUserId: null,
         office: null,
-        createdAt: now,
+        createdAt: createdAt, // ✅ Use original timestamp if provided
         latestActivityAt: now,
         originalPayload: body,
       };
@@ -81,7 +83,7 @@ export default async function ingestLead(req, res) {
         leadId,
         type: 'note',
         content: { title: 'Attribution v1', note: `source set to: ${doc.source}` },
-        createdAt: now,
+        createdAt: createdAt, // ✅ Also use original timestamp for first activity
       });
     } else {
       leadId = existing._id.toString();

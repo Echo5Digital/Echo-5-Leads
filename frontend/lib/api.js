@@ -47,6 +47,13 @@ export const leadsApi = {
     });
   },
 
+  // Delete lead
+  async deleteLead(id) {
+    return apiRequest(`/api/leads/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   // Add activity to lead
   async addActivity(leadId, data) {
     return apiRequest(`/api/leads/${leadId}/activity`, {

@@ -94,6 +94,7 @@ function oal_deactivate_plugin() {
 // --- Includes ---
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . 'admin/admin-pages.php';
+    require_once plugin_dir_path( __FILE__ ) . 'admin/migration-page.php';
 }
 
 // ========================================
