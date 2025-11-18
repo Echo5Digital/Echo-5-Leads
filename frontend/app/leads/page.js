@@ -15,10 +15,12 @@ export default function LeadsListPage() {
     q: '',
     spam_flag: '',
     page: 1,
-    limit: 50,
+    limit: 10,
   });
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const pageStart = total === 0 ? 0 : (filters.page - 1) * filters.limit + 1;
+  const pageEnd = Math.min(filters.page * filters.limit, total);
 
   useEffect(() => {
     loadLeads();
@@ -222,7 +224,7 @@ export default function LeadsListPage() {
 
             <div className="flex items-end gap-2">
               <button
-                onClick={() => setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 50 })}
+                onClick={() => setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 10 })}
                 className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
               >
                 Clear
@@ -240,7 +242,12 @@ export default function LeadsListPage() {
         {/* Results Info */}
         <div className="mb-4 flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            Showing {leads.length} of {total} leads
+            {total > 0 ? (
+              <>Showing {pageStart}
+              {'–'}{pageEnd} of {total} leads</>
+            ) : (
+              <>Showing 0 of 0 leads</>
+            )}
             {selectedLeads.length > 0 && (
               <span className="ml-4 text-blue-600 font-medium">
                 ({selectedLeads.length} selected)
