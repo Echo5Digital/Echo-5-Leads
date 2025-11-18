@@ -161,7 +161,7 @@ export default function NewClientPage() {
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Sunrise Foster Care"
+                  placeholder="e.g., Openarms Foster Care"
                   required
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -179,7 +179,7 @@ export default function NewClientPage() {
                   value={formData.slug}
                   onChange={(e) => handleChange('slug', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                  placeholder="e.g., sunrise-foster-care"
+                  placeholder="e.g., openarms-foster-care"
                   pattern="[a-z0-9-]+"
                   required
                 />
