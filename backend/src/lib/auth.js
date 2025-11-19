@@ -194,7 +194,10 @@ export async function createUser(db, userData) {
     email,
     password: hashedPassword,
     role,
-    tenantId: tenantId ? new ObjectId(tenantId) : null,
+    // Handle both ObjectId (24-char hex) and UUID formats
+    tenantId: tenantId 
+      ? (typeof tenantId === 'string' && tenantId.length === 24 ? new ObjectId(tenantId) : tenantId)
+      : null,
     firstName,
     lastName,
     active: true,
