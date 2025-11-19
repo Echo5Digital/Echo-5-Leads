@@ -28,6 +28,18 @@ import analyticsOverviewRoute from './src/routes/analytics-overview.js';
 import { verifyWebhook as metaVerifyWebhook, handleWebhook as metaHandleWebhook } from './src/routes/ingest-meta-lead.js';
 import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 
+// Auth routes
+import loginRoute from './src/routes/auth-login.js';
+import refreshTokenRoute from './src/routes/auth-refresh.js';
+import { protectedLogout } from './src/routes/auth-logout.js';
+import { protectedProfile } from './src/routes/auth-profile.js';
+import { 
+  protectedListUsers, 
+  protectedCreateUser, 
+  protectedUpdateUser, 
+  protectedDeleteUser 
+} from './src/routes/user-management.js';
+
 dotenv.config();
 
 const app = express();
@@ -59,6 +71,18 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Auth Routes (public)
+app.post('/api/auth/login', loginRoute);
+app.post('/api/auth/refresh', refreshTokenRoute);
+app.post('/api/auth/logout', ...protectedLogout);
+app.get('/api/auth/profile', ...protectedProfile);
+
+// User Management Routes (protected)
+app.get('/api/users', ...protectedListUsers);
+app.post('/api/users', ...protectedCreateUser);
+app.put('/api/users/:userId', ...protectedUpdateUser);
+app.delete('/api/users/:userId', ...protectedDeleteUser);
+
 // API Routes
 app.post('/api/ingest/lead', ingestLeadRoute);
 
@@ -69,8 +93,8 @@ app.post('/api/ingest/meta-lead', metaHandleWebhook);
 // Google Ads Lead Form Webhook
 app.post('/api/ingest/google-lead', handleGoogleLead);
 
-app.get('/api/leads', leadsRoute);
-app.get('/api/leads/:id', leadDetailRoute);
+app.get('/api/leads', ...leadsRoute);
+app.get('/api/leads/:id', ...leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
 app.put('/api/leads/:id', updateLeadRoute);
 app.delete('/api/leads/:id', deleteLeadRoute);
@@ -80,7 +104,7 @@ app.get('/api/tenant/config', tenantConfigRoute);
 app.put('/api/tenant/config', updateTenantConfigRoute);
 
 // Tenant Management (Admin)
-app.get('/api/tenants', listTenantsRoute);
+app.get('/api/tenants', ...listTenantsRoute);
 app.post('/api/tenants', createTenantRoute);
 app.get('/api/tenants/:id', getTenantRoute);
 app.put('/api/tenants/:id', updateTenantRoute);

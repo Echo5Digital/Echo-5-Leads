@@ -1,20 +1,22 @@
 // GET /api/tenants - List all tenants (admin endpoint)
 import { getDb } from '../lib/mongo.js';
+import { authenticateToken, requireRole, ROLES, canAccessTenant } from '../lib/auth.js';
+import { ObjectId } from 'mongodb';
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+async function listTenants(req, res) {
   try {
     const db = await getDb();
-    
-    // For now, no authentication check - in production, add admin role check
-    // const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
-    // TODO: Check if apiKey belongs to admin/super-admin user
+    let tenantsQuery = {};
+
+    // Role-based filtering
+    if (req.user.role === ROLES.CLIENT_ADMIN) {
+      // ClientAdmin can only see their own tenant
+      tenantsQuery = { _id: new ObjectId(req.user.tenantId) };
+    }
+    // SuperAdmin can see all tenants (no filter needed)
 
     const tenants = await db.collection('tenants')
-      .find({})
+      .find(tenantsQuery)
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -38,3 +40,10 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Server error' });
   }
 }
+
+// Protected route
+export default [
+  authenticateToken, 
+  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN), 
+  listTenants
+];

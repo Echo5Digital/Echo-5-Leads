@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { leadsApi, STAGES } from '@/lib/api';
+import { leadsApi, tenantsApi, STAGES } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext';
 import Link from 'next/link';
 
 export default function LeadsListPage() {
@@ -9,6 +10,9 @@ export default function LeadsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
+  const [tenants, setTenants] = useState([]);
+  const [selectedTenant, setSelectedTenant] = useState(''); // For SuperAdmin filtering
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     stage: '',
     source: '',
@@ -24,7 +28,23 @@ export default function LeadsListPage() {
 
   useEffect(() => {
     loadLeads();
-  }, [filters]);
+  }, [filters, selectedTenant]);
+
+  useEffect(() => {
+    // Load tenants for SuperAdmin users
+    if (user?.role === 'super_admin') {
+      loadTenants();
+    }
+  }, [user]);
+
+  async function loadTenants() {
+    try {
+      const data = await tenantsApi.listTenants();
+      setTenants(data.tenants || []);
+    } catch (err) {
+      console.error('Failed to load tenants:', err);
+    }
+  }
 
   async function loadLeads() {
     try {
@@ -35,8 +55,17 @@ export default function LeadsListPage() {
       if (filters.source) params.source = filters.source;
       if (filters.q) params.q = filters.q;
       if (filters.spam_flag) params.spam_flag = filters.spam_flag;
+      
+      // Add tenantId to params if a specific tenant is selected
+      if (selectedTenant) {
+        params.tenantId = selectedTenant;
+      }
+      
       params.page = filters.page;
       params.limit = filters.limit;
+
+      console.log('Frontend: Loading leads with params:', params); // Debug log
+      console.log('Frontend: selectedTenant:', selectedTenant); // Debug log
 
       const data = await leadsApi.getLeads(params);
       setLeads(data.items);
@@ -160,6 +189,42 @@ export default function LeadsListPage() {
           </div>
         </div>
 
+        {/* Client Filter for SuperAdmin */}
+        {user?.role === 'super_admin' && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-medium text-gray-700">
+                  View Client:
+                </label>
+                <select
+                  value={selectedTenant}
+                  onChange={(e) => setSelectedTenant(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[200px]"
+                >
+                  <option value="">🌐 All Clients Combined</option>
+                  {tenants.map((tenant) => (
+                    <option key={tenant._id} value={tenant._id}>
+                      🏢 {tenant.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-sm text-gray-600">
+                {selectedTenant ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Filtered: {tenants.find(t => t._id === selectedTenant)?.name || 'Unknown'}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Showing: All Clients ({total} total leads)
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -224,7 +289,10 @@ export default function LeadsListPage() {
 
             <div className="flex items-end gap-2">
               <button
-                onClick={() => setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 10 })}
+                onClick={() => {
+                  setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 10 });
+                  // Don't reset selectedTenant as it's separate from regular filters
+                }}
                 className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
               >
                 Clear

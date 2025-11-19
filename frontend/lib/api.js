@@ -1,10 +1,25 @@
+import Cookies from 'js-cookie';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
 
 async function apiRequest(endpoint, options = {}) {
+  const token = Cookies.get('accessToken');
+  
+  // Admin operations (when user is authenticated) - don't send API key
+  // This allows SuperAdmin to create tenants and manage all clients
+  const isAdminOperation = token && (
+    endpoint.includes('/api/tenants') ||
+    endpoint.includes('/api/users') ||
+    endpoint.includes('/api/auth') ||
+    endpoint.startsWith('/api/leads')  // Include all leads operations for proper authentication
+  );
+  
   const headers = {
     'Content-Type': 'application/json',
-    'X-Tenant-Key': API_KEY,
+    // Only send API key for non-admin operations (WordPress plugin compatibility)
+    ...(!isAdminOperation && API_KEY && { 'X-Tenant-Key': API_KEY }),
+    ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
 
@@ -26,11 +41,15 @@ export const leadsApi = {
   async getLeads(params = {}) {
     const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, String(value));
       }
     });
     const query = queryParams.toString();
+    
+    console.log('API: Making request with params:', params); // Debug log
+    console.log('API: Query string:', query); // Debug log
+    
     return apiRequest(`/api/leads${query ? `?${query}` : ''}`);
   },
 
@@ -100,6 +119,52 @@ export const leadsApi = {
     });
   },
 };
+
+// Special API function for viewing specific client's data (SuperAdmin only)
+async function apiRequestWithTenant(endpoint, tenantId = null, options = {}) {
+  const token = Cookies.get('accessToken');
+  
+  // Admin operations (when user is authenticated) - don't send API key
+  const isAdminOperation = token && (
+    endpoint.includes('/api/tenants') ||
+    endpoint.includes('/api/users') ||
+    endpoint.includes('/api/auth') ||
+    endpoint.includes('/api/leads')  // Include leads for tenant filtering
+  );
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    // Only send API key for non-admin operations
+    ...(!isAdminOperation && API_KEY && { 'X-Tenant-Key': API_KEY }),
+    ...(token && { Authorization: `Bearer ${token}` }),
+    // Add tenant-specific context for SuperAdmin operations
+    ...(tenantId && { 'X-Admin-Tenant-Filter': tenantId }),
+    ...options.headers,
+  };
+
+  // Add tenantId as query parameter for SuperAdmin filtering
+  let url = `${API_URL}${endpoint}`;
+  if (tenantId && !endpoint.includes('?')) {
+    url += `?tenantId=${tenantId}`;
+  } else if (tenantId && endpoint.includes('?')) {
+    url += `&tenantId=${tenantId}`;
+  }
+
+  console.log('API Request URL:', url); // Debug log
+  console.log('Headers:', headers); // Debug log
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || 'API request failed');
+  }
+
+  return response.json();
+}
 
 // Tenant Management API (Admin)
 export const tenantsApi = {

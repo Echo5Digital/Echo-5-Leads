@@ -1,8 +1,9 @@
 // POST /api/tenants - Create new tenant
 import crypto from 'crypto';
 import { getDb, sha256WithPepper } from '../lib/mongo.js';
+import { authenticateToken, requireRole, ROLES } from '../lib/auth.js';
 
-export default async function handler(req, res) {
+async function createTenant(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -71,3 +72,10 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Server error' });
   }
 }
+
+// Protected route - only SuperAdmin can create tenants
+export default [
+  authenticateToken,
+  requireRole(ROLES.SUPER_ADMIN),
+  createTenant
+];

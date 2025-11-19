@@ -22,7 +22,8 @@ async function ensureIndexes(db) {
     { key: { tenantId: 1, email: 1 }, name: 'u_tenant_email', unique: true, partialFilterExpression: { email: { $type: 'string' } } },
     { key: { tenantId: 1, phoneE164: 1 }, name: 'u_tenant_phone', unique: true, partialFilterExpression: { phoneE164: { $type: 'string' } } },
     { key: { tenantId: 1, createdAt: -1 }, name: 'idx_tenant_createdAt' },
-    { key: { tenantId: 1, stage: 1, latestActivityAt: -1 }, name: 'idx_tenant_stage_latest' }
+    { key: { tenantId: 1, stage: 1, latestActivityAt: -1 }, name: 'idx_tenant_stage_latest' },
+    { key: { assignedTo: 1 }, name: 'idx_assignedTo' }
   ]);
   await db.collection('activities').createIndexes([
     { key: { tenantId: 1, leadId: 1, createdAt: -1 }, name: 'idx_tenant_lead_createdAt' }
@@ -31,6 +32,20 @@ async function ensureIndexes(db) {
     { key: { keyHash: 1 }, name: 'idx_keyHash' },
     { key: { tenantId: 1, active: 1 }, name: 'idx_tenant_active' }
   ]);
+  // Create users indexes (handle existing index conflict)
+  try {
+    await db.collection('users').createIndexes([
+      { key: { email: 1 }, unique: true, name: 'idx_users_email_unique' },
+      { key: { tenantId: 1, role: 1 }, name: 'idx_users_tenant_role' },
+      { key: { active: 1 }, name: 'idx_users_active' }
+    ]);
+  } catch (error) {
+    if (error.code === 85) { // IndexOptionsConflict
+      console.log('Note: User indexes already exist with different names, skipping...');
+    } else {
+      throw error;
+    }
+  }
 }
 
 export function sha256WithPepper(value) {
