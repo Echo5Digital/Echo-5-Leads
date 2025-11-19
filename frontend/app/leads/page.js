@@ -409,7 +409,7 @@ export default function LeadsListPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left">
+                    <th className="px-3 py-3 text-left w-12">
                       <input
                         type="checkbox"
                         checked={selectedLeads.length === leads.length && leads.length > 0}
@@ -417,31 +417,22 @@ export default function LeadsListPage() {
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      City
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Contact
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Source
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stage
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Latest Note
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attempts
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                       Assigned To
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -449,7 +440,7 @@ export default function LeadsListPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {leads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap w-12">
                         <input
                           type="checkbox"
                           checked={selectedLeads.includes(lead._id)}
@@ -457,7 +448,7 @@ export default function LeadsListPage() {
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <Link
                           href={`/leads/${lead._id}`}
                           className="text-blue-600 hover:text-blue-900 font-medium"
@@ -469,18 +460,21 @@ export default function LeadsListPage() {
                             SPAM
                           </span>
                         )}
+                        {/* Show contact info on mobile */}
+                        <div className="md:hidden text-xs text-gray-500 mt-1">
+                          {lead.city && <span>{lead.city}</span>}
+                          {lead.source && <span className="ml-2">• {lead.source}</span>}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {lead.city || '-'}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 hidden md:table-cell">
+                        <div>{lead.city || '-'}</div>
+                        <div className="text-xs text-gray-500">{lead.source || '-'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {lead.source || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <select
                           value={lead.stage}
                           onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-[140px]"
                         >
                           {STAGES.map((stage) => (
                             <option key={stage} value={stage}>
@@ -489,18 +483,12 @@ export default function LeadsListPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                        {lead.notes || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
-                        0
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
                         {(user?.role === 'super_admin' || user?.role === 'client_admin') ? (
                           <select
                             value={lead.assignedUserId || ''}
                             onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value)}
-                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[120px]"
+                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full max-w-[160px]"
                           >
                             <option value="">Unassigned</option>
                             {teamMembers.map((member) => (
@@ -519,10 +507,10 @@ export default function LeadsListPage() {
                           })()
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
                         {formatDate(lead.createdAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
                           className="text-red-600 hover:text-red-900 font-medium"
