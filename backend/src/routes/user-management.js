@@ -18,7 +18,9 @@ async function listUsers(req, res) {
     if (req.user.role === ROLES.SUPER_ADMIN) {
       // Require tenant filter for SuperAdmin
       if (req.query.tenantId) {
-        filter.tenantId = new ObjectId(req.query.tenantId);
+        const queryTenantId = req.query.tenantId;
+        // Handle both ObjectId (24-char hex) and UUID formats
+        filter.tenantId = queryTenantId.length === 24 ? new ObjectId(queryTenantId) : queryTenantId;
       } else {
         // No tenant selected - return empty list
         return res.json({
@@ -29,7 +31,10 @@ async function listUsers(req, res) {
       }
     } else {
       // ClientAdmin can only see users in their tenant
-      filter.tenantId = new ObjectId(req.user.tenantId);
+      const userTenantId = req.user.tenantId;
+      filter.tenantId = typeof userTenantId === 'string' && userTenantId.length === 24 
+        ? new ObjectId(userTenantId) 
+        : userTenantId;
     }
 
     const users = await db.collection('users')
@@ -166,7 +171,10 @@ async function updateUserRoute(req, res) {
     if (req.user.role === ROLES.SUPER_ADMIN) {
       if (role !== undefined) updateDoc.role = role;
       if (tenantId !== undefined) {
-        updateDoc.tenantId = tenantId ? new ObjectId(tenantId) : null;
+        // Handle both ObjectId (24-char hex) and UUID formats
+        updateDoc.tenantId = tenantId 
+          ? (tenantId.length === 24 ? new ObjectId(tenantId) : tenantId)
+          : null;
       }
     }
 
