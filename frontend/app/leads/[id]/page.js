@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { leadsApi, STAGES } from '@/lib/api';
+import { leadsApi, usersApi, STAGES } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext';
 import Link from 'next/link';
 
 export default function LeadDetail() {
   const params = useParams();
   const router = useRouter();
+  const { user, isSuperAdmin, isClientAdmin } = useAuth();
   const [lead, setLead] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,10 +21,19 @@ export default function LeadDetail() {
     note: '',
     stage: '',
   });
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [assignedTo, setAssignedTo] = useState('');
 
   useEffect(() => {
     loadLead();
   }, [params.id]);
+
+  useEffect(() => {
+    // Load team members after lead is loaded (so we have the lead's tenantId)
+    if (lead?.tenantId) {
+      loadTeamMembers(lead.tenantId);
+    }
+  }, [lead?.tenantId]);
 
   async function loadLead() {
     try {
@@ -31,10 +42,32 @@ export default function LeadDetail() {
       const data = await leadsApi.getLead(params.id);
       setLead(data.lead);
       setActivities(data.activities);
+      setAssignedTo(data.lead.assignedUserId || '');
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadTeamMembers(tenantId) {
+    try {
+      // Load team members for the lead's tenant
+      const response = await usersApi.listUsers(tenantId);
+      setTeamMembers(response.users || []);
+    } catch (err) {
+      console.error('Failed to load team members:', err);
+    }
+  }
+
+  async function handleAssignmentChange(userId) {
+    try {
+      await leadsApi.updateLead(params.id, { assignedUserId: userId || null });
+      setAssignedTo(userId);
+      // Reload to get updated lead data
+      loadLead();
+    } catch (err) {
+      alert('Error updating assignment: ' + err.message);
     }
   }
 
@@ -137,6 +170,31 @@ export default function LeadDetail() {
         {/* Lead Details */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+          
+          {/* Assigned To Section - Only for SuperAdmin and ClientAdmin */}
+          {(isSuperAdmin() || isClientAdmin()) && (
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Assigned To
+              </label>
+              <select
+                value={assignedTo}
+                onChange={(e) => handleAssignmentChange(e.target.value)}
+                className="w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.firstName} {member.lastName} ({member.email})
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Assign this lead to a team member for follow-up
+              </p>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-500">Email</label>

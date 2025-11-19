@@ -50,6 +50,7 @@ async function getLeads(req, res) {
     const stage = req.query.stage || undefined;
     const source = req.query.source || undefined;
     const spamFlagParam = req.query.spam_flag;
+    const assignedToParam = req.query.assignedTo;
     const q = req.query.q || undefined;
     const dateFrom = req.query.date_from;
     const dateTo = req.query.date_to;
@@ -77,6 +78,17 @@ async function getLeads(req, res) {
     if (source) filter.source = source;
     if (spamFlagParam === 'true') filter.spamFlag = true;
     if (spamFlagParam === 'false') filter.spamFlag = false;
+    
+    // Filter by assigned user
+    if (assignedToParam) {
+      if (assignedToParam === 'unassigned') {
+        // Show only unassigned leads
+        filter.assignedUserId = null;
+      } else {
+        // Show leads assigned to specific user
+        filter.assignedUserId = assignedToParam;
+      }
+    }
 
     if (q) {
       const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');

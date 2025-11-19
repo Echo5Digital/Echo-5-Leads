@@ -96,7 +96,7 @@ app.post('/api/ingest/google-lead', handleGoogleLead);
 app.get('/api/leads', ...leadsRoute);
 app.get('/api/leads/:id', ...leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
-app.put('/api/leads/:id', updateLeadRoute);
+app.put('/api/leads/:id', ...updateLeadRoute);
 app.delete('/api/leads/:id', deleteLeadRoute);
 app.get('/api/dashboard/stats', ...dashboardStatsRoute);
 app.get('/api/leads/export/csv', exportLeadsRoute);

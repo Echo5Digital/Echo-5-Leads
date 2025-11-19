@@ -1,12 +1,41 @@
 import { getDb, resolveTenantId, normPhone } from '../lib/mongo.js';
+import { authenticateToken, ROLES } from '../lib/auth.js';
 import { ObjectId } from 'mongodb';
 
-export default async function updateLead(req, res) {
+async function updateLead(req, res) {
   try {
-    const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
     const db = await getDb();
-    const tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
-    if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
+    let tenantId = null;
+
+    // Check if authenticated user or API key
+    if (req.user) {
+      // JWT authenticated
+      if (req.user.role === ROLES.SUPER_ADMIN) {
+        // SuperAdmin can update any lead - get tenant from lead itself
+        const id = req.params.id;
+        if (!id) return res.status(400).json({ error: 'Invalid id' });
+        
+        let oid;
+        try { 
+          oid = new ObjectId(id); 
+        } catch { 
+          return res.status(400).json({ error: 'Invalid id format' }); 
+        }
+        
+        const existingLead = await db.collection('leads').findOne({ _id: oid });
+        if (!existingLead) return res.status(404).json({ error: 'Lead not found' });
+        tenantId = existingLead.tenantId;
+      } else {
+        // ClientAdmin/Member - use their tenantId
+        tenantId = req.user.tenantId;
+      }
+    } else {
+      // Fallback to API key authentication
+      const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
+      tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
+    }
+    
+    if (!tenantId) return res.status(401).json({ error: 'Authentication required' });
 
     const id = req.params.id;
     if (!id) return res.status(400).json({ error: 'Invalid id' });
@@ -81,3 +110,19 @@ export default async function updateLead(req, res) {
     return res.status(500).json({ error: 'internal_error', details: String(err?.message || err) });
   }
 }
+
+// Create a middleware that tries auth first, falls back to API key
+function flexibleAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (token) {
+    // Try JWT authentication first
+    return authenticateToken(req, res, next);
+  } else {
+    // No token, proceed without req.user (will use API key)
+    next();
+  }
+}
+
+export default [flexibleAuth, updateLead];
