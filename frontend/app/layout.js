@@ -1,8 +1,11 @@
+'use client';
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import { TenantProvider } from "@/lib/TenantContext";
 import { AuthProvider } from "@/lib/AuthContext";
+import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,10 +17,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "Echo5 Leads Management",
-  description: "Manage your leads efficiently",
-};
+function LayoutContent({ children }) {
+  const pathname = usePathname();
+  const isAuthPage = pathname === '/login' || pathname === '/unauthorized';
+
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className={`flex-1 ${!isAuthPage ? 'ml-64' : ''}`}>
+        {children}
+      </main>
+    </div>
+  );
+}
 
 export default function RootLayout({ children }) {
   return (
@@ -27,12 +39,7 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <TenantProvider>
-            <div className="flex">
-              <Sidebar />
-              <main className="ml-64 flex-1">
-                {children}
-              </main>
-            </div>
+            <LayoutContent>{children}</LayoutContent>
           </TenantProvider>
         </AuthProvider>
       </body>
