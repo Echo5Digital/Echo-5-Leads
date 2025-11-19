@@ -92,8 +92,9 @@ export const leadsApi = {
   },
 
   // Get dashboard stats
-  async getDashboardStats() {
-    return apiRequest('/api/dashboard/stats');
+  async getDashboardStats(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/api/dashboard/stats${query ? `?${query}` : ''}`);
   },
 
   // Export leads as CSV

@@ -3,7 +3,7 @@
  */
 export function Card({ children, className = '', noPadding = false }) {
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${noPadding ? '' : 'p-6'} ${className}`}>
+    <div className={`bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 ${noPadding ? '' : 'p-6'} ${className}`}>
       {children}
     </div>
   );
@@ -17,8 +17,8 @@ export function CardHeader({ title, subtitle, actions }) {
     <div className="border-b border-gray-200 pb-4 mb-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{title}</h2>
+          {subtitle && <p className="mt-1 text-sm text-gray-600">{subtitle}</p>}
         </div>
         {actions && <div className="flex gap-2">{actions}</div>}
       </div>
@@ -31,11 +31,11 @@ export function CardHeader({ title, subtitle, actions }) {
  */
 export function StatCard({ label, value, trend, alert = false, icon }) {
   return (
-    <Card className={alert ? 'border-2 border-red-400 bg-red-50' : ''}>
+    <Card className={alert ? 'border-2 border-red-400 bg-red-50/90' : 'hover:shadow-xl transition-shadow duration-200'}>
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-sm font-medium text-gray-500 mb-2">{label}</div>
-          <div className={`text-4xl font-bold ${alert ? 'text-red-600' : 'text-gray-900'}`}>
+          <div className="text-sm font-medium text-gray-600 mb-2">{label}</div>
+          <div className={`text-4xl font-bold ${alert ? 'text-red-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'}`}>
             {value}
           </div>
           {trend && (

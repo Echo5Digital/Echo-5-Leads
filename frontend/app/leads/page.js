@@ -208,24 +208,24 @@ export default function LeadsListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leads Management</h1>
-            <p className="mt-2 text-gray-600">Manage and track your leads</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Leads Management</h1>
+            <p className="mt-2 text-gray-700">Manage and track your leads</p>
           </div>
           <div className="flex gap-3">
             <Link
               href="/dashboard"
-              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+              className="px-4 py-2 bg-white/80 backdrop-blur-sm text-gray-700 rounded-lg hover:bg-white shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
             >
               Dashboard
             </Link>
             <Link
               href="/leads/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
             >
               + Add New Lead
             </Link>
@@ -234,7 +234,7 @@ export default function LeadsListPage() {
 
         {/* Client Filter for SuperAdmin */}
         {user?.role === 'super_admin' && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <label className="text-sm font-medium text-gray-700">
@@ -243,7 +243,7 @@ export default function LeadsListPage() {
                 <select
                   value={selectedTenant}
                   onChange={(e) => setSelectedTenant(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[200px]"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[200px] transition-all duration-200"
                 >
                   {tenants.map((tenant) => (
                     <option key={tenant._id} value={tenant._id}>
@@ -264,7 +264,7 @@ export default function LeadsListPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mb-6 border border-white/20">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -275,7 +275,7 @@ export default function LeadsListPage() {
                 value={filters.q}
                 onChange={(e) => handleFilterChange('q', e.target.value)}
                 placeholder="Name, email, phone..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
 
@@ -286,7 +286,7 @@ export default function LeadsListPage() {
               <select
                 value={filters.stage}
                 onChange={(e) => handleFilterChange('stage', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all duration-200"
               >
                 <option value="">All Stages</option>
                 {stages.map((stage) => (
@@ -306,7 +306,7 @@ export default function LeadsListPage() {
                 value={filters.source}
                 onChange={(e) => handleFilterChange('source', e.target.value)}
                 placeholder="website, google, etc."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
 
@@ -317,7 +317,7 @@ export default function LeadsListPage() {
               <select
                 value={filters.spam_flag}
                 onChange={(e) => handleFilterChange('spam_flag', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all duration-200"
               >
                 <option value="">All</option>
                 <option value="false">Non-Spam</option>
@@ -332,7 +332,7 @@ export default function LeadsListPage() {
               <select
                 value={filters.assignedTo}
                 onChange={(e) => handleFilterChange('assignedTo', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all duration-200"
               >
                 <option value="">All Members</option>
                 <option value="unassigned">Unassigned</option>
@@ -382,7 +382,7 @@ export default function LeadsListPage() {
           {selectedLeads.length > 0 && (
             <button
               onClick={handleBulkDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200"
             >
               Delete Selected ({selectedLeads.length})
             </button>
@@ -391,31 +391,31 @@ export default function LeadsListPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">Error: {error}</p>
+          <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl shadow-lg p-4 mb-6">
+            <p className="text-red-800 font-medium">Error: {error}</p>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center border border-white/20">
             <p className="text-gray-600">Loading leads...</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && leads.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center border border-white/20">
             <p className="text-gray-600">No leads found. Adjust your filters or add a new lead.</p>
           </div>
         )}
 
         {/* Leads Table */}
         {!loading && leads.length > 0 && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-white/20">
             <div className="overflow-x-auto">
               <table className="w-full table-fixed divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-3 py-3 text-left w-10">
                       <input
@@ -507,18 +507,27 @@ export default function LeadsListPage() {
                             ))}
                           </select>
                         ) : (
-                          <div className="truncate" title={(() => {
-                            if (!lead.assignedUserId) return 'Unassigned';
-                            const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
-                            return assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : lead.assignedUserId;
-                          })()}>
-                            {(() => {
-                              if (!lead.assignedUserId) return <span className="text-gray-400 italic">Unassigned</span>;
-                              const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
-                              return assignedUser 
-                                ? `${assignedUser.firstName} ${assignedUser.lastName}`
-                                : <span className="text-gray-500">{lead.assignedUserId.substring(0, 8)}...</span>;
-                            })()}
+                          <div>
+                            {!lead.assignedUserId ? (
+                              <button
+                                onClick={() => handleQuickAssignmentChange(lead._id, user._id)}
+                                className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium"
+                              >
+                                Self Assign
+                              </button>
+                            ) : (
+                              <div className="truncate" title={(() => {
+                                const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
+                                return assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : lead.assignedUserId;
+                              })()}>
+                                {(() => {
+                                  const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
+                                  return assignedUser 
+                                    ? `${assignedUser.firstName} ${assignedUser.lastName}`
+                                    : <span className="text-gray-500">{lead.assignedUserId.substring(0, 8)}...</span>;
+                                })()}
+                              </div>
+                            )}
                           </div>
                         )}
                       </td>
@@ -530,7 +539,7 @@ export default function LeadsListPage() {
                       <td className="px-4 py-4 w-24 text-sm">
                         <button
                           onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
-                          className="text-red-600 hover:text-red-900 font-medium truncate"
+                          className="text-red-600 hover:text-red-700 font-medium truncate transition-colors duration-200"
                           title="Delete lead"
                         >
                           Delete
@@ -549,14 +558,14 @@ export default function LeadsListPage() {
                   <button
                     onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
                     disabled={filters.page === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
                     disabled={filters.page === totalPages}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
                   >
                     Next
                   </button>
@@ -573,14 +582,14 @@ export default function LeadsListPage() {
                       <button
                         onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
                         disabled={filters.page === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                        className="relative inline-flex items-center px-4 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
                       >
                         Previous
                       </button>
                       <button
                         onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
                         disabled={filters.page === totalPages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                        className="relative inline-flex items-center px-4 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
                       >
                         Next
                       </button>

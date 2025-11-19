@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { leadsApi } from '@/lib/api';
+import { leadsApi, tenantsApi } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext';
+import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
 import PageContainer from '../components/PageContainer';
 import { Card, CardHeader, StatCard, LoadingSpinner, ErrorMessage, Button } from '../components/UIComponents';
@@ -11,20 +13,56 @@ export default function Dashboard() {
   const [overdueData, setOverdueData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tenants, setTenants] = useState([]);
+  const [selectedTenant, setSelectedTenant] = useState('');
+  const { user } = useAuth();
+  const { getStages } = useTenant();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
+  // Get dynamic stages from tenant config
+  const stages = getStages();
+
   useEffect(() => {
     loadStats();
     loadOverdueLeads();
-  }, []);
+  }, [selectedTenant]);
+
+  useEffect(() => {
+    // Load tenants for SuperAdmin users
+    if (user?.role === 'super_admin') {
+      loadTenants();
+    }
+  }, [user]);
+
+  async function loadTenants() {
+    try {
+      const data = await tenantsApi.listTenants();
+      const tenantsList = data.tenants || [];
+      setTenants(tenantsList);
+      
+      // Auto-select first tenant if no tenant is currently selected
+      if (tenantsList.length > 0 && !selectedTenant) {
+        setSelectedTenant(tenantsList[0]._id);
+      }
+    } catch (err) {
+      console.error('Failed to load tenants:', err);
+    }
+  }
 
   async function loadStats() {
     try {
       setLoading(true);
       setError(null);
-      const data = await leadsApi.getDashboardStats();
+      
+      // Add tenantId to params if a specific tenant is selected
+      const params = {};
+      if (selectedTenant) {
+        params.tenantId = selectedTenant;
+      }
+      
+      const data = await leadsApi.getDashboardStats(params);
       setStats(data);
     } catch (err) {
       setError(err.message);
@@ -35,7 +73,12 @@ export default function Dashboard() {
 
   async function loadOverdueLeads() {
     try {
-      const response = await fetch(`${API_URL}/api/sla/overdue`, {
+      let url = `${API_URL}/api/sla/overdue`;
+      if (selectedTenant) {
+        url += `?tenantId=${selectedTenant}`;
+      }
+      
+      const response = await fetch(url, {
         headers: { 'X-Tenant-Key': API_KEY },
       });
       const data = await response.json();
@@ -61,7 +104,6 @@ export default function Dashboard() {
     );
   }
 
-  const stageOrder = ['new', 'contacted', 'qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement', 'not_fit'];
   const maxCount = Math.max(...Object.values(stats.stageDistribution || {}), 1);
 
   return (
@@ -74,6 +116,37 @@ export default function Dashboard() {
         </Link>
       }
     >
+      {/* Client Filter for SuperAdmin */}
+      {user?.role === 'super_admin' && (
+        <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">
+                View Client:
+              </label>
+              <select
+                value={selectedTenant}
+                onChange={(e) => setSelectedTenant(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[200px] transition-all duration-200"
+              >
+                {tenants.map((tenant) => (
+                  <option key={tenant._id} value={tenant._id}>
+                    🏢 {tenant.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="text-sm text-gray-600">
+              {selectedTenant && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Viewing: {tenants.find(t => t._id === selectedTenant)?.name || 'Unknown'}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard 
@@ -109,7 +182,7 @@ export default function Dashboard() {
           subtitle="Distribution by stage"
         />
         <div className="space-y-3">
-          {stageOrder.map((stage) => {
+          {stages.map((stage) => {
             const count = stats.stageDistribution[stage] || 0;
             const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
             
