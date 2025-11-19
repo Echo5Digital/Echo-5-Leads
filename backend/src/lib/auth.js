@@ -149,15 +149,9 @@ export async function canViewLead(db, user, leadId) {
     return { canView: false, lead: null };
   }
 
-  // ClientAdmin can view all leads in their tenant
-  if (user.role === ROLES.CLIENT_ADMIN) {
+  // ClientAdmin and Members can view all leads in their tenant
+  if (user.role === ROLES.CLIENT_ADMIN || user.role === ROLES.MEMBER) {
     return { canView: true, lead };
-  }
-
-  // Member can only view leads assigned to them
-  if (user.role === ROLES.MEMBER) {
-    const canView = lead.assignedTo && lead.assignedTo.toString() === user.userId.toString();
-    return { canView, lead: canView ? lead : null };
   }
 
   return { canView: false, lead: null };

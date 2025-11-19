@@ -70,11 +70,8 @@ async function getLeads(req, res) {
     }
     // SuperAdmin with no tenantId = no tenant filter = see all leads
     
-    // Role-based filtering
-    if (req.user && req.user.role === ROLES.MEMBER) {
-      // Members can only see leads assigned to them
-      filter.assignedTo = new ObjectId(req.user.userId);
-    }
+    // Members can see all leads in their tenant (same as ClientAdmin)
+    // No additional filtering needed - tenant filter is sufficient
     
     if (stage) filter.stage = stage;
     if (source) filter.source = source;
