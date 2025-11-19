@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { leadsApi, tenantsApi, STAGES } from '@/lib/api';
+import { leadsApi, tenantsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
@@ -15,11 +15,13 @@ export default function LeadsListPage() {
   const [selectedTenant, setSelectedTenant] = useState(''); // For SuperAdmin filtering
   const { user } = useAuth();
   const { getStages } = useTenant();
+  const [teamMembers, setTeamMembers] = useState([]);
   const [filters, setFilters] = useState({
     stage: '',
     source: '',
     q: '',
     spam_flag: '',
+    assignedTo: '',
     page: 1,
     limit: 10,
   });
@@ -42,6 +44,16 @@ export default function LeadsListPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Load team members when tenant is selected or user changes
+    if (selectedTenant || user?.tenantId) {
+      const tenantId = selectedTenant || user?.tenantId;
+      if (tenantId) {
+        loadTeamMembers(tenantId);
+      }
+    }
+  }, [selectedTenant, user]);
+
   async function loadTenants() {
     try {
       const data = await tenantsApi.listTenants();
@@ -57,6 +69,16 @@ export default function LeadsListPage() {
     }
   }
 
+  async function loadTeamMembers(tenantId) {
+    try {
+      const data = await usersApi.listUsers(tenantId);
+      setTeamMembers(data.users || []);
+    } catch (err) {
+      console.error('Failed to load team members:', err);
+      setTeamMembers([]);
+    }
+  }
+
   async function loadLeads() {
     try {
       setLoading(true);
@@ -66,6 +88,7 @@ export default function LeadsListPage() {
       if (filters.source) params.source = filters.source;
       if (filters.q) params.q = filters.q;
       if (filters.spam_flag) params.spam_flag = filters.spam_flag;
+      if (filters.assignedTo) params.assignedTo = filters.assignedTo;
       
       // Add tenantId to params if a specific tenant is selected
       if (selectedTenant) {
@@ -111,6 +134,15 @@ export default function LeadsListPage() {
       loadLeads(); // Reload
     } catch (err) {
       alert('Error updating stage: ' + err.message);
+    }
+  }
+
+  async function handleQuickAssignmentChange(leadId, userId) {
+    try {
+      await leadsApi.updateLead(leadId, { assignedUserId: userId || null });
+      loadLeads(); // Reload
+    } catch (err) {
+      alert('Error updating assignment: ' + err.message);
     }
   }
 
@@ -293,10 +325,29 @@ export default function LeadsListPage() {
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Assigned To
+              </label>
+              <select
+                value={filters.assignedTo}
+                onChange={(e) => handleFilterChange('assignedTo', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Members</option>
+                <option value="unassigned">Unassigned</option>
+                {teamMembers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.firstName} {member.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* <div className="flex items-end gap-2">
               <button
                 onClick={() => {
-                  setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 10 });
+                  setFilters({ stage: '', source: '', q: '', spam_flag: '', assignedTo: '', page: 1, limit: 10 });
                   // Don't reset selectedTenant as it's separate from regular filters
                 }}
                 className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
@@ -442,9 +493,34 @@ export default function LeadsListPage() {
                         </select>
                       </td>
                       <td className="px-4 py-4 w-40 text-sm text-gray-600 hidden lg:table-cell">
-                        <div className="truncate" title={lead.assignedUserId || 'Unassigned'}>
-                          {lead.assignedUserId || 'Unassigned'}
-                        </div>
+                        {(user?.role === 'super_admin' || user?.role === 'client_admin') ? (
+                          <select
+                            value={lead.assignedUserId || ''}
+                            onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value)}
+                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full"
+                          >
+                            <option value="">Unassigned</option>
+                            {teamMembers.map((member) => (
+                              <option key={member._id} value={member._id}>
+                                {member.firstName} {member.lastName}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div className="truncate" title={(() => {
+                            if (!lead.assignedUserId) return 'Unassigned';
+                            const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
+                            return assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : lead.assignedUserId;
+                          })()}>
+                            {(() => {
+                              if (!lead.assignedUserId) return <span className="text-gray-400 italic">Unassigned</span>;
+                              const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
+                              return assignedUser 
+                                ? `${assignedUser.firstName} ${assignedUser.lastName}`
+                                : <span className="text-gray-500">{lead.assignedUserId.substring(0, 8)}...</span>;
+                            })()}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-4 w-32 text-sm text-gray-500 hidden xl:table-cell">
                         <div className="truncate" title={formatDate(lead.createdAt)}>
