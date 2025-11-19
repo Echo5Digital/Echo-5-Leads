@@ -288,7 +288,7 @@ export default function LeadsListPage() {
               </select>
             </div>
 
-            <div className="flex items-end gap-2">
+            {/* <div className="flex items-end gap-2">
               <button
                 onClick={() => {
                   setFilters({ stage: '', source: '', q: '', spam_flag: '', page: 1, limit: 10 });
@@ -304,7 +304,7 @@ export default function LeadsListPage() {
               >
                 Export CSV
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -358,10 +358,10 @@ export default function LeadsListPage() {
         {!loading && leads.length > 0 && (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full table-fixed divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left">
+                    <th className="px-3 py-3 text-left w-10">
                       <input
                         type="checkbox"
                         checked={selectedLeads.length === leads.length && leads.length > 0}
@@ -369,31 +369,22 @@ export default function LeadsListPage() {
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      City
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell">
+                      Contact
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Source
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
                       Stage
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Latest Note
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attempts
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 hidden lg:table-cell">
                       Assigned To
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden xl:table-cell">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       Actions
                     </th>
                   </tr>
@@ -401,7 +392,7 @@ export default function LeadsListPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {leads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 w-10">
                         <input
                           type="checkbox"
                           checked={selectedLeads.includes(lead._id)}
@@ -409,30 +400,34 @@ export default function LeadsListPage() {
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 w-40 md:w-48">
                         <Link
                           href={`/leads/${lead._id}`}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
+                          className="text-blue-600 hover:text-blue-900 font-medium block truncate"
+                          title={`${lead.firstName || ''} ${lead.lastName || ''}`}
                         >
                           {lead.firstName || ''} {lead.lastName || ''}
                         </Link>
                         {lead.spamFlag && (
-                          <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                          <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
                             SPAM
                           </span>
                         )}
+                        {/* Show contact info on mobile */}
+                        <div className="md:hidden text-xs text-gray-500 mt-1 truncate">
+                          {lead.city && <span className="truncate">{lead.city}</span>}
+                          {lead.source && <span className="ml-2">• {lead.source}</span>}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {lead.city || '-'}
+                      <td className="px-4 py-4 w-32 text-sm text-gray-600 hidden md:table-cell">
+                        <div className="truncate" title={lead.city}>{lead.city || '-'}</div>
+                        <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || '-'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {lead.source || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 w-36">
                         <select
                           value={lead.stage}
                           onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                         >
                           {STAGES.map((stage) => (
                             <option key={stage} value={stage}>
@@ -441,22 +436,20 @@ export default function LeadsListPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                        {lead.notes || '-'}
+                      <td className="px-4 py-4 w-40 text-sm text-gray-600 hidden lg:table-cell">
+                        <div className="truncate" title={lead.assignedUserId || 'Unassigned'}>
+                          {lead.assignedUserId || 'Unassigned'}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
-                        0
+                      <td className="px-4 py-4 w-32 text-sm text-gray-500 hidden xl:table-cell">
+                        <div className="truncate" title={formatDate(lead.createdAt)}>
+                          {formatDate(lead.createdAt)}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {lead.assignedUserId || 'Unassigned'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(lead.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-4 py-4 w-24 text-sm">
                         <button
                           onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
-                          className="text-red-600 hover:text-red-900 font-medium"
+                          className="text-red-600 hover:text-red-900 font-medium truncate"
                           title="Delete lead"
                         >
                           Delete
