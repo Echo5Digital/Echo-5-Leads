@@ -507,28 +507,21 @@ export default function LeadsListPage() {
                             ))}
                           </select>
                         ) : (
-                          <div>
-                            {!lead.assignedUserId ? (
-                              <button
-                                onClick={() => handleQuickAssignmentChange(lead._id, user._id)}
-                                className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium"
-                              >
-                                Self Assign
-                              </button>
-                            ) : (
-                              <div className="truncate" title={(() => {
-                                const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
-                                return assignedUser ? `${assignedUser.firstName} ${assignedUser.lastName}` : lead.assignedUserId;
-                              })()}>
-                                {(() => {
-                                  const assignedUser = teamMembers.find(m => m._id === lead.assignedUserId);
-                                  return assignedUser 
-                                    ? `${assignedUser.firstName} ${assignedUser.lastName}`
-                                    : <span className="text-gray-500">{lead.assignedUserId.substring(0, 8)}...</span>;
-                                })()}
-                              </div>
-                            )}
-                          </div>
+                          <select
+                            value={lead.assignedUserId === user._id ? user._id : (lead.assignedUserId || '')}
+                            onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value)}
+                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full"
+                          >
+                            <option value="">Unassigned</option>
+                            <option value={user._id}>
+                              {lead.assignedUserId === user._id ? '✓ ' : ''}Self Assign ({user.firstName} {user.lastName})
+                            </option>
+                            {teamMembers.filter(m => m._id !== user._id).map((member) => (
+                              <option key={member._id} value={member._id} disabled>
+                                {member.firstName} {member.lastName} (Assigned)
+                              </option>
+                            ))}
+                          </select>
                         )}
                       </td>
                       <td className="px-4 py-4 w-32 text-sm text-gray-500 hidden xl:table-cell">
