@@ -16,9 +16,16 @@ async function listUsers(req, res) {
 
     // SuperAdmin can see all users
     if (req.user.role === ROLES.SUPER_ADMIN) {
-      // Optional tenant filter
+      // Require tenant filter for SuperAdmin
       if (req.query.tenantId) {
         filter.tenantId = new ObjectId(req.query.tenantId);
+      } else {
+        // No tenant selected - return empty list
+        return res.json({
+          success: true,
+          users: [],
+          message: 'Please select a tenant to view users'
+        });
       }
     } else {
       // ClientAdmin can only see users in their tenant
