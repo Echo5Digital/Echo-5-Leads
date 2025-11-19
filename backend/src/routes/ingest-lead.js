@@ -1,11 +1,47 @@
 import { getDb, resolveTenantId, normPhone } from '../lib/mongo.js';
+import { authenticateToken } from '../lib/auth.js';
 
 export default async function ingestLead(req, res) {
   try {
-    const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
     const db = await getDb();
-    const tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
-    if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
+    let tenantId = null;
+    
+    // Check if user is authenticated (manual lead creation)
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (token) {
+      // Authenticated user - use tenantId from request body if provided (SuperAdmin)
+      // or user's assigned tenant (ClientAdmin/Member)
+      try {
+        const { verifyToken } = await import('../lib/auth.js');
+        const decoded = verifyToken(token);
+        if (decoded) {
+          req.user = decoded;
+          
+          // SuperAdmin can specify tenantId in body
+          if (req.user.role === 'super_admin' && req.body.tenantId) {
+            tenantId = req.body.tenantId;
+            console.log('SuperAdmin manual lead creation - using tenantId from body:', tenantId);
+          } else if (req.user.tenantId) {
+            // ClientAdmin/Member use their assigned tenant
+            tenantId = req.user.tenantId;
+            console.log('User manual lead creation - using user tenantId:', tenantId);
+          }
+        }
+      } catch (error) {
+        console.error('Token verification error:', error);
+      }
+    }
+    
+    // Fallback to API key authentication (WordPress plugins)
+    if (!tenantId) {
+      const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
+      tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
+      console.log('API key lead creation - resolved tenantId:', tenantId);
+    }
+    
+    if (!tenantId) return res.status(401).json({ error: 'Invalid API key or authentication required' });
 
     const body = req.body || {};
 
