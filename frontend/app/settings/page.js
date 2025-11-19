@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { leadsApi } from '@/lib/api';
+import { useTenant } from '@/lib/TenantContext';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -9,6 +11,9 @@ export default function SettingsPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   
+  const { selectedTenant, switchTenant, tenants } = useTenant();
+  const { isSuperAdmin, user } = useAuth();
+
   const [settings, setSettings] = useState({
     tenantName: '',
     slaHours: 24,
@@ -20,15 +25,27 @@ export default function SettingsPage() {
   const [newStage, setNewStage] = useState('');
   const [newUserName, setNewUserName] = useState('');
 
+  // Initialize: auto-select tenant for non-SuperAdmin users
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (!isSuperAdmin() && user?.tenantId && tenants.length > 0) {
+      const userTenant = tenants.find(t => t._id === user.tenantId);
+      if (userTenant && !selectedTenant) {
+        switchTenant(userTenant);
+      }
+    }
+  }, [user, tenants, isSuperAdmin]);
+
+  useEffect(() => {
+    if (selectedTenant) {
+      loadSettings();
+    }
+  }, [selectedTenant]);
 
   async function loadSettings() {
     try {
       setLoading(true);
       setError(null);
-      const config = await leadsApi.getTenantConfig();
+      const config = await leadsApi.getTenantConfig(selectedTenant?._id);
       setSettings({
         tenantName: config.name,
         slaHours: config.slaHours,
@@ -110,7 +127,7 @@ export default function SettingsPage() {
         users: settings.users,
         spamKeywords: settings.spamKeywords,
         slaHours: parseInt(settings.slaHours),
-      });
+      }, selectedTenant?._id);
       
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -129,6 +146,24 @@ export default function SettingsPage() {
     );
   }
 
+  if (!selectedTenant) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No client selected. Please select a client to view settings.</p>
+          {isSuperAdmin() && tenants.length > 0 && (
+            <button
+              onClick={() => switchTenant(tenants[0])}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Select First Client
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -137,6 +172,34 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
           <p className="mt-2 text-gray-600">Configure stages, users, and tenant settings</p>
         </div>
+
+        {/* Client Switcher (SuperAdmin Only) */}
+        {isSuperAdmin() && (
+          <div className="mb-8 bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Manage Client</h2>
+            <p className="text-sm text-gray-600 mb-4">Select which client's settings you want to configure.</p>
+            <div className="max-w-md">
+              <label htmlFor="client-select" className="block text-sm font-medium text-gray-700 mb-1">
+                Current Client
+              </label>
+              <select
+                id="client-select"
+                value={selectedTenant?._id || ''}
+                onChange={(e) => {
+                  const tenant = tenants.find(t => t._id === e.target.value);
+                  if (tenant) switchTenant(tenant);
+                }}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                {tenants.map((tenant) => (
+                  <option key={tenant._id} value={tenant._id}>
+                    {tenant.name} ({tenant.slug || 'No Slug'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Success Message */}
         {success && (

@@ -21,7 +21,6 @@ export default function Sidebar() {
     isMember,
     apiCall
   } = useAuth();
-  const [showTenantDropdown, setShowTenantDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -252,72 +251,6 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-gray-800">
-        {/* Tenant Switcher - Only for SuperAdmin */}
-        {isSuperAdmin() && (
-          <div className="p-4 border-b border-gray-800">
-            <div className="relative">
-              <button
-                onClick={() => setShowTenantDropdown(!showTenantDropdown)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <svg className="w-4 h-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <div className="text-left min-w-0">
-                    <p className="text-xs text-gray-400">Current Client</p>
-                    <p className="text-sm font-medium truncate">
-                      {loading ? 'Loading...' : (selectedTenant?.name || 'All Clients')}
-                    </p>
-                  </div>
-                </div>
-                <svg className={`w-4 h-4 transition-transform ${showTenantDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Dropdown */}
-              {showTenantDropdown && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50">
-                  <button
-                    onClick={() => {
-                      switchTenant(null);
-                      setShowTenantDropdown(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left hover:bg-gray-700 transition-colors ${
-                      !selectedTenant ? 'bg-blue-600' : ''
-                    }`}
-                  >
-                    <p className="text-sm font-medium">All Clients</p>
-                    <p className="text-xs text-gray-400">View all data</p>
-                  </button>
-                  {tenants.length === 0 ? (
-                    <div className="p-3 text-sm text-gray-400 text-center">
-                      No clients found
-                    </div>
-                  ) : (
-                    tenants.map((tenant) => (
-                      <button
-                        key={tenant._id}
-                        onClick={() => {
-                          switchTenant(tenant);
-                          setShowTenantDropdown(false);
-                        }}
-                        className={`w-full px-3 py-2 text-left hover:bg-gray-700 transition-colors ${
-                          selectedTenant?._id === tenant._id ? 'bg-blue-600' : ''
-                        }`}
-                      >
-                        <p className="text-sm font-medium">{tenant.name}</p>
-                        <p className="text-xs text-gray-400">{tenant.slug || tenant._id.substring(0, 8)}</p>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Current Context Info */}
         <div className="p-4">
           <div className="text-xs text-gray-400">

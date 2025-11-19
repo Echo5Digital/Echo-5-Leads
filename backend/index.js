@@ -98,10 +98,10 @@ app.get('/api/leads/:id', ...leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
 app.put('/api/leads/:id', updateLeadRoute);
 app.delete('/api/leads/:id', deleteLeadRoute);
-app.get('/api/dashboard/stats', dashboardStatsRoute);
+app.get('/api/dashboard/stats', ...dashboardStatsRoute);
 app.get('/api/leads/export/csv', exportLeadsRoute);
-app.get('/api/tenant/config', tenantConfigRoute);
-app.put('/api/tenant/config', updateTenantConfigRoute);
+app.get('/api/tenant/config', ...tenantConfigRoute);
+app.put('/api/tenant/config', ...updateTenantConfigRoute);
 
 // Tenant Management (Admin)
 app.get('/api/tenants', ...listTenantsRoute);

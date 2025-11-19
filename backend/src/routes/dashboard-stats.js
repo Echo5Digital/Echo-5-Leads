@@ -1,11 +1,48 @@
 import { getDb, resolveTenantId } from '../lib/mongo.js';
+import { authenticateToken, ROLES } from '../lib/auth.js';
+import { ObjectId } from 'mongodb';
 
-export default async function getDashboardStats(req, res) {
+async function getDashboardStats(req, res) {
   try {
-    const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
     const db = await getDb();
-    const tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
-    if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
+    let tenantId = null;
+
+    // Check if authenticated user or API key
+    if (req.user) {
+      if (req.user.role === ROLES.SUPER_ADMIN) {
+        // SuperAdmin can filter by tenant
+        if (req.query.tenantId) {
+          const queryTenantId = req.query.tenantId;
+          if (queryTenantId.length === 36 || queryTenantId.length === 24) {
+             tenantId = queryTenantId.length === 24 ? new ObjectId(queryTenantId) : queryTenantId;
+          }
+        }
+        // If no tenantId, SuperAdmin sees aggregate stats (or we could enforce tenant selection)
+        // For now, let's assume if no tenantId, we calculate across ALL tenants (or return empty)
+        // But the current logic below relies on `tenantId` being set for the queries.
+        // Let's default to returning empty or requiring tenantId for stats.
+        if (!tenantId) {
+           // Optional: return global stats if needed, but for now let's require tenant context or handle it
+           // If we want global stats, we'd need to remove { tenantId } from queries below.
+           // Let's assume for dashboard stats, we want to see data for a specific tenant context.
+           // If SuperAdmin hasn't selected one, maybe we pick the first one or return 0s?
+           // Let's proceed with tenantId = null and handle it in queries.
+        }
+      } else {
+        tenantId = req.user.tenantId;
+      }
+    } else {
+      const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
+      tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
+      if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    // If we still don't have a tenantId (e.g. SuperAdmin without selection), 
+    // we might want to return an error or global stats. 
+    // Existing logic heavily relies on `tenantId`.
+    if (!tenantId && (!req.user || req.user.role !== ROLES.SUPER_ADMIN)) {
+       return res.status(401).json({ error: 'Tenant context required' });
+    }
 
     const leads = db.collection('leads');
     const activities = db.collection('activities');
@@ -14,23 +51,28 @@ export default async function getDashboardStats(req, res) {
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    // Get tenant config for SLA hours
-    const tenant = await tenants.findOne({ _id: tenantId });
-    const slaHours = tenant?.config?.slaHours || 24;
+    let slaHours = 24;
+    if (tenantId) {
+      const tenant = await tenants.findOne({ _id: tenantId });
+      slaHours = tenant?.config?.slaHours || 24;
+    }
     const slaMs = slaHours * 60 * 60 * 1000;
 
+    // Build query filter
+    const queryFilter = tenantId ? { tenantId } : {};
+
     // Total leads
-    const totalLeads = await leads.countDocuments({ tenantId });
+    const totalLeads = await leads.countDocuments(queryFilter);
 
     // Leads this week
     const leadsThisWeek = await leads.countDocuments({
-      tenantId,
+      ...queryFilter,
       createdAt: { $gte: oneWeekAgo }
     });
 
     // Lead distribution by stage
     const stageDistribution = await leads.aggregate([
-      { $match: { tenantId } },
+      { $match: queryFilter },
       { $group: { _id: '$stage', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]).toArray();
@@ -42,7 +84,7 @@ export default async function getDashboardStats(req, res) {
 
     // Calculate avg time to first contact
     const leadsWithContact = await leads.find({
-      tenantId,
+      ...queryFilter,
       stage: { $ne: 'new' }
     }).toArray();
 
@@ -111,3 +153,19 @@ export default async function getDashboardStats(req, res) {
     return res.status(500).json({ error: 'internal_error', details: String(err?.message || err) });
   }
 }
+
+// Create a middleware that tries auth first, falls back to API key
+function flexibleAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (token) {
+    // Try JWT authentication first
+    return authenticateToken(req, res, next);
+  } else {
+    // No token, proceed without req.user (will use API key)
+    next();
+  }
+}
+
+export default [flexibleAuth, getDashboardStats];

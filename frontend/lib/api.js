@@ -12,6 +12,8 @@ async function apiRequest(endpoint, options = {}) {
     endpoint.includes('/api/tenants') ||
     endpoint.includes('/api/users') ||
     endpoint.includes('/api/auth') ||
+    endpoint.includes('/api/dashboard') || // Dashboard stats should use token
+    endpoint.includes('/api/tenant') || // Tenant config should use token
     endpoint.startsWith('/api/leads')  // Include all leads operations for proper authentication
   );
   
@@ -107,13 +109,15 @@ export const leadsApi = {
   },
 
   // Get tenant configuration
-  async getTenantConfig() {
-    return apiRequest('/api/tenant/config');
+  async getTenantConfig(tenantId = null) {
+    const query = tenantId ? `?tenantId=${tenantId}` : '';
+    return apiRequest(`/api/tenant/config${query}`);
   },
 
   // Update tenant configuration
-  async updateTenantConfig(data) {
-    return apiRequest('/api/tenant/config', {
+  async updateTenantConfig(data, tenantId = null) {
+    const query = tenantId ? `?tenantId=${tenantId}` : '';
+    return apiRequest(`/api/tenant/config${query}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -214,3 +218,35 @@ export const STAGES = [
   'placement',
   'not_fit',
 ];
+
+// User Management API
+export const usersApi = {
+  // List users (SuperAdmin can pass tenantId)
+  async listUsers(tenantId = null) {
+    const query = tenantId ? `?tenantId=${tenantId}` : '';
+    return apiRequest(`/api/users${query}`);
+  },
+
+  // Create new user
+  async createUser(data) {
+    return apiRequest('/api/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Update user
+  async updateUser(userId, data) {
+    return apiRequest(`/api/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete/deactivate user
+  async deleteUser(userId) {
+    return apiRequest(`/api/users/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+};
