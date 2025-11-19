@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { leadsApi, tenantsApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
+import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
 
 export default function LeadsListPage() {
@@ -13,6 +14,7 @@ export default function LeadsListPage() {
   const [tenants, setTenants] = useState([]);
   const [selectedTenant, setSelectedTenant] = useState(''); // For SuperAdmin filtering
   const { user } = useAuth();
+  const { getStages } = useTenant();
   const [filters, setFilters] = useState({
     stage: '',
     source: '',
@@ -25,6 +27,9 @@ export default function LeadsListPage() {
   const [total, setTotal] = useState(0);
   const pageStart = total === 0 ? 0 : (filters.page - 1) * filters.limit + 1;
   const pageEnd = Math.min(filters.page * filters.limit, total);
+
+  // Get stages from tenant config or fallback to default
+  const stages = getStages();
 
   useEffect(() => {
     loadLeads();
@@ -252,7 +257,7 @@ export default function LeadsListPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Stages</option>
-                {STAGES.map((stage) => (
+                {stages.map((stage) => (
                   <option key={stage} value={stage}>
                     {stage.replace(/_/g, ' ').toUpperCase()}
                   </option>
@@ -429,7 +434,7 @@ export default function LeadsListPage() {
                           onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
                           className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                         >
-                          {STAGES.map((stage) => (
+                          {stages.map((stage) => (
                             <option key={stage} value={stage}>
                               {stage.replace(/_/g, ' ').toUpperCase()}
                             </option>

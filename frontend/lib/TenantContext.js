@@ -1,12 +1,14 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { leadsApi, STAGES as DEFAULT_STAGES } from './api';
 
 const TenantContext = createContext();
 
 export function TenantProvider({ children }) {
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [tenants, setTenants] = useState([]);
+  const [tenantConfig, setTenantConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Load selected tenant from localStorage on mount
@@ -26,8 +28,24 @@ export function TenantProvider({ children }) {
   useEffect(() => {
     if (selectedTenant) {
       localStorage.setItem('selectedTenant', JSON.stringify(selectedTenant));
+      // Load tenant config when tenant changes
+      loadTenantConfig();
+    } else {
+      setTenantConfig(null);
     }
   }, [selectedTenant]);
+
+  const loadTenantConfig = async () => {
+    if (!selectedTenant?._id) return;
+    try {
+      const config = await leadsApi.getTenantConfig(selectedTenant._id);
+      setTenantConfig(config);
+    } catch (error) {
+      console.error('Failed to load tenant config:', error);
+      // Fallback to default config
+      setTenantConfig({ stages: DEFAULT_STAGES });
+    }
+  };
 
   const switchTenant = (tenant) => {
     setSelectedTenant(tenant);
@@ -35,7 +53,13 @@ export function TenantProvider({ children }) {
 
   const clearTenant = () => {
     setSelectedTenant(null);
+    setTenantConfig(null);
     localStorage.removeItem('selectedTenant');
+  };
+
+  // Helper to get stages (from config or default)
+  const getStages = () => {
+    return tenantConfig?.stages || DEFAULT_STAGES;
   };
 
   return (
@@ -45,7 +69,10 @@ export function TenantProvider({ children }) {
       clearTenant,
       tenants,
       setTenants,
-      loading 
+      loading,
+      tenantConfig,
+      getStages,
+      refreshTenantConfig: loadTenantConfig
     }}>
       {children}
     </TenantContext.Provider>

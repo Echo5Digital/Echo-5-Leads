@@ -19,11 +19,9 @@ export default function SettingsPage() {
     slaHours: 24,
     spamKeywords: [],
     stages: [],
-    users: [],
   });
 
   const [newStage, setNewStage] = useState('');
-  const [newUserName, setNewUserName] = useState('');
 
   // Initialize: auto-select tenant for non-SuperAdmin users
   useEffect(() => {
@@ -51,7 +49,6 @@ export default function SettingsPage() {
         slaHours: config.slaHours,
         spamKeywords: config.spamKeywords,
         stages: config.stages,
-        users: config.users,
       });
     } catch (err) {
       setError(err.message);
@@ -91,29 +88,7 @@ export default function SettingsPage() {
     setSettings({ ...settings, stages: newStages });
   }
 
-  function addUser() {
-    if (!newUserName.trim()) return;
-    if (settings.users.some(u => u.name === newUserName)) {
-      alert('User already exists');
-      return;
-    }
-    setSettings({
-      ...settings,
-      users: [...settings.users, { name: newUserName, email: '', active: true }]
-    });
-    setNewUserName('');
-  }
 
-  function removeUser(index) {
-    const newUsers = settings.users.filter((_, i) => i !== index);
-    setSettings({ ...settings, users: newUsers });
-  }
-
-  function toggleUserActive(index) {
-    const newUsers = [...settings.users];
-    newUsers[index].active = !newUsers[index].active;
-    setSettings({ ...settings, users: newUsers });
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -124,12 +99,15 @@ export default function SettingsPage() {
       
       await leadsApi.updateTenantConfig({
         stages: settings.stages,
-        users: settings.users,
         spamKeywords: settings.spamKeywords,
         slaHours: parseInt(settings.slaHours),
       }, selectedTenant?._id);
       
       setSuccess(true);
+      
+      // Reload settings to confirm changes
+      await loadSettings();
+      
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(err.message);
@@ -280,55 +258,29 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Users Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Team Members</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Manage users who can be assigned to leads.
-            </p>
-            
-            {/* Users List */}
-            <div className="space-y-2 mb-4">
-              {settings.users.map((user, index) => (
-                <div key={index} className="flex items-center gap-3 bg-gray-50 p-3 rounded border">
-                  <span className={`flex-1 font-medium ${user.active ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
-                    {user.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleUserActive(index)}
-                    className={`px-3 py-1 rounded ${user.active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}`}
-                  >
-                    {user.active ? 'Active' : 'Inactive'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeUser(index)}
-                    className="px-3 py-1 text-red-600 hover:text-red-800"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Add New User */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newUserName}
-                onChange={(e) => setNewUserName(e.target.value)}
-                placeholder="User name (e.g., Baylee)"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addUser())}
-              />
-              <button
-                type="button"
-                onClick={addUser}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Add User
-              </button>
+          {/* Team Members Section - Redirects to /team page */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0">
+                <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Team Members Management</h2>
+                <p className="text-sm text-gray-700 mb-4">
+                  Team member accounts (with login credentials and permissions) are now managed on the dedicated Team page.
+                </p>
+                <a
+                  href="/team"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                >
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Manage Team Members
+                </a>
+              </div>
             </div>
           </div>
 
@@ -410,7 +362,7 @@ export default function SettingsPage() {
         {/* Info Card */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>💡 Note:</strong> Changes to stages and users apply immediately. All historical leads are preserved with their current stage values.
+            <strong>💡 Note:</strong> Changes to stages apply immediately and will be reflected in all lead dropdowns throughout the dashboard. All historical leads are preserved with their current stage values.
           </p>
         </div>
       </div>

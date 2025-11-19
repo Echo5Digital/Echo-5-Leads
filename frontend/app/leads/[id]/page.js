@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { leadsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
+import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
 
 export default function LeadDetail() {
   const params = useParams();
   const router = useRouter();
   const { user, isSuperAdmin, isClientAdmin } = useAuth();
+  const { getStages } = useTenant();
   const [lead, setLead] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,9 @@ export default function LeadDetail() {
   });
   const [teamMembers, setTeamMembers] = useState([]);
   const [assignedTo, setAssignedTo] = useState('');
+
+  // Get stages from tenant config or fallback to default
+  const stages = getStages();
 
   useEffect(() => {
     loadLead();
@@ -315,7 +320,7 @@ export default function LeadDetail() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select stage...</option>
-                      {STAGES.map((stage) => (
+                      {stages.map((stage) => (
                         <option key={stage} value={stage}>
                           {stage.replace(/_/g, ' ').toUpperCase()}
                         </option>
