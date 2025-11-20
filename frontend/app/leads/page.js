@@ -426,7 +426,7 @@ export default function LeadsListPage() {
                       />
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
-                      Name
+                      Email
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell">
                       Contact
@@ -460,9 +460,9 @@ export default function LeadsListPage() {
                         <Link
                           href={`/leads/${lead._id}`}
                           className="text-blue-600 hover:text-blue-900 font-medium block truncate"
-                          title={`${lead.firstName || ''} ${lead.lastName || ''}`}
+                          title={lead.email || 'Unknown'}
                         >
-                          {lead.firstName || ''} {lead.lastName || ''}
+                          {lead.email || 'Unknown'}
                         </Link>
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
@@ -506,7 +506,7 @@ export default function LeadsListPage() {
                               </option>
                             ))}
                           </select>
-                        ) : (
+                        ) : user ? (
                           <select
                             value={lead.assignedUserId === user._id ? user._id : (lead.assignedUserId || '')}
                             onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value)}
@@ -522,6 +522,8 @@ export default function LeadsListPage() {
                               </option>
                             ))}
                           </select>
+                        ) : (
+                          <span className="text-gray-400 italic text-xs">Loading...</span>
                         )}
                       </td>
                       <td className="px-4 py-4 w-32 text-sm text-gray-500 hidden xl:table-cell">
