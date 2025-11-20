@@ -31,6 +31,7 @@ import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 import loginRoute from './src/routes/auth-login.js';
 import refreshTokenRoute from './src/routes/auth-refresh.js';
 import { protectedLogout } from './src/routes/auth-logout.js';
+import { protectedProfile } from './src/routes/auth-profile.js';
 import { 
   protectedListUsers, 
   protectedCreateUser, 
@@ -73,6 +74,7 @@ app.get('/health', (req, res) => {
 app.post('/api/auth/login', loginRoute);
 app.post('/api/auth/refresh', refreshTokenRoute);
 app.post('/api/auth/logout', ...protectedLogout);
+app.get('/api/auth/profile', ...protectedProfile);
 
 // User Management Routes (protected)
 app.get('/api/users', ...protectedListUsers);

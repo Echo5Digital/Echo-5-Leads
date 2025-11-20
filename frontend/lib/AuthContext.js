@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
   // API helper function
   const apiCall = async (url, options = {}) => {
     const token = Cookies.get('accessToken');
+    console.log('📞 API Call:', url, 'hasToken:', !!token);
     
     const config = {
       headers: {
@@ -60,17 +61,20 @@ export function AuthProvider({ children }) {
     }
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, config);
+    console.log('📡 API Response:', url, 'status:', response.status);
     
-    // Handle token expiration
+    // Handle token expiration - but DON'T call logout here to avoid infinite loop
     if (response.status === 403 && token) {
+      console.log('🔄 Token expired, attempting refresh...');
       const refreshSuccess = await refreshToken();
       if (refreshSuccess) {
         // Retry the original request with new token
+        console.log('✅ Retrying request with new token');
         config.headers.Authorization = `Bearer ${Cookies.get('accessToken')}`;
         return fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, config);
       } else {
-        // Refresh failed, logout user
-        logout();
+        console.log('❌ Refresh failed');
+        // Don't call logout here - let the caller handle it
         throw new Error('Session expired');
       }
     }
@@ -90,9 +94,17 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Store tokens
-        Cookies.set('accessToken', data.accessToken, { expires: 7 });
-        Cookies.set('refreshToken', data.refreshToken, { expires: 30 });
+        // Store tokens with proper cookie attributes
+        Cookies.set('accessToken', data.accessToken, { 
+          expires: 7, 
+          path: '/',
+          sameSite: 'lax'
+        });
+        Cookies.set('refreshToken', data.refreshToken, { 
+          expires: 30, 
+          path: '/',
+          sameSite: 'lax'
+        });
         
         setUser(data.user);
         setIsAuthenticated(true);
@@ -122,7 +134,11 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        Cookies.set('accessToken', data.accessToken, { expires: 7 });
+        Cookies.set('accessToken', data.accessToken, { 
+          expires: 7, 
+          path: '/',
+          sameSite: 'lax'
+        });
         return true;
       } else {
         return false;
@@ -142,8 +158,8 @@ export function AuthProvider({ children }) {
       console.error('Logout error:', error);
     } finally {
       // Clear client-side tokens and state
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
+      Cookies.remove('accessToken', { path: '/' });
+      Cookies.remove('refreshToken', { path: '/' });
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -152,19 +168,22 @@ export function AuthProvider({ children }) {
   // Get user profile
   const getUserProfile = async () => {
     try {
+      console.log('👤 Getting user profile...');
       const response = await apiCall('/api/auth/profile');
+      console.log('📡 Profile response status:', response.status);
       const data = await response.json();
 
       if (response.ok) {
+        console.log('✅ Profile fetched successfully:', data.user.email);
         setUser(data.user);
         setIsAuthenticated(true);
         return data.user;
       } else {
-        throw new Error(data.error);
+        console.log('❌ Profile fetch failed:', data);
+        return null;
       }
     } catch (error) {
-      console.error('Get profile error:', error);
-      logout();
+      console.error('❌ Get profile error:', error);
       return null;
     }
   };
@@ -189,18 +208,48 @@ export function AuthProvider({ children }) {
   // Initialize auth state on mount
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🔐 Initializing auth...');
       const token = Cookies.get('accessToken');
+      const refreshTokenValue = Cookies.get('refreshToken');
       
-      if (token) {
-        // Try to get user profile
-        const profile = await getUserProfile();
-        if (!profile) {
-          // Token is invalid, try refresh
+      console.log('🍪 Tokens found:', { 
+        hasAccessToken: !!token, 
+        hasRefreshToken: !!refreshTokenValue 
+      });
+      console.log('🍪 Tokens found:', { 
+        hasAccessToken: !!token, 
+        hasRefreshToken: !!refreshTokenValue 
+      });
+      
+      if (token || refreshTokenValue) {
+        console.log('📞 Fetching user profile...');
+        // Try to get user profile with existing token
+        let profile = await getUserProfile();
+        console.log('👤 Profile result:', !!profile);
+        
+        // If profile fetch failed but we have a refresh token, try refreshing
+        if (!profile && refreshTokenValue) {
+          console.log('🔄 Attempting token refresh...');
           const refreshSuccess = await refreshToken();
+          console.log('✅ Refresh success:', refreshSuccess);
           if (refreshSuccess) {
-            await getUserProfile();
+            profile = await getUserProfile();
+            console.log('👤 Profile after refresh:', !!profile);
           }
         }
+        
+        // If still no profile after refresh attempt, clear tokens
+        if (!profile) {
+          console.log('❌ No profile, clearing tokens');
+          Cookies.remove('accessToken', { path: '/' });
+          Cookies.remove('refreshToken', { path: '/' });
+          setUser(null);
+          setIsAuthenticated(false);
+        } else {
+          console.log('✅ Auth successful, user:', profile.email);
+        }
+      } else {
+        console.log('⚠️ No tokens found');
       }
       
       setLoading(false);

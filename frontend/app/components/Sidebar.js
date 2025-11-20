@@ -53,10 +53,12 @@ export default function Sidebar() {
 
   // Handle authentication redirects
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    // Only redirect if auth is fully loaded AND user is not authenticated
+    // AND we're not already on the login page
+    if (!authLoading && !isAuthenticated && pathname !== '/login') {
       router.push('/login');
     }
-  }, [authLoading, isAuthenticated, router]);
+  }, [authLoading, isAuthenticated, router, pathname]);
 
   // Role-based menu items
   const getMenuItems = () => {
