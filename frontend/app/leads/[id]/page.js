@@ -236,19 +236,42 @@ export default function LeadDetail() {
               {Object.entries(lead.originalPayload)
                 .filter(([key]) => !['original_payload', '_id', 'tenantId'].includes(key))
                 .map(([key, value]) => {
-                  // Try to get friendly label from pro_field_label_* keys
-                  const labelKey = `pro_field_label_${key.replace('pro_field_', '')}`;
-                  const friendlyLabel = lead.originalPayload[labelKey] || 
-                                       key.replace(/_/g, ' ')
-                                          .replace(/pro field /g, '')
-                                          .replace(/elementor field /g, '')
-                                          .replace(/cf7 /g, '')
-                                          .split(' ')
-                                          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                                          .join(' ');
+                  // Skip label keys (they're metadata used below)
+                  if (key.includes('_label_') || key.endsWith('_label')) return null;
                   
-                  // Skip label keys (they're used above)
-                  if (key.includes('_label_')) return null;
+                  // Try to get friendly label - use the EXACT pattern from Pro Forms plugin
+                  let friendlyLabel = null;
+                  
+                  // Pattern 1: pro_field_label_* (WordPress Pro Forms - PROVEN WORKING)
+                  if (key.startsWith('pro_field_')) {
+                    const labelKey = key.replace('pro_field_', 'pro_field_label_');
+                    friendlyLabel = lead.originalPayload[labelKey];
+                  }
+                  
+                  // Pattern 2: elementor_field_label_* (Elementor - same structure)
+                  else if (key.startsWith('elementor_field_')) {
+                    const labelKey = key.replace('elementor_field_', 'elementor_field_label_');
+                    friendlyLabel = lead.originalPayload[labelKey];
+                  }
+                  
+                  // Pattern 3: cf7_label_* (Contact Form 7)
+                  else if (key.startsWith('cf7_')) {
+                    const labelKey = `cf7_label_${key.replace('cf7_', '')}`;
+                    friendlyLabel = lead.originalPayload[labelKey];
+                  }
+                  
+                  // Fallback: Format the key nicely
+                  if (!friendlyLabel) {
+                    friendlyLabel = key
+                      .replace(/_/g, ' ')
+                      .replace(/pro field /g, '')
+                      .replace(/elementor field /g, '')
+                      .replace(/elementor /g, '')
+                      .replace(/cf7 /g, '')
+                      .split(' ')
+                      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(' ');
+                  }
                   
                   // Format value
                   let displayValue = value;

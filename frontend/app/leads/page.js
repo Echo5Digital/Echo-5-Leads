@@ -11,10 +11,8 @@ export default function LeadsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
-  const [tenants, setTenants] = useState([]);
-  const [selectedTenant, setSelectedTenant] = useState(''); // For SuperAdmin filtering
   const { user } = useAuth();
-  const { getStages } = useTenant();
+  const { getStages, selectedTenant } = useTenant();
   const [teamMembers, setTeamMembers] = useState([]);
   const [filters, setFilters] = useState({
     stage: '',
@@ -34,40 +32,25 @@ export default function LeadsListPage() {
   const stages = getStages();
 
   useEffect(() => {
-    loadLeads();
-  }, [filters, selectedTenant]);
-
-  useEffect(() => {
-    // Load tenants for SuperAdmin users
+    // Only load if we have a selected tenant (for Super Admins) or always load for other roles
     if (user?.role === 'super_admin') {
-      loadTenants();
+      if (selectedTenant) {
+        loadLeads();
+      }
+    } else {
+      loadLeads();
     }
-  }, [user]);
+  }, [filters, selectedTenant, user]);
 
   useEffect(() => {
     // Load team members when tenant is selected or user changes
     if (selectedTenant || user?.tenantId) {
-      const tenantId = selectedTenant || user?.tenantId;
+      const tenantId = user?.role === 'super_admin' && selectedTenant ? selectedTenant._id : user?.tenantId;
       if (tenantId) {
         loadTeamMembers(tenantId);
       }
     }
   }, [selectedTenant, user]);
-
-  async function loadTenants() {
-    try {
-      const data = await tenantsApi.listTenants();
-      const tenantsList = data.tenants || [];
-      setTenants(tenantsList);
-      
-      // Auto-select first tenant if no tenant is currently selected
-      if (tenantsList.length > 0 && !selectedTenant) {
-        setSelectedTenant(tenantsList[0]._id);
-      }
-    } catch (err) {
-      console.error('Failed to load tenants:', err);
-    }
-  }
 
   async function loadTeamMembers(tenantId) {
     try {
@@ -90,9 +73,9 @@ export default function LeadsListPage() {
       if (filters.spam_flag) params.spam_flag = filters.spam_flag;
       if (filters.assignedTo) params.assignedTo = filters.assignedTo;
       
-      // Add tenantId to params if a specific tenant is selected
-      if (selectedTenant) {
-        params.tenantId = selectedTenant;
+      // Add tenantId to params if Super Admin and a specific tenant is selected
+      if (user?.role === 'super_admin' && selectedTenant) {
+        params.tenantId = selectedTenant._id;
       }
       
       params.page = filters.page;
@@ -232,32 +215,39 @@ export default function LeadsListPage() {
           </div>
         </div>
 
-        {/* Client Filter for SuperAdmin */}
-        {user?.role === 'super_admin' && (
-          <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <label className="text-sm font-medium text-gray-700">
-                  View Client:
-                </label>
-                <select
-                  value={selectedTenant}
-                  onChange={(e) => setSelectedTenant(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[200px] transition-all duration-200"
-                >
-                  {tenants.map((tenant) => (
-                    <option key={tenant._id} value={tenant._id}>
-                      🏢 {tenant.name}
-                    </option>
-                  ))}
-                </select>
+        {/* Super Admin info banner - showing selected client */}
+        {user?.role === 'super_admin' && selectedTenant && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl shadow-sm p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="shrink-0">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
               </div>
-              <div className="text-sm text-gray-600">
-                {selectedTenant && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Viewing: {tenants.find(t => t._id === selectedTenant)?.name || 'Unknown'} ({total} leads)
-                  </span>
-                )}
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900">
+                  Viewing <span className="font-bold">{total}</span> leads for: <span className="font-bold">{selectedTenant.name}</span>
+                </p>
+                <p className="text-xs text-blue-700 mt-0.5">
+                  Use the sidebar client selector to switch between clients
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {user?.role === 'super_admin' && !selectedTenant && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl shadow-sm p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="shrink-0">
+                <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-yellow-900">
+                  Please select a client from the sidebar to view leads
+                </p>
               </div>
             </div>
           </div>

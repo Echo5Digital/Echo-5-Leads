@@ -60,7 +60,18 @@ export default async function ingestLead(req, res) {
     ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid','referrer','form_id']
       .forEach(k => { if (body[k]) utm[k] = String(body[k]); });
 
-    if (!email && !phoneE164) return res.status(400).json({ error: 'email or phone required' });
+    // For migration purposes, allow submissions without email/phone but log them
+    if (!email && !phoneE164) {
+      console.log('Lead ingestion without email/phone - storing with available data:', {
+        tenantId,
+        firstName,
+        lastName,
+        source: providedSource,
+        hasUtm: Object.keys(utm).length > 0,
+        bodyKeys: Object.keys(body).slice(0, 10)
+      });
+      // Continue processing instead of returning error
+    }
 
     const tenants = db.collection('tenants');
     const leads = db.collection('leads');
@@ -70,13 +81,17 @@ export default async function ingestLead(req, res) {
     const spamKeywords = (tenant?.config?.spamKeywords || []).map(s => String(s).toLowerCase());
     const stageDefault = 'new';
 
-    const existing = await leads.findOne({
-      tenantId,
-      $or: [
-        ...(email ? [{ email }] : []),
-        ...(phoneE164 ? [{ phoneE164 }] : []),
-      ]
-    });
+    // Only check for duplicates if we have email or phone
+    let existing = null;
+    if (email || phoneE164) {
+      existing = await leads.findOne({
+        tenantId,
+        $or: [
+          ...(email ? [{ email }] : []),
+          ...(phoneE164 ? [{ phoneE164 }] : []),
+        ]
+      });
+    }
 
     const isNewLead = !existing;
 

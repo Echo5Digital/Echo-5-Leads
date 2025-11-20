@@ -22,6 +22,7 @@ export default function Sidebar() {
     apiCall
   } = useAuth();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showTenantSelector, setShowTenantSelector] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Fetch tenants on mount (authenticated users only) - MUST be called before any early returns
@@ -231,28 +232,98 @@ export default function Sidebar() {
         </ul>
       </nav>
 
+      {/* Global Tenant Selector (Super Admin Only) */}
+      {isSuperAdmin() && (
+        <div className="p-4 border-t border-gray-800">
+          <label className="block text-xs text-gray-400 mb-2 font-medium">
+            Selected Client
+          </label>
+          <div className="relative">
+            <button
+              onClick={() => setShowTenantSelector(!showTenantSelector)}
+              className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-750 transition-colors text-left"
+            >
+              <div className="flex-1 min-w-0">
+                {selectedTenant ? (
+                  <>
+                    <p className="text-sm font-medium text-white truncate">
+                      {selectedTenant.name}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {selectedTenant.activeApiKeys || 0} API Key{selectedTenant.activeApiKeys !== 1 ? 's' : ''}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-400">Select a client...</p>
+                )}
+              </div>
+              <svg 
+                className={`w-4 h-4 ml-2 text-gray-400 transition-transform flex-shrink-0 ${showTenantSelector ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Tenant Dropdown */}
+            {showTenantSelector && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                {tenants.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-400">
+                    No clients available
+                  </div>
+                ) : (
+                  <div className="py-1">
+                    {tenants.map((tenant) => (
+                      <button
+                        key={tenant._id}
+                        onClick={() => {
+                          switchTenant(tenant);
+                          setShowTenantSelector(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-colors ${
+                          selectedTenant?._id === tenant._id ? 'bg-gray-750' : ''
+                        }`}
+                      >
+                        <p className="text-sm font-medium text-white">
+                          {tenant.name}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          ID: {tenant._id.substring(0, 12)}... • {tenant.activeApiKeys || 0} API Keys
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {selectedTenant && (
+            <div className="mt-2 text-xs text-gray-400">
+              <div className="flex items-center gap-1">
+                <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>All data filtered to this client</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-gray-800">
-        {/* Current Context Info */}
+        {/* Current Context Info - Simplified */}
         <div className="p-4">
           <div className="text-xs text-gray-400">
-            {isClientAdmin() || isMember() ? (
-              // Show user's tenant info
-              user?.tenant && (
-                <>
-                  <p className="font-medium text-gray-300">{user.tenant.name}</p>
-                  <p className="mt-1">Your Organization</p>
-                </>
-              )
-            ) : (
-              // Show selected tenant for SuperAdmin
-              selectedTenant && (
-                <>
-                  <p className="font-medium text-gray-300">{selectedTenant.name}</p>
-                  <p className="mt-1">ID: {selectedTenant._id.substring(0, 8)}...</p>
-                  <p>API Keys: {selectedTenant.activeApiKeys || 0}</p>
-                </>
-              )
+            {(isClientAdmin() || isMember()) && user?.tenant && (
+              <>
+                <p className="font-medium text-gray-300">{user.tenant.name}</p>
+                <p className="mt-1">Your Organization</p>
+              </>
             )}
           </div>
         </div>
