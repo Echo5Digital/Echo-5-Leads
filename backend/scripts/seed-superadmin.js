@@ -37,7 +37,7 @@ async function seedSuperAdmin() {
       email: 'sony@echo5digital.com',
       password: 'admin123',
       firstName: 'Sony',
-      lastName: 'Admin',
+      lastName: 'Thomas',
       role: ROLES.SUPER_ADMIN,
       tenantId: null // SuperAdmin has no tenant
     });
