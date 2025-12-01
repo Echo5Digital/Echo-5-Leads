@@ -8,10 +8,16 @@ import ingestLeadRoute from './src/routes/ingest-lead.js';
 import leadsRoute from './src/routes/leads.js';
 import leadDetailRoute from './src/routes/lead-detail.js';
 import leadActivityRoute from './src/routes/lead-activity.js';
+import metaLeadsRoute from './src/routes/meta-leads.js';
+import metaLeadDetailRoute from './src/routes/meta-lead-detail.js';
+import metaLeadActivityRoute from './src/routes/meta-lead-activity.js';
+import updateMetaLeadRoute from './src/routes/update-meta-lead.js';
+import deleteMetaLeadRoute from './src/routes/delete-meta-lead.js';
 import dashboardStatsRoute from './src/routes/dashboard-stats.js';
 import updateLeadRoute from './src/routes/update-lead.js';
 import deleteLeadRoute from './src/routes/delete-lead.js';
 import exportLeadsRoute from './src/routes/export-leads.js';
+import importLeadsCSVRoute from './src/routes/import-leads-csv.js';
 import tenantConfigRoute from './src/routes/tenant-config.js';
 import updateTenantConfigRoute from './src/routes/update-tenant-config.js';
 import listTenantsRoute from './src/routes/list-tenants.js';
@@ -97,8 +103,17 @@ app.get('/api/leads/:id', ...leadDetailRoute);
 app.post('/api/leads/:id/activity', leadActivityRoute);
 app.put('/api/leads/:id', ...updateLeadRoute);
 app.delete('/api/leads/:id', deleteLeadRoute);
+
+// Meta Leads Routes (Facebook/Meta Lead Ads)
+app.get('/api/meta-leads', ...metaLeadsRoute);
+app.get('/api/meta-leads/:id', ...metaLeadDetailRoute);
+app.post('/api/meta-leads/:leadId/activity', metaLeadActivityRoute);
+app.put('/api/meta-leads/:id', ...updateMetaLeadRoute);
+app.delete('/api/meta-leads/:id', deleteMetaLeadRoute);
+
 app.get('/api/dashboard/stats', ...dashboardStatsRoute);
 app.get('/api/leads/export/csv', exportLeadsRoute);
+app.post('/api/leads/import/csv', ...importLeadsCSVRoute);
 app.get('/api/tenant/config', ...tenantConfigRoute);
 app.put('/api/tenant/config', ...updateTenantConfigRoute);
 

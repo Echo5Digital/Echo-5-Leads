@@ -123,6 +123,62 @@ export const leadsApi = {
       body: JSON.stringify(data),
     });
   },
+
+  // Import leads from CSV
+  async importCSV(csvData, tenantId = null) {
+    const body = {
+      csvData,
+      ...(tenantId && { tenantId })
+    };
+    return apiRequest('/api/leads/import/csv', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+};
+
+// Meta Leads API (Facebook/Meta Lead Ads)
+export const metaLeadsApi = {
+  // List meta leads with filters
+  async getMetaLeads(params = {}) {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+    const query = queryParams.toString();
+    
+    return apiRequest(`/api/meta-leads${query ? `?${query}` : ''}`);
+  },
+
+  // Get single meta lead with activities
+  async getMetaLead(id) {
+    return apiRequest(`/api/meta-leads/${id}`);
+  },
+
+  // Update meta lead
+  async updateMetaLead(id, data) {
+    return apiRequest(`/api/meta-leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete meta lead
+  async deleteMetaLead(id) {
+    return apiRequest(`/api/meta-leads/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Add activity to meta lead
+  async addActivity(leadId, data) {
+    return apiRequest(`/api/meta-leads/${leadId}/activity`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
 };
 
 // Special API function for viewing specific client's data (SuperAdmin only)
