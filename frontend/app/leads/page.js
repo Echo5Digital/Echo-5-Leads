@@ -45,6 +45,15 @@ export default function LeadsListPage() {
   const [leadDetails, setLeadDetails] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Meta activity form state
+  const [showMetaActivityForm, setShowMetaActivityForm] = useState(false);
+  const [metaActivityForm, setMetaActivityForm] = useState({
+    type: 'note',
+    title: '',
+    note: '',
+  });
+  const [addingMetaActivity, setAddingMetaActivity] = useState(false);
+
   // Get stages from tenant config or fallback to default
   const stages = getStages();
 
@@ -214,6 +223,49 @@ export default function LeadsListPage() {
       }
     } catch (err) {
       alert('Error deleting lead: ' + err.message);
+    }
+  }
+
+  async function handleAddMetaActivity(e) {
+    e.preventDefault();
+    if (!leadDetails?._id) {
+      alert('Lead ID not found');
+      return;
+    }
+
+    try {
+      setAddingMetaActivity(true);
+      const activityData = {
+        type: metaActivityForm.type,
+        content: {},
+      };
+
+      if (metaActivityForm.type === 'note') {
+        activityData.content = {
+          title: metaActivityForm.title,
+          note: metaActivityForm.note,
+        };
+      } else {
+        activityData.content = {
+          note: metaActivityForm.note,
+        };
+      }
+
+      await metaLeadsApi.addActivity(leadDetails._id, activityData);
+      
+      // Reset form
+      setShowMetaActivityForm(false);
+      setMetaActivityForm({ type: 'note', title: '', note: '' });
+      
+      // Reload lead details
+      const updatedLead = await metaLeadsApi.getMetaLead(leadDetails._id);
+      setLeadDetails(updatedLead);
+      
+      alert('Activity added successfully');
+    } catch (err) {
+      alert('Error adding activity: ' + err.message);
+    } finally {
+      setAddingMetaActivity(false);
     }
   }
 
@@ -1163,31 +1215,101 @@ export default function LeadsListPage() {
                   )}
 
                   {/* Activities */}
-                  {leadDetails.activities && leadDetails.activities.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <span>📝</span> Activities ({leadDetails.activities.length})
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <span>📝</span> Activity Timeline ({leadDetails.activities?.length || 0})
                       </h3>
-                      <div className="space-y-3">
-                        {leadDetails.activities.map((activity, idx) => (
-                          <div key={idx} className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-medium text-gray-900">{activity.type === 'note' ? '📌 Note' : '🔄 ' + activity.type}</p>
-                                {activity.content?.title && (
-                                  <p className="text-sm font-medium text-gray-700 mt-1">{activity.content.title}</p>
-                                )}
-                                {activity.content?.note && (
-                                  <p className="text-sm text-gray-600 mt-1">{activity.content.note}</p>
-                                )}
-                              </div>
-                              <span className="text-xs text-gray-500">{formatDate(activity.createdAt)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <button
+                        onClick={() => setShowMetaActivityForm(!showMetaActivityForm)}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                        disabled={addingMetaActivity}
+                      >
+                        {showMetaActivityForm ? '✕ Cancel' : '+ Add Activity'}
+                      </button>
                     </div>
-                  )}
+
+                    {/* Activity Form */}
+                    {showMetaActivityForm && (
+                      <form onSubmit={handleAddMetaActivity} className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Activity Type
+                          </label>
+                          <select
+                            value={metaActivityForm.type}
+                            onChange={(e) => setMetaActivityForm({ ...metaActivityForm, type: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          >
+                            <option value="note">Note</option>
+                            <option value="call">Call</option>
+                            <option value="email">Email</option>
+                            <option value="sms">SMS</option>
+                          </select>
+                        </div>
+
+                        {metaActivityForm.type === 'note' && (
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Title
+                            </label>
+                            <input
+                              type="text"
+                              value={metaActivityForm.title}
+                              onChange={(e) => setMetaActivityForm({ ...metaActivityForm, title: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                              placeholder="Note title"
+                            />
+                          </div>
+                        )}
+
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Details
+                          </label>
+                          <textarea
+                            value={metaActivityForm.note}
+                            onChange={(e) => setMetaActivityForm({ ...metaActivityForm, note: e.target.value })}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            placeholder="Activity details..."
+                            required
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={addingMetaActivity}
+                          className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:bg-gray-400 text-sm font-medium"
+                        >
+                          {addingMetaActivity ? 'Saving...' : 'Save Activity'}
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Activity List */}
+                    <div className="space-y-3">
+                      {(!leadDetails.activities || leadDetails.activities.length === 0) && !showMetaActivityForm && (
+                        <p className="text-gray-500 text-sm text-center py-4">No activities yet</p>
+                      )}
+                      {leadDetails.activities?.map((activity, idx) => (
+                        <div key={idx} className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900">{activity.type === 'note' ? '📌 Note' : activity.type === 'call' ? '📞 Call' : activity.type === 'email' ? '✉️ Email' : activity.type === 'sms' ? '💬 SMS' : '🔄 ' + activity.type}</p>
+                              {activity.content?.title && (
+                                <p className="text-sm font-medium text-gray-700 mt-1">{activity.content.title}</p>
+                              )}
+                              {activity.content?.note && (
+                                <p className="text-sm text-gray-600 mt-1">{activity.content.note}</p>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{formatDate(activity.createdAt)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="p-8 text-center">
