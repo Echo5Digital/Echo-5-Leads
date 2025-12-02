@@ -45,6 +45,7 @@ async function getDashboardStats(req, res) {
     }
 
     const leads = db.collection('leads');
+    const metaLeads = db.collection('meta_leads');
     const activities = db.collection('activities');
     const tenants = db.collection('tenants');
 
@@ -61,26 +62,48 @@ async function getDashboardStats(req, res) {
     // Build query filter
     const queryFilter = tenantId ? { tenantId } : {};
 
-    // Total leads
-    const totalLeads = await leads.countDocuments(queryFilter);
+    // Total leads (website leads + meta leads)
+    const [websiteLeadsCount, metaLeadsCount] = await Promise.all([
+      leads.countDocuments(queryFilter),
+      metaLeads.countDocuments(queryFilter)
+    ]);
+    const totalLeads = websiteLeadsCount + metaLeadsCount;
 
-    // Leads this week
-    const leadsThisWeek = await leads.countDocuments({
-      ...queryFilter,
-      createdAt: { $gte: oneWeekAgo }
-    });
+    // Leads this week (website leads + meta leads)
+    const [websiteLeadsThisWeek, metaLeadsThisWeek] = await Promise.all([
+      leads.countDocuments({
+        ...queryFilter,
+        createdAt: { $gte: oneWeekAgo }
+      }),
+      metaLeads.countDocuments({
+        ...queryFilter,
+        createdAt: { $gte: oneWeekAgo }
+      })
+    ]);
+    const leadsThisWeek = websiteLeadsThisWeek + metaLeadsThisWeek;
 
-    // Lead distribution by stage
-    const stageDistribution = await leads.aggregate([
-      { $match: queryFilter },
-      { $group: { _id: '$stage', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]).toArray();
+    // Lead distribution by stage (website leads + meta leads)
+    const [websiteStageDistribution, metaStageDistribution] = await Promise.all([
+      leads.aggregate([
+        { $match: queryFilter },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]).toArray(),
+      metaLeads.aggregate([
+        { $match: queryFilter },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]).toArray()
+    ]);
 
-    const stageData = stageDistribution.reduce((acc, item) => {
-      acc[item._id] = item.count;
-      return acc;
-    }, {});
+    // Combine stage distributions from both collections
+    const stageData = {};
+    for (const item of websiteStageDistribution) {
+      stageData[item._id] = (stageData[item._id] || 0) + item.count;
+    }
+    for (const item of metaStageDistribution) {
+      stageData[item._id] = (stageData[item._id] || 0) + item.count;
+    }
 
     // Calculate avg time to first contact
     const leadsWithContact = await leads.find({
@@ -133,12 +156,33 @@ async function getDashboardStats(req, res) {
       ? Math.round((withinSLA / totalWithActivity) * 100 * 10) / 10
       : 0;
 
-    // Source distribution
-    const sourceDistribution = await leads.aggregate([
-      { $match: { tenantId } },
-      { $group: { _id: '$source', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]).toArray();
+    // Source distribution (website leads + meta leads)
+    const [websiteSourceDistribution, metaSourceDistribution] = await Promise.all([
+      leads.aggregate([
+        { $match: queryFilter },
+        { $group: { _id: '$source', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]).toArray(),
+      metaLeads.aggregate([
+        { $match: queryFilter },
+        { $group: { _id: '$source', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]).toArray()
+    ]);
+
+    // Combine source distributions from both collections
+    const sourceData = {};
+    for (const item of websiteSourceDistribution) {
+      sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
+    }
+    for (const item of metaSourceDistribution) {
+      sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
+    }
+
+    // Convert to array format and sort by count
+    const sourceDistribution = Object.entries(sourceData)
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count);
 
     return res.status(200).json({
       totalLeads,
@@ -146,7 +190,7 @@ async function getDashboardStats(req, res) {
       avgTimeToContact,
       pctWithinSLA,
       stageDistribution: stageData,
-      sourceDistribution: sourceDistribution.map(s => ({ source: s._id, count: s.count }))
+      sourceDistribution
     });
   } catch (err) {
     console.error('Dashboard stats error:', err);
