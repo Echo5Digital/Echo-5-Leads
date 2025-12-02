@@ -81,9 +81,22 @@ export default async function ingestLead(req, res) {
     const spamKeywords = (tenant?.config?.spamKeywords || []).map(s => String(s).toLowerCase());
     const stageDefault = 'new';
 
-    // Only check for duplicates if we have email or phone
+    // Check if this is a migration request - skip duplicate check for:
+    // 1. Explicit force_insert flag
+    // 2. Elementor migrations (source contains 'elementor')
+    // 3. WordPress migrations (source contains 'wordpress' or form_id contains 'wordpress')
+    const isElementorMigration = providedSource?.toLowerCase().includes('elementor') || 
+                                  body.form_id?.toString().toLowerCase().includes('elementor');
+    const isWordPressMigration = providedSource?.toLowerCase().includes('wordpress') || 
+                                 body.form_id?.toString().toLowerCase().includes('wordpress');
+    const isMigration = body.force_insert === true || 
+                        body.skip_duplicate_check === true || 
+                        isElementorMigration || 
+                        isWordPressMigration;
+
+    // Only check for duplicates if we have email or phone (and not during migration)
     let existing = null;
-    if (email || phoneE164) {
+    if (!isMigration && (email || phoneE164)) {
       existing = await leads.findOne({
         tenantId,
         $or: [
