@@ -287,9 +287,7 @@ export default function LeadDetail() {
                         {friendlyLabel}
                       </label>
                       <p className="mt-1 text-gray-900 break-words">
-                        {typeof displayValue === 'string' && displayValue.length > 100 
-                          ? displayValue.substring(0, 100) + '...' 
-                          : String(displayValue)}
+                        {String(displayValue)}
                       </p>
                     </div>
                   );
