@@ -181,20 +181,7 @@ async function importLeadsCSV(req, res) {
           continue;
         }
 
-        // Check for duplicates within this tenant (in meta_leads collection)
-        const existing = await metaLeads.findOne({
-          tenantId,
-          $or: [
-            ...(email ? [{ email }] : []),
-            ...(phoneE164 ? [{ phoneE164 }] : []),
-          ]
-        });
-
-        if (existing) {
-          results.errors.push(`Row ${i + 2}: Meta lead already exists (${email || phoneE164})`);
-          results.skipped++;
-          continue;
-        }
+        // Do not deduplicate CSV imports — always insert each row as a separate meta lead
 
         // Prepare meta lead document
         const leadDoc = {

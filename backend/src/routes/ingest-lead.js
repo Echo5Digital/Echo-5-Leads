@@ -94,19 +94,12 @@ export default async function ingestLead(req, res) {
                         isElementorMigration || 
                         isWordPressMigration;
 
-    // Only check for duplicates if we have email or phone (and not during migration)
+    // Do not perform deduplication — always insert new leads
+    // Some sources (Google, Wordpress, CSV) may re-submit the same contact
+    // and those should be recorded as separate lead events. We intentionally
+    // skip searching/updating an existing lead and always create a new one.
     let existing = null;
-    if (!isMigration && (email || phoneE164)) {
-      existing = await leads.findOne({
-        tenantId,
-        $or: [
-          ...(email ? [{ email }] : []),
-          ...(phoneE164 ? [{ phoneE164 }] : []),
-        ]
-      });
-    }
-
-    const isNewLead = !existing;
+    const isNewLead = true;
 
     const leadData = {
       firstName,
@@ -149,9 +142,6 @@ export default async function ingestLead(req, res) {
         content: { title: 'Attribution v1', note: `source set to: ${doc.source}` },
         createdAt: createdAt, // ✅ Also use original timestamp for first activity
       });
-    } else {
-      leadId = existing._id.toString();
-      await leads.updateOne({ _id: existing._id }, { $set: leadData });
     }
 
     if (Object.keys(utm).length > 0) {
