@@ -7,7 +7,7 @@ import { getDb } from './src/lib/mongo.js';
 import ingestLeadRoute from './src/routes/ingest-lead.js';
 import leadsRoute from './src/routes/leads.js';
 import leadDetailRoute from './src/routes/lead-detail.js';
-import leadActivityRoute from './src/routes/lead-activity.js';
+import leadActivityRoute, { protectedAddLeadActivity } from './src/routes/lead-activity.js';
 import metaLeadsRoute from './src/routes/meta-leads.js';
 import metaLeadDetailRoute from './src/routes/meta-lead-detail.js';
 import metaLeadActivityRoute from './src/routes/meta-lead-activity.js';
@@ -100,7 +100,7 @@ app.post('/api/ingest/google-lead', handleGoogleLead);
 
 app.get('/api/leads', ...leadsRoute);
 app.get('/api/leads/:id', ...leadDetailRoute);
-app.post('/api/leads/:id/activity', leadActivityRoute);
+app.post('/api/leads/:id/activity', ...protectedAddLeadActivity);
 app.put('/api/leads/:id', ...updateLeadRoute);
 app.delete('/api/leads/:id', deleteLeadRoute);
 

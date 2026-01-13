@@ -1,13 +1,24 @@
 import { getDb, resolveTenantId } from '../lib/mongo.js';
 import { sendNoteNotification } from '../lib/email.js';
+import { authenticateToken } from '../lib/auth.js';
 import { ObjectId } from 'mongodb';
 
-export default async function addLeadActivity(req, res) {
+async function addLeadActivity(req, res) {
   try {
-    const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
     const db = await getDb();
-    const tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
-    if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
+    
+    // Support both JWT authentication (from frontend) and API key (from WordPress plugin)
+    let tenantId;
+    if (req.user) {
+      // JWT authenticated - use user's tenantId
+      tenantId = req.user.tenantId;
+    } else {
+      // API key authentication - for WordPress plugin
+      const apiKey = req.headers['x-tenant-key'] || req.headers['X-Tenant-Key'];
+      tenantId = await resolveTenantId(db, typeof apiKey === 'string' ? apiKey : undefined);
+    }
+    
+    if (!tenantId) return res.status(401).json({ error: 'Authentication required' });
 
     const id = req.params.id;
     if (!id) return res.status(400).json({ error: 'Invalid id' });
@@ -57,3 +68,8 @@ export default async function addLeadActivity(req, res) {
     return res.status(500).json({ error: 'internal_error', details: String(err?.message || err) });
   }
 }
+
+// Export both authenticated and non-authenticated versions
+// Authenticated version for frontend (JWT), non-authenticated for WordPress plugin (API key)
+export default addLeadActivity;
+export const protectedAddLeadActivity = [authenticateToken, addLeadActivity];
