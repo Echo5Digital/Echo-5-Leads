@@ -145,7 +145,7 @@ export default function LeadDetail() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-800">Error: {error || 'Lead not found'}</p>
-            <Link href="/" className="text-blue-600 hover:text-blue-900 mt-2 inline-block">
+            <Link href="/leads" className="text-blue-600 hover:text-blue-900 mt-2 inline-block">
               ← Back to Leads
             </Link>
           </div>
@@ -159,7 +159,7 @@ export default function LeadDetail() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/" className="text-blue-600 hover:text-blue-900 mb-4 inline-block">
+          <Link href="/leads" className="text-blue-600 hover:text-blue-900 mb-4 inline-block">
             ← Back to Leads
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
