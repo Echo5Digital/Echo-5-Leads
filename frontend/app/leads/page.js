@@ -704,9 +704,12 @@ export default function LeadsListPage() {
                         <Link
                           href={`/leads/${lead._id}`}
                           className="text-blue-600 hover:text-blue-900 font-medium block truncate"
-                          title={lead.email || 'Unknown'}
+                          title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
                         >
-                          {lead.email || 'Unknown'}
+                          {/* Old: Display email */}
+                          {/* {lead.email || 'Unknown'} */}
+                          {/* New: Display name (fullName or firstName+lastName), fallback to email */}
+                          {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
                         </Link>
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
