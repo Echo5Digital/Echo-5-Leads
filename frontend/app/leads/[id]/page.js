@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { leadsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
-import Link from 'next/link';
 
 export default function LeadDetail() {
   const params = useParams();
@@ -155,9 +154,12 @@ export default function LeadDetail() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-800">Error: {error || 'Lead not found'}</p>
-            <Link href="/leads" className="text-blue-600 hover:text-blue-900 mt-2 inline-block">
+            <button
+              onClick={() => window.history.back()}
+              className="text-blue-600 hover:text-blue-900 mt-2 inline-block bg-transparent border-0 cursor-pointer"
+            >
               ← Back to Leads
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -169,9 +171,12 @@ export default function LeadDetail() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/leads" className="text-blue-600 hover:text-blue-900 mb-4 inline-block">
+          <button
+            onClick={() => window.history.back()}
+            className="text-blue-600 hover:text-blue-900 mb-4 inline-block bg-transparent border-0 cursor-pointer"
+          >
             ← Back to Leads
-          </Link>
+          </button>
           <h1 className="text-3xl font-bold text-gray-900">
             {lead.firstName} {lead.lastName}
           </h1>

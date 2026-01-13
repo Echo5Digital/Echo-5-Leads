@@ -57,6 +57,36 @@ export default function LeadsListPage() {
   // Get stages from tenant config or fallback to default
   const stages = getStages();
 
+  // Restore scroll position and filters when returning from lead detail
+  useEffect(() => {
+    const savedFilters = sessionStorage.getItem('leadsFilters');
+    const savedScroll = sessionStorage.getItem('leadsScrollPosition');
+    const savedTab = sessionStorage.getItem('leadsActiveTab');
+    
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        setFilters(parsed);
+        sessionStorage.removeItem('leadsFilters');
+      } catch (e) {
+        console.error('Failed to restore filters:', e);
+      }
+    }
+    
+    if (savedTab) {
+      setActiveTab(savedTab);
+      sessionStorage.removeItem('leadsActiveTab');
+    }
+    
+    if (savedScroll) {
+      // Delay scroll restoration to ensure DOM is ready
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScroll));
+        sessionStorage.removeItem('leadsScrollPosition');
+      }, 100);
+    }
+  }, []);
+
   useEffect(() => {
     // Only load if we have a selected tenant (for Super Admins) or always load for other roles
     if (user?.role === 'super_admin') {
@@ -705,6 +735,11 @@ export default function LeadsListPage() {
                           href={`/leads/${lead._id}`}
                           className="text-blue-600 hover:text-blue-900 font-medium block truncate"
                           title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
+                          onClick={() => {
+                            sessionStorage.setItem('leadsFilters', JSON.stringify(filters));
+                            sessionStorage.setItem('leadsScrollPosition', window.scrollY.toString());
+                            sessionStorage.setItem('leadsActiveTab', activeTab);
+                          }}
                         >
                           {/* Old: Display email */}
                           {/* {lead.email || 'Unknown'} */}
