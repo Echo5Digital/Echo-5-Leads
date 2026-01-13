@@ -672,7 +672,7 @@ export default function LeadsListPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell" style={{display: 'none'}}>
                       Contact
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
@@ -722,7 +722,7 @@ export default function LeadsListPage() {
                           {lead.source && <span className="ml-2">• {lead.source}</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-4 w-32 text-sm text-gray-600 hidden md:table-cell">
+                      <td className="px-4 py-4 w-32 text-sm text-gray-600 hidden md:table-cell" style={{display: 'none'}}>
                         <div className="truncate" title={lead.city}>{lead.city || '-'}</div>
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || '-'}</div>
                       </td>
@@ -861,7 +861,7 @@ export default function LeadsListPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell" style={{display: 'none'}}>
                       Contact
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
@@ -907,7 +907,7 @@ export default function LeadsListPage() {
                           {lead.source && <span className="ml-2">• {lead.source}</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-4 w-32 text-sm text-gray-600 hidden md:table-cell">
+                      <td className="px-4 py-4 w-32 text-sm text-gray-600 hidden md:table-cell" style={{display: 'none'}}>
                         <div className="truncate" title={lead.city}>{lead.city || '-'}</div>
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || 'facebook_import'}</div>
                       </td>
