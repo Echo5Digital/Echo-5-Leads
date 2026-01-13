@@ -20,7 +20,16 @@ async function main() {
     _id: crypto.randomUUID(),
     name: 'Open Arms Foster Care',
     slug: 'open-arms',
-    config: { spamKeywords: ['viagra','loan','casino'], slaHours: 24, allowedOrigins: [] },
+    config: { 
+      spamKeywords: ['viagra','loan','casino'], 
+      slaHours: 24, 
+      allowedOrigins: [],
+      notificationEmails: [
+        'amber.price@openarmsfostercare.com',
+        'kamryn.bass@openarmsfostercare.com',
+        'shani@echo5digital.com'
+      ]
+    },
     createdAt: new Date()
   };
   await db.collection('tenants').insertOne(tenant);

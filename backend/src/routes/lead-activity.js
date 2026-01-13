@@ -1,4 +1,5 @@
 import { getDb, resolveTenantId } from '../lib/mongo.js';
+import { sendNoteNotification } from '../lib/email.js';
 import { ObjectId } from 'mongodb';
 
 export default async function addLeadActivity(req, res) {
@@ -21,11 +22,15 @@ export default async function addLeadActivity(req, res) {
     const leads = db.collection('leads');
     const lead = await leads.findOne({ _id: oid, tenantId });
     if (!lead) return res.status(404).json({ error: 'Not found' });
+    
+    // Get tenant for notification config
+    const tenant = await db.collection('tenants').findOne({ _id: tenantId });
 
     const body = req.body || {};
     const type = body.type;
     const content = body.content || {};
     const stage = body.stage;
+    const addedByName = body.addedBy || 'System';
     const now = new Date();
 
     const allowed = ['note','call','email','sms','status_change'];
@@ -34,6 +39,11 @@ export default async function addLeadActivity(req, res) {
     const activities = db.collection('activities');
     const activity = { tenantId, leadId: id, type, content, createdAt: now };
     await activities.insertOne(activity);
+
+    // Send notification email if note was added
+    if (type === 'note' && tenant) {
+      await sendNoteNotification(lead, activity, addedByName, tenant);
+    }
 
     if (type !== 'utm_snapshot') {
       const update = { latestActivityAt: now };

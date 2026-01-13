@@ -10,7 +10,7 @@ async function createTenant(req, res) {
 
   try {
     const db = await getDb();
-    const { name, slug, stages, users, spamKeywords, slaHours } = req.body;
+    const { name, slug, stages, users, spamKeywords, slaHours, notificationEmails } = req.body;
 
     // Validation
     if (!name || !slug) {
@@ -38,7 +38,8 @@ async function createTenant(req, res) {
         users: users || [],
         spamKeywords: spamKeywords || [],
         slaHours: slaHours || 24,
-        allowedOrigins: []
+        allowedOrigins: [],
+        notificationEmails: notificationEmails || []
       },
       createdAt: new Date()
     };
