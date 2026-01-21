@@ -10,14 +10,10 @@ import { Card, CardHeader, StatCard, LoadingSpinner, ErrorMessage, Button } from
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
-  const [overdueData, setOverdueData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
   const { getStages, selectedTenant } = useTenant();
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
   // Get dynamic stages from tenant config
   const stages = getStages();
@@ -27,11 +23,9 @@ export default function Dashboard() {
     if (user?.role === 'super_admin') {
       if (selectedTenant) {
         loadStats();
-        loadOverdueLeads();
       }
     } else {
       loadStats();
-      loadOverdueLeads();
     }
   }, [selectedTenant, user]);
 
@@ -52,23 +46,6 @@ export default function Dashboard() {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function loadOverdueLeads() {
-    try {
-      let url = `${API_URL}/api/sla/overdue`;
-      if (user?.role === 'super_admin' && selectedTenant) {
-        url += `?tenantId=${selectedTenant._id}`;
-      }
-      
-      const response = await fetch(url, {
-        headers: { 'X-Tenant-Key': API_KEY },
-      });
-      const data = await response.json();
-      setOverdueData(data);
-    } catch (err) {
-      console.error('Failed to load overdue leads:', err);
     }
   }
 
@@ -159,10 +136,9 @@ export default function Dashboard() {
         />
 
         <StatCard 
-          label={overdueData?.totalOverdue > 0 ? '⚠️ Overdue Leads' : '% Within SLA'}
-          value={overdueData?.totalOverdue > 0 ? overdueData.totalOverdue : `${stats.pctWithinSLA.toFixed(1)}%`}
-          alert={overdueData?.totalOverdue > 0}
-          trend={overdueData?.totalOverdue > 0 ? 'Require immediate attention' : null}
+          label="New Leads" 
+          value={stats.stageDistribution?.new || 0}
+          icon="🆕"
         />
       </div>
 
