@@ -182,7 +182,7 @@ export default function LeadDetail() {
           </h1>
           <div className="mt-2">
             <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
-              {lead.stage.replace(/_/g, ' ').toUpperCase()}
+              {(lead.stage || 'New').replace(/_/g, ' ').toUpperCase()}
             </span>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function LeadDetail() {
               Stage
             </label>
             <select
-              value={lead.stage}
+              value={lead.stage || 'New'}
               onChange={(e) => handleStageChange(e.target.value)}
               className="w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >

@@ -25,7 +25,9 @@
     "libphonenumber-js": "^1.11.7",
     "mongodb": "^6.8.0",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^7.0.12"
+    "nodemailer": "^7.0.12",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.15.2"
   },
   "engines": {
     "node": ">=18.x"

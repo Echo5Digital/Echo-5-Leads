@@ -256,6 +256,27 @@ export default function LeadsListPage() {
     }
   }
 
+  async function handleSendForm(lead) {
+    const email = lead.email;
+    const name = `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Applicant';
+    
+    if (!email) {
+      alert('This lead does not have an email address.');
+      return;
+    }
+
+    if (!confirm(`Send the foster care application form to ${name} (${email})?`)) {
+      return;
+    }
+
+    try {
+      await leadsApi.sendFormToLead(email, name);
+      alert(`Form sent successfully to ${email}`);
+    } catch (err) {
+      alert('Error sending form: ' + err.message);
+    }
+  }
+
   async function handleAddMetaActivity(e) {
     e.preventDefault();
     if (!leadDetails?._id) {
@@ -814,13 +835,22 @@ export default function LeadsListPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4 w-24 text-sm">
-                        <button
-                          onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
-                          className="text-red-600 hover:text-red-700 font-medium truncate transition-colors duration-200"
-                          title="Delete lead"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSendForm(lead)}
+                            className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+                            title="Send application form"
+                          >
+                            Send Form
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
+                            className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                            title="Delete lead"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1001,15 +1031,22 @@ export default function LeadsListPage() {
                       <td className="px-4 py-4 w-24 text-sm">
                         <div className="flex gap-2">
                           <button
+                            onClick={() => handleSendForm(lead)}
+                            className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                            title="Send application form"
+                          >
+                            Send Form
+                          </button>
+                          <button
                             onClick={() => handleViewDetails(lead)}
-                            className="text-blue-600 hover:text-blue-700 font-medium truncate transition-colors duration-200"
+                            className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
                             title="View details"
                           >
                             View
                           </button>
                           <button
                             onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`, true)}
-                            className="text-red-600 hover:text-red-700 font-medium truncate transition-colors duration-200"
+                            className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
                             title="Delete lead"
                           >
                             Delete

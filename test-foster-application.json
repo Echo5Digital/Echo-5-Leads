@@ -1,0 +1,90 @@
+{
+  "firstName": "Sarah",
+  "middleName": "Marie",
+  "lastName": "Johnson",
+  "dateOfBirth": "1985-06-15",
+  "ssn": "123-45-6789",
+  "driversLicense": "D1234567",
+  "dlState": "TX",
+  "streetAddress": "123 Main Street",
+  "city": "Austin",
+  "state": "TX",
+  "zipCode": "78701",
+  "homePhone": "(512) 555-0100",
+  "cellPhone": "(512) 555-0101",
+  "workPhone": "(512) 555-0102",
+  "email": "sarah.johnson@example.com",
+  "employer": "ABC Corporation",
+  "occupation": "Marketing Manager",
+  "workAddress": "456 Business Ave, Austin, TX 78702",
+  "workYears": "5",
+  "grossIncome": "75000",
+  "hasSpouse": true,
+  "spouseFirstName": "Michael",
+  "spouseMiddleName": "David",
+  "spouseLastName": "Johnson",
+  "spouseDateOfBirth": "1983-09-22",
+  "spouseSSN": "987-65-4321",
+  "spouseDriversLicense": "D7654321",
+  "spouseDLState": "TX",
+  "spouseEmployer": "XYZ Company",
+  "spouseOccupation": "Software Engineer",
+  "spouseWorkAddress": "789 Tech Drive, Austin, TX 78703",
+  "spouseWorkYears": "7",
+  "spouseGrossIncome": "95000",
+  "residenceType": "Own",
+  "residenceYears": "3",
+  "landlordName": "",
+  "landlordPhone": "",
+  "bedrooms": "4",
+  "bathrooms": "2.5",
+  "householdMembers": [
+    {
+      "name": "Emma Johnson",
+      "age": "8",
+      "relationship": "Daughter"
+    },
+    {
+      "name": "Liam Johnson",
+      "age": "5",
+      "relationship": "Son"
+    }
+  ],
+  "references": [
+    {
+      "name": "Jennifer Smith",
+      "relationship": "Friend",
+      "phone": "(512) 555-0201",
+      "yearsKnown": "10"
+    },
+    {
+      "name": "Robert Brown",
+      "relationship": "Coworker",
+      "phone": "(512) 555-0202",
+      "yearsKnown": "5"
+    },
+    {
+      "name": "Patricia Davis",
+      "relationship": "Neighbor",
+      "phone": "(512) 555-0203",
+      "yearsKnown": "3"
+    }
+  ],
+  "criminalHistory": false,
+  "criminalDetails": "",
+  "childAbuseHistory": false,
+  "childAbuseDetails": "",
+  "substanceAbuseHistory": false,
+  "substanceAbuseDetails": "",
+  "reasonForFostering": "My husband and I have always had a passion for helping children. After raising our two biological children, we feel called to open our home to children who need a safe, loving environment. We have a stable home, strong family values, and the time and resources to provide the care and support that foster children need. We believe every child deserves a chance to thrive in a nurturing family setting.",
+  "childCareExperience": "I have over 15 years of experience caring for children. I raised two children of my own, and I have volunteered in Sunday school for the past 8 years. I also worked part-time at a daycare center while in college. My husband and I have hosted several children from difficult backgrounds for weekend respite care through our church's ministry program.",
+  "preferredAgeRange": "6-12",
+  "specialNeedsWillingness": true,
+  "emergencyName": "Linda Martinez",
+  "emergencyRelationship": "Sister",
+  "emergencyPhone": "(512) 555-0300",
+  "emergencyAddress": "321 Oak Lane, Austin, TX 78704",
+  "signatureName": "Sarah Marie Johnson",
+  "signatureDate": "2026-01-23",
+  "agreeToTerms": true
+}

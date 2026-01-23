@@ -14,7 +14,8 @@ async function apiRequest(endpoint, options = {}) {
     endpoint.includes('/api/auth') ||
     endpoint.includes('/api/dashboard') || // Dashboard stats should use token
     endpoint.includes('/api/tenant') || // Tenant config should use token
-    endpoint.startsWith('/api/leads')  // Include all leads operations for proper authentication
+    endpoint.startsWith('/api/leads') ||  // Include all leads operations for proper authentication
+    endpoint.includes('/api/share-foster-application')  // Share form functionality
   );
   
   const headers = {
@@ -133,6 +134,20 @@ export const leadsApi = {
     return apiRequest('/api/leads/import/csv', {
       method: 'POST',
       body: JSON.stringify(body),
+    });
+  },
+
+  // Send foster care application form to lead
+  async sendFormToLead(recipientEmail, recipientName, message = '') {
+    const formUrl = `${window.location.origin}/foster-care-application`;
+    return apiRequest('/api/share-foster-application', {
+      method: 'POST',
+      body: JSON.stringify({
+        recipientEmail,
+        recipientName,
+        message,
+        formUrl
+      }),
     });
   },
 };

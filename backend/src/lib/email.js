@@ -6,9 +6,6 @@ let transporter = null;
 function getTransporter() {
   if (transporter) return transporter;
   
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '587');
-  const secure = process.env.SMTP_SECURE === 'true';
   const user = process.env.MAIL_USER;
   const pass = process.env.MAIL_PASS;
 
@@ -17,10 +14,9 @@ function getTransporter() {
     return null;
   }
 
+  // Use Gmail service configuration
   transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
+    service: 'gmail',
     auth: {
       user,
       pass
@@ -39,6 +35,19 @@ function getTransporter() {
  * @param {string} options.html - HTML body (optional)
  */
 export async function sendEmail({ to, subject, text, html }) {
+  // Check if in test mode
+  const testMode = process.env.EMAIL_TEST_MODE === 'true';
+  
+  if (testMode) {
+    console.log('='.repeat(80));
+    console.log('[Email] TEST MODE - Email not actually sent');
+    console.log('To:', to);
+    console.log('Subject:', subject);
+    console.log('Body:', text.substring(0, 200) + '...');
+    console.log('='.repeat(80));
+    return { success: true, messageId: 'test-mode-' + Date.now(), testMode: true };
+  }
+
   const transport = getTransporter();
   
   if (!transport) {

@@ -33,6 +33,11 @@ import slaOverdueRoute from './src/routes/sla-overdue.js';
 import { verifyWebhook as metaVerifyWebhook, handleWebhook as metaHandleWebhook } from './src/routes/ingest-meta-lead.js';
 import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 
+// Foster Care Application routes
+import fosterCareApplicationRoute from './src/routes/foster-care-application.js';
+import fosterCareApplicationPdfRoute from './src/routes/foster-care-application-pdf.js';
+import shareFosterApplicationRoute from './src/routes/share-foster-application.js';
+
 // Auth routes
 import loginRoute from './src/routes/auth-login.js';
 import refreshTokenRoute from './src/routes/auth-refresh.js';
@@ -132,6 +137,11 @@ app.delete('/api/tenants/:tenantId/api-keys/:keyId', revokeApiKeyRoute);
 
 // SLA Monitoring
 app.get('/api/sla/overdue', slaOverdueRoute);
+
+// Foster Care Application Routes
+app.post('/api/foster-care-application', fosterCareApplicationRoute);
+app.get('/api/foster-care-application/:id/pdf', fosterCareApplicationPdfRoute);
+app.post('/api/share-foster-application', shareFosterApplicationRoute);
 
 // Error handling
 app.use((err, req, res, next) => {
