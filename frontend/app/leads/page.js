@@ -45,6 +45,9 @@ export default function LeadsListPage() {
   const [leadDetails, setLeadDetails] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Under construction modal state
+  const [showUnderConstructionModal, setShowUnderConstructionModal] = useState(false);
+
   // Meta activity form state
   const [showMetaActivityForm, setShowMetaActivityForm] = useState(false);
   const [metaActivityForm, setMetaActivityForm] = useState({
@@ -257,6 +260,10 @@ export default function LeadsListPage() {
   }
 
   async function handleSendForm(lead) {
+    setShowUnderConstructionModal(true);
+    return;
+    
+    // Original code - will be enabled when ready
     const email = lead.email;
     const name = `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Applicant';
     
@@ -269,9 +276,12 @@ export default function LeadsListPage() {
       return;
     }
 
+    // Show processing message
+    alert('Your request is being processed. You will be notified once completed.');
+
     try {
       await leadsApi.sendFormToLead(email, name);
-      alert(`Form sent successfully to ${email}`);
+      alert(`✓ Form sent successfully!\n\nThe application form has been sent to ${email}. The recipient will receive an email with a link to complete the form.`);
     } catch (err) {
       alert('Error sending form: ' + err.message);
     }
@@ -1391,6 +1401,43 @@ export default function LeadsListPage() {
                   <p className="text-gray-600">Failed to load lead details</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Under Construction Modal */}
+        {showUnderConstructionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-gray-200">
+                <div className="flex items-center justify-center">
+                  <span className="text-4xl"></span>
+                </div>
+              </div>
+              
+              {/* Content */}
+              <div className="px-6 py-6 text-center">
+                <h3 className="text-xl font-bold text-gray-800 mb-3">
+                  Feature Under Construction
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  We're working hard to bring you this feature!
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Once completed, you'll be able to send application forms directly to leads via email.
+                </p>
+              </div>
+              
+              {/* Footer */}
+              <div className="px-6 py-4 bg-gray-50 flex justify-center">
+                <button
+                  onClick={() => setShowUnderConstructionModal(false)}
+                  className="px-6 py-2.5 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}
