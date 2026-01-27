@@ -222,8 +222,14 @@ async function generateApplicationPDF(formData) {
     
     console.log('[PDF] Filling government PDF template with form data...');
     
-    // ========== PAGE 1 - Personal Information ==========
-    // Text fields
+    // ==========================================
+    // PAGE 1 - Oklahoma State Bureau of Investigation (OSBI)
+    // Background Check Authorization Form
+    // Text Fields: page1_field2,3,6,8,9,10,11,20,22,23,24,25,26,27,28,29
+    // Checkboxes: page1_field1,4,5,12,13,14,15,16,17,18,19,21
+    // ==========================================
+    
+    // Applicant's personal information
     fillTextField(form, 'page1_field2', formData.firstName);
     fillTextField(form, 'page1_field3', formData.lastName);
     fillTextField(form, 'page1_field6', formData.middleName);
@@ -231,19 +237,27 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page1_field9', formData.dateOfBirth);
     fillTextField(form, 'page1_field10', formData.ssn);
     fillTextField(form, 'page1_field11', formData.driversLicense);
-    fillTextField(form, 'page1_field19', formData.height);
-    fillTextField(form, 'page1_field20', formData.weight);
-    fillTextField(form, 'page1_field21', formData.cityOfBirth);
-    fillTextField(form, 'page1_field22', formData.stateOfBirth);
-    fillTextField(form, 'page1_field23', formData.hairColor);
-    fillTextField(form, 'page1_field24', formData.eyeColor);
-    fillTextField(form, 'page1_field25', formData.driverSex);
-    fillTextField(form, 'page1_field26', formData.dlState);
     
-    // Checkboxes
+    // Physical description
+    fillTextField(form, 'page1_field20', formData.sex);
+    fillTextField(form, 'page1_field22', formData.height);
+    fillTextField(form, 'page1_field23', formData.weight);
+    fillTextField(form, 'page1_field24', formData.hairColor);
+    fillTextField(form, 'page1_field25', formData.eyeColor);
+    fillTextField(form, 'page1_field26', formData.cityOfBirth);
+    fillTextField(form, 'page1_field27', formData.stateOfBirth);
+    fillTextField(form, 'page1_field28', formData.dlState);
+    fillTextField(form, 'page1_field29', formData.driverSex);
+    
+    // Checkboxes for Page 1
     fillCheckbox(form, 'page1_field1', formData.noMiddleName);
     
-    // ========== PAGE 2 - Aliases and Previous Addresses ==========
+    // ==========================================
+    // PAGE 2 - Aliases, Previous Addresses, Criminal History
+    // Text Fields: 48 total
+    // Checkboxes: page2_field4,5,26,27,44
+    // ==========================================
+    
     // Alias 1
     if (formData.aliases && formData.aliases[0]) {
       fillTextField(form, 'page2_field1', formData.aliases[0].firstName);
@@ -263,53 +277,140 @@ async function generateApplicationPDF(formData) {
       fillTextField(form, 'page2_field11', formData.aliases[2].lastName);
     }
     
-    // Previous Residency
-    if (formData.previousResidency && formData.previousResidency[0]) {
-      fillTextField(form, 'page2_field12', formData.previousResidency[0].state);
-      fillTextField(form, 'page2_field13', formData.previousResidency[0].startDate);
-      fillTextField(form, 'page2_field14', formData.previousResidency[0].endDate);
+    // Previous Residency (State, Start Date, End Date for each row)
+    if (formData.previousResidency) {
+      if (formData.previousResidency[0]) {
+        fillTextField(form, 'page2_field12', formData.previousResidency[0].state);
+        fillTextField(form, 'page2_field13', formData.previousResidency[0].startDate);
+        fillTextField(form, 'page2_field14', formData.previousResidency[0].endDate);
+      }
+      if (formData.previousResidency[1]) {
+        fillTextField(form, 'page2_field15', formData.previousResidency[1].state);
+        fillTextField(form, 'page2_field16', formData.previousResidency[1].startDate);
+        fillTextField(form, 'page2_field17', formData.previousResidency[1].endDate);
+      }
+      if (formData.previousResidency[2]) {
+        fillTextField(form, 'page2_field18', formData.previousResidency[2].state);
+        fillTextField(form, 'page2_field19', formData.previousResidency[2].startDate);
+        fillTextField(form, 'page2_field20', formData.previousResidency[2].endDate);
+      }
+    }
+    
+    // International Residency
+    if (formData.internationalResidency) {
+      if (formData.internationalResidency[0]) {
+        fillTextField(form, 'page2_field21', formData.internationalResidency[0].country);
+        fillTextField(form, 'page2_field23', formData.internationalResidency[0].startDate);
+        fillTextField(form, 'page2_field24', formData.internationalResidency[0].endDate);
+      }
+      if (formData.internationalResidency[1]) {
+        fillTextField(form, 'page2_field25', formData.internationalResidency[1].country);
+        fillTextField(form, 'page2_field28', formData.internationalResidency[1].startDate);
+        fillTextField(form, 'page2_field29', formData.internationalResidency[1].endDate);
+      }
     }
     
     // Criminal History
     fillCheckbox(form, 'page2_field44', formData.convictedOfCrime);
     fillTextField(form, 'page2_field45', formData.crimeExplanation);
     
-    // Consent checkboxes
+    // Consent/Authorization checkboxes
     fillCheckbox(form, 'page2_field4', formData.consentBackgroundCheck);
     fillCheckbox(form, 'page2_field5', formData.consentChildAbuseCheck);
     fillCheckbox(form, 'page2_field26', formData.consentRestrictedRegistry);
     fillCheckbox(form, 'page2_field27', formData.consentFingerprints);
     
-    // Signature fields
+    // Applicant Signature on Page 2
     fillTextField(form, 'page2_field53', formData.applicantSignature);
     fillTextField(form, 'page2_field54', formData.applicantSignatureDate);
     
-    // ========== PAGE 3 - Background Check Purpose ==========
+    // ==========================================
+    // PAGE 3 - Child Welfare Purpose (Name Based)
+    // Text Fields: page3_field2-11 (for agency info)
+    // Checkboxes: page3_field1,12-19
+    // ==========================================
+    
     fillCheckbox(form, 'page3_field1', formData.childWelfareNameBased);
+    
+    // Adoption options
     fillCheckbox(form, 'page3_field12', formData.adoption);
-    fillCheckbox(form, 'page3_field13', formData.fosterCare);
-    fillCheckbox(form, 'page3_field14', formData.contractedResourceFamily);
-    fillCheckbox(form, 'page3_field15', formData.kinshipNonRelative);
-    fillCheckbox(form, 'page3_field16', formData.kinshipRelative);
-    fillCheckbox(form, 'page3_field17', formData.therapeuticFosterCare);
-    fillCheckbox(form, 'page3_field18', formData.traditionalFosterCare);
-    fillCheckbox(form, 'page3_field19', formData.guardianship);
+    fillCheckbox(form, 'page3_field13', formData.indianChildWelfareAdoption);
+    fillCheckbox(form, 'page3_field14', formData.okdhsAdoption);
+    fillCheckbox(form, 'page3_field15', formData.ericasRule);
     
-    // ========== PAGE 4 - More Background Check Options ==========
-    fillCheckbox(form, 'page4_field1', formData.ipap);
-    fillCheckbox(form, 'page4_field4', formData.hostHomes);
-    fillCheckbox(form, 'page4_field5', formData.reissueChildWelfareFingerprint);
-    fillCheckbox(form, 'page4_field6', formData.trialReunification);
+    // Foster Care options
+    fillCheckbox(form, 'page3_field16', formData.fosterCare);
+    fillCheckbox(form, 'page3_field17', formData.contractedResourceFamily);
+    fillCheckbox(form, 'page3_field18', formData.kinshipNonRelative);
+    fillCheckbox(form, 'page3_field19', formData.kinshipRelative);
     
-    // Signature and Date
+    // Agency information text fields
+    fillTextField(form, 'page3_field2', formData.representativeName);
+    fillTextField(form, 'page3_field3', formData.representativeTitle);
+    fillTextField(form, 'page3_field4', formData.representativeMailingAddress);
+    fillTextField(form, 'page3_field5', formData.representativeCity);
+    fillTextField(form, 'page3_field6', formData.representativeState);
+    fillTextField(form, 'page3_field7', formData.representativeZipCode);
+    fillTextField(form, 'page3_field8', formData.representativePhone);
+    fillTextField(form, 'page3_field9', formData.representativeFax);
+    fillTextField(form, 'page3_field10', formData.representativeEmail);
+    
+    // ==========================================
+    // PAGE 4 - More Child Welfare Options (22 checkboxes)
+    // ==========================================
+    
+    fillCheckbox(form, 'page4_field1', formData.therapeuticFosterCare);
+    fillCheckbox(form, 'page4_field4', formData.traditionalFosterCare);
+    fillCheckbox(form, 'page4_field5', formData.guardianship);
+    fillCheckbox(form, 'page4_field6', formData.icwTribalGuardianship);
+    fillCheckbox(form, 'page4_field7', formData.okdhsGuardianship);
+    fillCheckbox(form, 'page4_field8', formData.ipap);
+    fillCheckbox(form, 'page4_field9', formData.indianChildWelfareFoster);
+    fillCheckbox(form, 'page4_field10', formData.reissueChildWelfare);
+    fillCheckbox(form, 'page4_field11', formData.reissuePreviousOnly);
+    fillCheckbox(form, 'page4_field12', formData.safetyPlanMonitor);
+    fillCheckbox(form, 'page4_field13', formData.okdhsTrialReunification);
+    fillCheckbox(form, 'page4_field14', formData.volunteer);
+    fillCheckbox(form, 'page4_field15', formData.childWelfareFingerprintBased);
+    fillCheckbox(form, 'page4_field16', formData.adoptionFingerprint);
+    fillCheckbox(form, 'page4_field17', formData.icwTribalAdoptionFingerprint);
+    fillCheckbox(form, 'page4_field18', formData.okdhsAdoptionFingerprint);
+    fillCheckbox(form, 'page4_field19', formData.fosterCareFingerprint);
+    fillCheckbox(form, 'page4_field20', formData.rfpAgency);
+    fillCheckbox(form, 'page4_field21', formData.ddsSpecializedFosterCare);
+    fillCheckbox(form, 'page4_field22', formData.emergencyAfterHours);
+    fillCheckbox(form, 'page4_field23', formData.icwTribalFosterCareFingerprint);
+    fillCheckbox(form, 'page4_field24', formData.okdhsFosterCareFingerprint);
+    
+    // Signature Date
     fillTextField(form, 'Date_1', formData.applicantSignatureDate);
     
-    // ========== PAGE 5 - Private Child Welfare ==========
-    fillCheckbox(form, 'page5_field1', formData.privateChildWelfare);
-    fillCheckbox(form, 'page5_field2', formData.privateAdoption);
-    fillCheckbox(form, 'page5_field3', formData.privateAdoptionNameBased);
+    // ==========================================
+    // PAGE 5 - More Fingerprint Options (28 checkboxes)
+    // ==========================================
     
-    // ========== PAGE 6 - OKDHS Representative ==========
+    fillCheckbox(form, 'page5_field1', formData.therapeuticFosterCareFingerprint);
+    fillCheckbox(form, 'page5_field2', formData.guardianshipFingerprint);
+    fillCheckbox(form, 'page5_field3', formData.icwTribalGuardianshipFingerprint);
+    fillCheckbox(form, 'page5_field4', formData.okdhsGuardianshipFingerprint);
+    fillCheckbox(form, 'page5_field5', formData.hostHomes);
+    fillCheckbox(form, 'page5_field6', formData.ipapSafetyPlan);
+    fillCheckbox(form, 'page5_field7', formData.reissueChildWelfareFingerprint);
+    fillCheckbox(form, 'page5_field8', formData.reissueFingerprintPreviousOnly);
+    fillCheckbox(form, 'page5_field9', formData.trialReunification);
+    fillCheckbox(form, 'page5_field10', formData.privateChildWelfare);
+    fillCheckbox(form, 'page5_field11', formData.privateAdoption);
+    fillCheckbox(form, 'page5_field12', formData.privateAdoptionNameBased);
+    fillCheckbox(form, 'page5_field13', formData.privateDomesticAdoptionFingerprint);
+    fillCheckbox(form, 'page5_field14', formData.privateGuardianshipNameBased);
+    fillCheckbox(form, 'page5_field15', formData.privateInternationalAdoptionNameBased);
+    
+    // ==========================================
+    // PAGE 6 - OKDHS Representative Info
+    // Text Fields: page6_field7-16
+    // Checkboxes: page6_field1-6
+    // ==========================================
+    
     fillTextField(form, 'page6_field7', formData.representativeName);
     fillTextField(form, 'page6_field8', formData.representativeTitle);
     fillTextField(form, 'page6_field9', formData.representativeMailingAddress);
@@ -319,92 +420,147 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page6_field13', formData.representativePhone);
     fillTextField(form, 'page6_field14', formData.representativeFax);
     fillTextField(form, 'page6_field15', formData.representativeEmail);
+    fillTextField(form, 'page6_field16', formData.representativeDate);
     
-    // ========== PAGE 7 - Consent for Release ==========
-    fillTextField(form, 'page7_field1', formData.resourceFirstName1);
-    fillTextField(form, 'page7_field2', formData.resourceLastName1);
-    fillTextField(form, 'page7_field3', formData.resourceFirstName2);
-    fillTextField(form, 'page7_field4', formData.resourceLastName2);
-    fillTextField(form, 'page7_field5', formData.authorizedIndividualName);
-    fillTextField(form, 'page7_field6', formData.authorizedIndividualAddress);
+    // ==========================================
+    // PAGE 7 - Records Request and Consent to Release (Driver Records)
+    // Text Fields: page7_field1-6
+    // Checkboxes: page7_field7-28
+    // ==========================================
     
-    // Information to Include checkboxes
-    fillCheckbox(form, 'page7_field7', formData.includeFirstLastName);
-    fillCheckbox(form, 'page7_field8', formData.includePhoneNumber);
-    fillCheckbox(form, 'page7_field9', formData.includeChurchHome);
-    fillCheckbox(form, 'page7_field10', formData.includeApplicationProvided);
-    fillCheckbox(form, 'page7_field11', formData.includeApplicationCompleted);
-    fillCheckbox(form, 'page7_field12', formData.includeAgency);
-    fillCheckbox(form, 'page7_field13', formData.includeInitialPaperwork);
-    fillCheckbox(form, 'page7_field14', formData.includeTrainingStarted);
-    fillCheckbox(form, 'page7_field15', formData.includeTrainingCompleted);
-    fillCheckbox(form, 'page7_field16', formData.includeHomeStudyStarted);
-    fillCheckbox(form, 'page7_field17', formData.includeHomeStudyCompleted);
+    // Driver's Name (full name)
+    const fullName = `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+    fillTextField(form, 'page7_field1', fullName);
     
-    // ========== PAGE 8 - Consent Signatures ==========
-    fillTextField(form, 'page8_field1', formData.consentEntityName);
+    // Sex
+    fillTextField(form, 'page7_field2', formData.driverSex || formData.sex);
+    
+    // Driver License Number
+    fillTextField(form, 'page7_field3', formData.driversLicense);
+    
+    // Date of Birth
+    fillTextField(form, 'page7_field4', formData.dateOfBirth);
+    
+    // Printed Name and Signature
+    fillTextField(form, 'page7_field5', formData.applicantSignature);
+    fillTextField(form, 'page7_field6', formData.applicantSignature);
+    
+    // Driver record request checkboxes
+    fillCheckbox(form, 'page7_field7', formData.oklahomaDrivingRecord);
+    fillCheckbox(form, 'page7_field8', formData.collisionReport);
+    fillCheckbox(form, 'page7_field9', formData.otherDrivingRecord);
+    fillCheckbox(form, 'page7_field10', formData.iAmPersonNamed);
+    fillCheckbox(form, 'page7_field11', formData.requestingRecordOfAnother);
+    fillCheckbox(form, 'page7_field12', formData.governmentAgency);
+    fillCheckbox(form, 'page7_field13', formData.legalUse);
+    fillCheckbox(form, 'page7_field14', formData.researchActivities);
+    fillCheckbox(form, 'page7_field15', formData.insuranceCompany);
+    fillCheckbox(form, 'page7_field16', formData.licensedInvestigator);
+    fillCheckbox(form, 'page7_field17', formData.commercialDriverEmployer);
+    fillCheckbox(form, 'page7_field18', formData.otherAuthorized);
+    
+    // ==========================================
+    // PAGE 8 - Consent Entity Name
+    // Text Fields: page8_field1, Date_2, Date_3
+    // ==========================================
+    
+    fillTextField(form, 'page8_field1', formData.resourceFirstName1 + ' ' + formData.resourceLastName1);
     fillTextField(form, 'Date_2', formData.applicant1ConsentDate);
     fillTextField(form, 'Date_3', formData.applicant2ConsentDate);
     
-    // ========== PAGE 9 - Resource Family Application - General Information ==========
-    fillTextField(form, 'page9_field1', formData.familyName);
-    fillTextField(form, 'page9_field2', formData.physicalAddress);
-    fillTextField(form, 'page9_field3', formData.physicalCity);
-    fillTextField(form, 'page9_field4', formData.physicalState);
-    fillTextField(form, 'page9_field5', formData.physicalZipCode);
+    // ==========================================
+    // PAGE 9 - Resource Family Application
+    // Text Fields: 24 total for address and home info
+    // Checkboxes: page9_field13,14,19,24,25,26,28,29
+    // ==========================================
+    
+    fillTextField(form, 'page9_field1', formData.familyName || fullName);
+    fillTextField(form, 'page9_field2', formData.physicalAddress || formData.streetAddress);
+    fillTextField(form, 'page9_field3', formData.physicalCity || formData.city);
+    fillTextField(form, 'page9_field4', formData.physicalState || formData.state);
+    fillTextField(form, 'page9_field5', formData.physicalZipCode || formData.zipCode);
     fillTextField(form, 'page9_field6', formData.mailingAddress);
     fillTextField(form, 'page9_field7', formData.mailingCity);
     fillTextField(form, 'page9_field8', formData.mailingState);
     fillTextField(form, 'page9_field9', formData.mailingZipCode);
     fillTextField(form, 'page9_field11', formData.findingDirections);
-    fillTextField(form, 'page9_field12', formData.squareFootage);
-    fillTextField(form, 'page9_field15', formData.numberOfBedrooms);
+    fillTextField(form, 'page9_field12', formData.homePhone);
+    fillTextField(form, 'page9_field15', formData.cellPhone);
+    fillTextField(form, 'page9_field16', formData.workPhone);
+    fillTextField(form, 'page9_field17', formData.faxNumber);
+    fillTextField(form, 'page9_field18', formData.email);
+    fillTextField(form, 'page9_field20', formData.squareFootage);
+    fillTextField(form, 'page9_field21', formData.numberOfBedrooms || formData.bedrooms);
+    fillTextField(form, 'page9_field22', formData.bathrooms);
+    fillTextField(form, 'page9_field23', formData.residenceYears);
     
-    // Home Type
+    // Home Type checkboxes
     fillCheckbox(form, 'page9_field13', formData.homeType === 'rent');
     fillCheckbox(form, 'page9_field14', formData.homeType === 'own');
     
-    // ========== PAGE 10 - Resource Applicant 1 Information ==========
-    fillTextField(form, 'page10_field1', formData.applicant1FirstName);
-    fillTextField(form, 'page10_field9', formData.applicant1MiddleName);
-    fillTextField(form, 'page10_field10', formData.applicant1LastName);
+    // ==========================================
+    // PAGE 10 - Resource Applicant 1 Info
+    // Text Fields: 16 total
+    // Checkboxes: 23 total
+    // ==========================================
+    
+    fillTextField(form, 'page10_field1', formData.applicant1FirstName || formData.firstName);
+    fillTextField(form, 'page10_field9', formData.applicant1MiddleName || formData.middleName);
+    fillTextField(form, 'page10_field10', formData.applicant1LastName || formData.lastName);
     fillTextField(form, 'page10_field19', formData.applicant1OtherNames);
-    fillTextField(form, 'page10_field20', formData.applicant1DateOfBirth);
-    fillTextField(form, 'page10_field21', formData.applicant1SSN);
-    fillTextField(form, 'page10_field22', formData.applicant1Gender);
+    fillTextField(form, 'page10_field20', formData.applicant1DateOfBirth || formData.dateOfBirth);
+    fillTextField(form, 'page10_field21', formData.applicant1SSN || formData.ssn);
+    fillTextField(form, 'page10_field22', formData.applicant1Gender || formData.sex);
     fillTextField(form, 'page10_field23', formData.applicant1Tribe);
     fillTextField(form, 'page10_field24', formData.applicant1HispanicLatino);
     fillTextField(form, 'page10_field25', formData.applicant1Race);
-    fillTextField(form, 'page10_field26', formData.applicant1WorkPhone);
-    fillTextField(form, 'page10_field27', formData.applicant1CellPhone);
-    fillTextField(form, 'page10_field28', formData.applicant1HomePhone);
-    fillTextField(form, 'page10_field29', formData.applicant1Email);
+    fillTextField(form, 'page10_field26', formData.applicant1WorkPhone || formData.workPhone);
+    fillTextField(form, 'page10_field27', formData.applicant1CellPhone || formData.cellPhone);
+    fillTextField(form, 'page10_field28', formData.applicant1HomePhone || formData.homePhone);
+    fillTextField(form, 'page10_field29', formData.applicant1Email || formData.email);
+    fillTextField(form, 'page10_field30', formData.applicant1DriversLicense || formData.driversLicense);
+    fillTextField(form, 'page10_field31', formData.applicant1DLState || formData.dlState);
     
     fillCheckbox(form, 'page10_field2', formData.applicant1OtherNamesNA);
     fillCheckbox(form, 'page10_field17', formData.applicant1TribeNA);
     fillCheckbox(form, 'page10_field32', formData.applicant1USCitizen === 'yes');
     fillCheckbox(form, 'page10_field33', formData.applicant1USCitizen === 'no');
     
-    // ========== PAGE 11 - Applicant 1 Continued ==========
-    fillTextField(form, 'page11_field6', formData.applicant1StatesLived);
-    fillCheckbox(form, 'page11_field1', formData.applicant1StatesLivedNA);
+    // ==========================================
+    // PAGE 11 - Applicant 1 Employment & History
+    // Text Fields: 15 total
+    // Checkboxes: 6 total
+    // ==========================================
     
-    // Employment
-    fillTextField(form, 'page11_field7', formData.applicant1Employer);
-    fillTextField(form, 'page11_field8', formData.applicant1Occupation);
-    fillTextField(form, 'page11_field9', formData.applicant1WorkAddress);
+    fillTextField(form, 'page11_field6', formData.applicant1StatesLived);
+    fillTextField(form, 'page11_field7', formData.applicant1Employer || formData.employer);
+    fillTextField(form, 'page11_field8', formData.applicant1Occupation || formData.occupation);
+    fillTextField(form, 'page11_field9', formData.applicant1WorkAddress || formData.workAddress);
     fillTextField(form, 'page11_field10', formData.applicant1WorkCity);
     fillTextField(form, 'page11_field11', formData.applicant1WorkState);
     fillTextField(form, 'page11_field12', formData.applicant1WorkZipCode);
-    fillTextField(form, 'page11_field16', formData.applicant1GrossIncome);
+    fillTextField(form, 'page11_field16', formData.applicant1GrossIncome || formData.grossIncome);
+    fillTextField(form, 'page11_field17', formData.applicant1WorkYears || formData.workYears);
+    fillTextField(form, 'page11_field18', formData.applicant1MaritalStatus);
+    fillTextField(form, 'page11_field19', formData.applicant1HighestGrade);
+    fillTextField(form, 'page11_field20', formData.applicant1AdvancedDegree);
     
-    // ========== PAGE 12 - Resource Applicant 2 Information ==========
-    fillTextField(form, 'page12_field1', formData.applicant2FirstName);
-    fillTextField(form, 'page12_field2', formData.applicant2MiddleName);
-    fillTextField(form, 'page12_field3', formData.applicant2LastName);
+    fillCheckbox(form, 'page11_field1', formData.applicant1StatesLivedNA);
+    fillCheckbox(form, 'page11_field2', formData.applicant1Employed === 'yes');
+    fillCheckbox(form, 'page11_field3', formData.applicant1SelfEmployed === 'yes');
+    
+    // ==========================================
+    // PAGE 12 - Applicant 2 Info (Spouse)
+    // Text Fields: 30 total
+    // Checkboxes: 2 total
+    // ==========================================
+    
+    fillTextField(form, 'page12_field1', formData.applicant2FirstName || formData.spouseFirstName);
+    fillTextField(form, 'page12_field2', formData.applicant2MiddleName || formData.spouseMiddleName);
+    fillTextField(form, 'page12_field3', formData.applicant2LastName || formData.spouseLastName);
     fillTextField(form, 'page12_field4', formData.applicant2OtherNames);
-    fillTextField(form, 'page12_field6', formData.applicant2DateOfBirth);
-    fillTextField(form, 'page12_field7', formData.applicant2SSN);
+    fillTextField(form, 'page12_field6', formData.applicant2DateOfBirth || formData.spouseDateOfBirth);
+    fillTextField(form, 'page12_field7', formData.applicant2SSN || formData.spouseSSN);
     fillTextField(form, 'page12_field8', formData.applicant2Gender);
     fillTextField(form, 'page12_field9', formData.applicant2Tribe);
     fillTextField(form, 'page12_field11', formData.applicant2HispanicLatino);
@@ -413,50 +569,89 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page12_field15', formData.applicant2CellPhone);
     fillTextField(form, 'page12_field19', formData.applicant2HomePhone);
     fillTextField(form, 'page12_field20', formData.applicant2Email);
+    fillTextField(form, 'page12_field21', formData.spouseDriversLicense);
+    fillTextField(form, 'page12_field22', formData.spouseDLState);
+    fillTextField(form, 'page12_field23', formData.spouseEmployer);
+    fillTextField(form, 'page12_field24', formData.spouseOccupation);
+    fillTextField(form, 'page12_field25', formData.spouseWorkAddress);
+    fillTextField(form, 'page12_field26', formData.spouseWorkYears);
+    fillTextField(form, 'page12_field27', formData.spouseGrossIncome);
     
-    // ========== PAGE 13 - Household Members ==========
-    if (formData.householdMembers) {
-      formData.householdMembers.forEach((member, index) => {
-        // Map household members to appropriate fields
-        // Field names would need exact mapping based on PDF layout
-      });
-    }
+    // ==========================================
+    // PAGE 13 - References
+    // Text Fields: 5 total
+    // Checkboxes: 2 total
+    // ==========================================
     
-    // Signatures
-    fillTextField(form, 'Date_4', formData.applicant1SignatureDate);
-    fillTextField(form, 'Date_5', formData.applicant2SignatureDate);
-    
-    // ========== PAGE 14 - References ==========
     if (formData.references && formData.references[0]) {
-      fillTextField(form, 'page14_field9', formData.references[0].name);
+      fillTextField(form, 'page13_field3', formData.references[0].firstName + ' ' + formData.references[0].lastName);
+      fillTextField(form, 'page13_field4', formData.references[0].phoneNumber || formData.references[0].phone);
+      fillTextField(form, 'page13_field5', formData.references[0].relationship);
+    }
+    if (formData.references && formData.references[1]) {
+      fillTextField(form, 'page13_field6', formData.references[1].firstName + ' ' + formData.references[1].lastName);
+      fillTextField(form, 'page13_field7', formData.references[1].phoneNumber || formData.references[1].phone);
     }
     
-    // ========== PAGE 15 - Additional Information ==========
-    // Required forms checkboxes
+    // ==========================================
+    // PAGE 14 - Background Questions
+    // Text Fields: page14_field9
+    // Checkboxes: 10 total
+    // ==========================================
+    
+    fillCheckbox(form, 'page14_field1', formData.criminalHistory);
+    fillCheckbox(form, 'page14_field2', formData.childAbuseHistory);
+    fillCheckbox(form, 'page14_field3', formData.substanceAbuseHistory);
+    fillCheckbox(form, 'page14_field4', formData.applicant1ArrestedCharges === 'yes');
+    fillCheckbox(form, 'page14_field5', formData.applicant1PleaGuilty === 'yes');
+    fillCheckbox(form, 'page14_field6', formData.applicant1InvestigatedAbuse === 'yes');
+    fillCheckbox(form, 'page14_field7', formData.applicant1PreviousFosterApply === 'yes');
+    fillCheckbox(form, 'page14_field8', formData.applicant1ProtectiveOrder === 'yes');
+    fillTextField(form, 'page14_field9', formData.criminalDetails || formData.childAbuseDetails || formData.substanceAbuseDetails);
+    
+    // ==========================================
+    // PAGE 15 - Required Documents Checklist
+    // Text Fields: page15_field2,6,21
+    // Checkboxes: 19 total
+    // ==========================================
+    
     fillCheckbox(form, 'page15_field1', formData.requiredMedicalExam);
     fillTextField(form, 'page15_field2', formData.medicalExamAppointmentDate);
     fillCheckbox(form, 'page15_field3', formData.requiredFinancialAssessment);
     fillCheckbox(form, 'page15_field4', formData.requiredParentHealthHistory);
     fillCheckbox(form, 'page15_field5', formData.requiredChildHealthStatement);
     fillTextField(form, 'page15_field6', formData.childHealthAppointmentDate);
-    fillCheckbox(form, 'page15_field7', formData.requiredChildCareApplication);
-    fillCheckbox(form, 'page15_field8', formData.requiredOtherAdults);
-    fillCheckbox(form, 'page15_field9', formData.requiredDivorceDecrees);
-    fillCheckbox(form, 'page15_field10', formData.requiredAutoInsurance);
-    fillCheckbox(form, 'page15_field11', formData.requiredCDIB);
-    fillCheckbox(form, 'page15_field12', formData.requiredMarriageLicense);
-    fillCheckbox(form, 'page15_field13', formData.requiredDD214);
-    fillCheckbox(form, 'page15_field14', formData.requiredDriverLicense);
-    fillCheckbox(form, 'page15_field15', formData.requiredImmunization);
-    fillCheckbox(form, 'page15_field16', formData.requiredPaycheckStub);
-    fillCheckbox(form, 'page15_field17', formData.requiredPetVaccination);
-    fillCheckbox(form, 'page15_field18', formData.requiredSocialSecurity);
-    fillCheckbox(form, 'page15_field19', formData.requiredFingerprints);
-    fillCheckbox(form, 'page15_field20', formData.requiredLawfulResidence);
-    fillCheckbox(form, 'page15_field22', formData.requiredOtherSpecify);
+    fillCheckbox(form, 'page15_field7', formData.requiredCDIB);
+    fillCheckbox(form, 'page15_field8', formData.requiredMarriageLicense);
+    fillCheckbox(form, 'page15_field9', formData.requiredDD214);
+    fillCheckbox(form, 'page15_field10', formData.requiredDriverLicense);
+    fillCheckbox(form, 'page15_field11', formData.requiredImmunization);
+    fillCheckbox(form, 'page15_field12', formData.requiredPaycheckStub);
+    fillCheckbox(form, 'page15_field13', formData.requiredPetVaccination);
+    fillCheckbox(form, 'page15_field14', formData.requiredSocialSecurity);
+    fillCheckbox(form, 'page15_field15', formData.requiredFingerprints);
+    fillCheckbox(form, 'page15_field16', formData.requiredLawfulResidence);
+    fillCheckbox(form, 'page15_field17', formData.requiredDivorceDecrees);
+    fillCheckbox(form, 'page15_field18', formData.requiredAutoInsurance);
+    fillCheckbox(form, 'page15_field19', formData.requiredChildCareApplication);
+    fillCheckbox(form, 'page15_field20', formData.requiredOtherAdults);
     fillTextField(form, 'page15_field21', formData.requiredOtherSpecifyText);
+    fillCheckbox(form, 'page15_field22', formData.requiredOtherSpecify);
     
-    // Note: Skipping form.flatten() due to PDF template compatibility issue
+    // ==========================================
+    // SIGNATURE DATES (Special Fields)
+    // ==========================================
+    
+    fillTextField(form, 'Date_4', formData.applicant1SignatureDate || formData.signatureDate);
+    fillTextField(form, 'Date_5', formData.applicant2SignatureDate);
+    fillTextField(form, 'Date_6', formData.adultMember1SignatureDate);
+    fillTextField(form, 'Date_7', formData.adultMember2SignatureDate);
+    
+    // Extra text fields
+    fillTextField(form, 'Text_1', formData.reasonForFostering);
+    fillTextField(form, 'Text_2', formData.childCareExperience);
+    fillTextField(form, 'Text_3', formData.preferredAgeRange);
+    fillTextField(form, 'Text_4', formData.emergencyName + ' - ' + formData.emergencyPhone);
     
     console.log('[PDF] Government PDF filled successfully');
     
