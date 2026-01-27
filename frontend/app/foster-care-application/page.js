@@ -434,7 +434,8 @@ export default function FosterCareApplicationPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/foster-care-application', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/foster-care-application`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
