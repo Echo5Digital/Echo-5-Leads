@@ -10,9 +10,7 @@ export default function ShareFosterApplication() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const formUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/foster-care-application`
-    : '/foster-care-application';
+  const formUrl = 'https://echo-5-leads.vercel.app/foster-care-application';
 
   const handleSendLink = async (e) => {
     e.preventDefault();

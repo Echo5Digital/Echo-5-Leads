@@ -20,11 +20,21 @@ const geistMono = Geist_Mono({
 function LayoutContent({ children }) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/unauthorized';
+  const isPublicForm = pathname === '/foster-care-application' || pathname === '/share-foster-application';
+
+  // Don't show sidebar on auth pages or public forms
+  if (isAuthPage || isPublicForm) {
+    return (
+      <main className="flex-1">
+        {children}
+      </main>
+    );
+  }
 
   return (
     <div className="flex">
       <Sidebar />
-      <main className={`flex-1 ${!isAuthPage ? 'ml-64' : ''}`}>
+      <main className="flex-1 ml-64">
         {children}
       </main>
     </div>
