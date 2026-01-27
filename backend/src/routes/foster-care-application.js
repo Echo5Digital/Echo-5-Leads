@@ -36,14 +36,8 @@ export default async function handler(req, res) {
     const timestamp = new Date();
     const fileName = `foster-application-${applicationId}.pdf`;
 
-    // Store PDF in filesystem or cloud storage
-    // For now, we'll store it in a local directory
-    const uploadDir = path.join(__dirname, '../../uploads/foster-applications');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, pdfBuffer);
+    // Store PDF as base64 in database (works with Vercel serverless)
+    const pdfBase64 = pdfBuffer.toString('base64');
 
     // Find the Open Arms tenant
     const tenantsCollection = db.collection('tenants');
@@ -56,13 +50,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Configuration error: Tenant not found' });
     }
 
-    // Save application to database
+    // Save application to database (with PDF stored as base64)
     const application = {
       _id: applicationId,
       tenantId: tenant._id,
       formData: formData,
       pdfFileName: fileName,
-      pdfFilePath: filePath,
+      pdfBase64: pdfBase64,
       status: 'submitted',
       submittedAt: timestamp,
       createdAt: timestamp,

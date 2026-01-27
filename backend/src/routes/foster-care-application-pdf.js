@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from '../lib/mongo.js';
-import fs from 'fs';
 
 /**
  * GET /api/foster-care-application/:id/pdf
@@ -29,13 +28,13 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Application not found' });
     }
 
-    // Check if PDF file exists
-    if (!fs.existsSync(application.pdfFilePath)) {
-      return res.status(404).json({ error: 'PDF file not found' });
+    // Check if PDF is stored in database as base64
+    if (!application.pdfBase64) {
+      return res.status(404).json({ error: 'PDF not found for this application' });
     }
 
-    // Read and send the PDF file
-    const pdfBuffer = fs.readFileSync(application.pdfFilePath);
+    // Convert base64 back to buffer and send
+    const pdfBuffer = Buffer.from(application.pdfBase64, 'base64');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${application.pdfFileName}"`);
