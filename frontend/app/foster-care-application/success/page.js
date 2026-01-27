@@ -15,7 +15,8 @@ function SuccessContent() {
     }
     
     try {
-      const response = await fetch(`http://localhost:3001/api/foster-care-application/${applicationId}/pdf`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/foster-care-application/${applicationId}/pdf`);
       if (!response.ok) throw new Error('Failed to download PDF');
       
       const blob = await response.blob();
@@ -40,7 +41,8 @@ function SuccessContent() {
     }
     
     try {
-      const response = await fetch(`http://localhost:3001/api/foster-care-application/${applicationId}/pdf`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/foster-care-application/${applicationId}/pdf`);
       if (!response.ok) throw new Error('Failed to load PDF');
       
       const blob = await response.blob();
