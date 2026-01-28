@@ -593,8 +593,8 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page6_field6', formData.privateInternationalAdoptionNameBased);
     
     // OKDHS Representative or Requesting Authority text fields (your 7-16)
-    // 7 = UE ID# field (labeled as "Name" in PDF but actually for UE ID)
-    fillTextField(form, 'page6_field7', formData.ueId);
+    // 7 = UE ID# field - NOTE: Frontend doesn't have this in formData, leave blank
+    // fillTextField(form, 'page6_field7', formData.ueId);
     // 8 = Name (left field in Name/Title row)
     fillTextField(form, 'page6_field8', formData.representativeName);
     // 9 = Title (right field in Name/Title row)
@@ -613,8 +613,59 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page6_field15', formData.representativeFax);
     // 16 = Email
     fillTextField(form, 'page6_field16', formData.representativeEmail);
-    fillTextField(form, 'page6_field15', formData.representativeEmail);
-    fillTextField(form, 'page6_field16', formData.representativeDate);
+    
+    // ==========================================
+    // PAGE 7 - Consent for Release of Information (your 1-28)
+    // ==========================================
+    
+    // Resource Applicant Information (your 1-6)
+    // 1 = First name (applicant 1)
+    fillTextField(form, 'page7_field1', formData.resourceFirstName1);
+    // 2 = Last name (applicant 1)
+    fillTextField(form, 'page7_field2', formData.resourceLastName1);
+    // 3 = First name (applicant 2)
+    fillTextField(form, 'page7_field3', formData.resourceFirstName2);
+    // 4 = Last name (applicant 2)
+    fillTextField(form, 'page7_field4', formData.resourceLastName2);
+    // 5 = Individual or agency name
+    fillTextField(form, 'page7_field5', formData.consentAgencyName);
+    // 6 = Individual or agency address
+    fillTextField(form, 'page7_field6', formData.consentAgencyAddress);
+    
+    // Information to Include checkboxes (your 7-28, Yes/No pairs)
+    // 7-8 = First and last name (Yes/No)
+    fillCheckbox(form, 'page7_field7', formData.shareFirstLastName === true);
+    fillCheckbox(form, 'page7_field8', formData.shareFirstLastName === false);
+    // 9-10 = Phone number (Yes/No)
+    fillCheckbox(form, 'page7_field11', formData.sharePhoneNumber === true);
+    fillCheckbox(form, 'page7_field12', formData.sharePhoneNumber === false);
+    // 11-12 = Identified church home (Yes/No)
+    fillCheckbox(form, 'page7_field15', formData.shareChurchHome === true);
+    fillCheckbox(form, 'page7_field16', formData.shareChurchHome === false);
+    // 13-14 = Application provided (Yes/No)
+    fillCheckbox(form, 'page7_field19', formData.shareApplicationProvided === true);
+    fillCheckbox(form, 'page7_field20', formData.shareApplicationProvided === false);
+    // 15-16 = Application completed (Yes/No)
+    fillCheckbox(form, 'page7_field23', formData.shareApplicationCompleted === true);
+    fillCheckbox(form, 'page7_field24', formData.shareApplicationCompleted === false);
+    // 17-18 = Identified agency (Yes/No)
+    fillCheckbox(form, 'page7_field27', formData.shareIdentifiedAgency === true);
+    fillCheckbox(form, 'page7_field28', formData.shareIdentifiedAgency === false);
+    // 19-20 = Initial paperwork completed (Yes/No)
+    fillCheckbox(form, 'page7_field9', formData.shareInitialPaperwork === true);
+    fillCheckbox(form, 'page7_field10', formData.shareInitialPaperwork === false);
+    // 21-22 = Training started (Yes/No)
+    fillCheckbox(form, 'page7_field13', formData.shareTrainingStarted === true);
+    fillCheckbox(form, 'page7_field14', formData.shareTrainingStarted === false);
+    // 23-24 = Training completed (Yes/No)
+    fillCheckbox(form, 'page7_field17', formData.shareTrainingCompleted === true);
+    fillCheckbox(form, 'page7_field18', formData.shareTrainingCompleted === false);
+    // 25-26 = Home study started (Yes/No)
+    fillCheckbox(form, 'page7_field21', formData.shareHomeStudyStarted === true);
+    fillCheckbox(form, 'page7_field22', formData.shareHomeStudyStarted === false);
+    // 27-28 = Home study completed (Yes/No)
+    fillCheckbox(form, 'page7_field25', formData.shareHomeStudyCompleted === true);
+    fillCheckbox(form, 'page7_field26', formData.shareHomeStudyCompleted === false);
     
     // ==========================================
     // PAGE 8/9 - Consent Entity Name  
