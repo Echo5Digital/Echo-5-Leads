@@ -297,16 +297,16 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page1_field21', formData.reasonOther); // Other checkbox
     
     // Consent to Release by Person Named in Request
-    fillTextField(form, 'page1_field22', fullName); // Printed Name of Person Named in Request
-    fillTextField(form, 'page1_field23', fullName); // Signature of Person Named in Request
+    fillTextField(form, 'page1_field22', formData.personNamedPrintedName || fullName); // Printed Name of Person Named in Request
+    // page1_field23 is signature - will be embedded as image, leave text empty
     
     // Affirmation of Person Making Request
-    fillTextField(form, 'page1_field24', fullName); // Printed Name of Person Making Request
-    fillTextField(form, 'page1_field25', fullName); // Signature of Person Making Request
-    fillTextField(form, 'page1_field26', formData.agencyName || ''); // Agency/Company Name
-    fillTextField(form, 'page1_field27', formData.applicantSignatureDate); // Date
-    fillTextField(form, 'page1_field28', formData.physicalAddress || formData.streetAddress || ''); // Address
-    fillTextField(form, 'page1_field29', `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
+    fillTextField(form, 'page1_field24', formData.personMakingPrintedName || fullName); // Printed Name of Person Making Request
+    // page1_field25 is signature - will be embedded as image, leave text empty
+    fillTextField(form, 'page1_field26', formData.personMakingAgencyName || formData.agencyName || ''); // Agency/Company Name
+    fillTextField(form, 'page1_field27', formData.personMakingDate || formData.applicantSignatureDate); // Date
+    fillTextField(form, 'page1_field28', formData.personMakingAddress || formData.physicalAddress || formData.streetAddress || ''); // Address
+    fillTextField(form, 'page1_field29', formData.personMakingCityStateZip || `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
     
     // ==========================================
     // PAGE 2 - BACKGROUND CHECK (Applicant Information)

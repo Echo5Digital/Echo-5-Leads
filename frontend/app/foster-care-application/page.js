@@ -300,7 +300,13 @@ export default function FosterCareApplicationPage() {
     
     // Driver Records Request Signatures
     personNamedSignature: '',
+    personNamedPrintedName: '',
     personMakingSignature: '',
+    personMakingPrintedName: '',
+    personMakingAgencyName: '',
+    personMakingDate: '',
+    personMakingAddress: '',
+    personMakingCityStateZip: '',
     
     // Page 15 - Agency Use Only
     assessmentFosterHome: false,
@@ -1082,6 +1088,9 @@ export default function FosterCareApplicationPage() {
                           <div className="mb-1">Printed Name of Person Named in Request</div>
                           <input
                             type="text"
+                            name="personNamedPrintedName"
+                            value={formData.personNamedPrintedName}
+                            onChange={handleInputChange}
                             className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
                           />
                         </td>
@@ -1129,6 +1138,9 @@ export default function FosterCareApplicationPage() {
                         <div className="font-semibold mb-1">Printed Name of Person Making Request</div>
                         <input
                           type="text"
+                          name="personMakingPrintedName"
+                          value={formData.personMakingPrintedName}
+                          onChange={handleInputChange}
                           className="w-full border-b border-gray-400 outline-none bg-transparent mt-4"
                         />
                       </td>
@@ -1157,6 +1169,9 @@ export default function FosterCareApplicationPage() {
                         <div className="font-semibold mb-1">† Print Agency/Company Name (if items 1, 3, 4, 5, or 6 was checked above)</div>
                         <input
                           type="text"
+                          name="personMakingAgencyName"
+                          value={formData.personMakingAgencyName}
+                          onChange={handleInputChange}
                           className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
                         />
                       </td>
@@ -1166,6 +1181,9 @@ export default function FosterCareApplicationPage() {
                         <div className="font-semibold mb-1">Date</div>
                         <input
                           type="date"
+                          name="personMakingDate"
+                          value={formData.personMakingDate}
+                          onChange={handleInputChange}
                           className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
                         />
                       </td>
@@ -1173,6 +1191,9 @@ export default function FosterCareApplicationPage() {
                         <div className="font-semibold mb-1">City, State Zip</div>
                         <input
                           type="text"
+                          name="personMakingCityStateZip"
+                          value={formData.personMakingCityStateZip}
+                          onChange={handleInputChange}
                           className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
                         />
                       </td>
@@ -1182,6 +1203,9 @@ export default function FosterCareApplicationPage() {
                         <div className="font-semibold mb-1">Address</div>
                         <input
                           type="text"
+                          name="personMakingAddress"
+                          value={formData.personMakingAddress}
+                          onChange={handleInputChange}
                           className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
                         />
                       </td>
