@@ -685,8 +685,8 @@ async function generateApplicationPDF(formData) {
     // ==========================================
     
     // General Information (your 1-14)
-    // 1 = Family name (page10_field1 y:722)
-    fillTextField(form, 'page10_field1', formData.familyName || fullName);
+    // 1 = Finding directions to home (page10_field1 y:722 - large text area at top)
+    fillTextField(form, 'page10_field1', formData.findingDirections);
     // 2 = Physical address (page9_field2 y:574)
     fillTextField(form, 'page9_field2', formData.physicalAddress || formData.streetAddress);
     // 3 = Physical city (page9_field3 y:575)
@@ -703,8 +703,8 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page9_field8', formData.mailingState);
     // 9 = Mailing ZIP (page9_field9 y:540)
     fillTextField(form, 'page9_field9', formData.mailingZipCode);
-    // 10 = Finding directions (page9_field1 y:612)
-    fillTextField(form, 'page9_field1', formData.findingDirections);
+    // 10 = Family name (page9_field1 y:612)
+    fillTextField(form, 'page9_field1', formData.familyName || fullName);
     // 11-12 = Home: Rent/Own checkboxes (page10_field11/12 y:625/626)
     fillCheckbox(form, 'page10_field11', formData.homeType === 'rent');
     fillCheckbox(form, 'page10_field12', formData.homeType === 'own');
