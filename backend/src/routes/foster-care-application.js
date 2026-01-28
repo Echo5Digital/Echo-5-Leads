@@ -705,9 +705,12 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'Text_2', formData.findingDirections);
     // Square footage (page9_field11 from debug PDF)
     fillTextField(form, 'page9_field11', formData.squareFootage);
-    // Number of bedrooms - appears after square footage in General Info section
-    // Need to identify correct field - leaving as comment for now
-    // fillTextField(form, 'page9_field??', formData.numberOfBedrooms || formData.bedrooms);
+    // Number of bedrooms (page9_field12)
+    fillTextField(form, 'page9_field12', formData.numberOfBedrooms || formData.bedrooms);
+    // Home: Rent checkbox (page9_field13)
+    fillCheckbox(form, 'page9_field13', formData.homeRent);
+    // Home: Own checkbox (page9_field14)
+    fillCheckbox(form, 'page9_field14', formData.homeOwn);
     
     // ==========================================
     // RESOURCE APPLICANT 1 - Still on PDF Page 10 (uses page9_field*)
@@ -757,11 +760,14 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page10_field10', formData.applicant1HighestGrade || formData.highestGrade);
     
     // Unemployed section (page10_field19, 20, 21 from debug PDF)
-    fillTextField(form, 'page10_field19', formData.applicant1UnemployedLabel);
+    fillTextField(form, 'page10_field19', formData.applicant1UnemployedLabel || formData.unemployedStartDate);
     fillTextField(form, 'page10_field20', formData.applicant1UnemployedSourceOfIncome || formData.unemployedSourceOfIncome);
     fillTextField(form, 'page10_field21', formData.applicant1UnemployedTakeHome || formData.unemployedTakeHome);
     
     // Employed (Non Self-Employment) section
+    // Employment start dates (page10_field22, 23 from debug PDF)
+    fillTextField(form, 'page10_field22', formData.applicant1EmploymentStartDate || formData.employmentStartDate);
+    fillTextField(form, 'page10_field23', formData.applicant1EmploymentEndDate || formData.employmentEndDate);
     // Source of income (page10_field24 from debug PDF)
     fillTextField(form, 'page10_field24', formData.applicant1EmployedIncome || formData.employedSourceOfIncome);
     // Total approximate monthly take-home pay (page10_field25 from debug PDF)
