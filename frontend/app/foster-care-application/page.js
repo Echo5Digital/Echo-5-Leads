@@ -190,6 +190,7 @@ export default function FosterCareApplicationPage() {
     includeHomeStudyCompleted: false,
     
     // Page 9 - Consent Signatures
+    consentEntityName: '',
     applicant1ConsentSignature: '',
     applicant1ConsentDate: '',
     applicant2ConsentSignature: '',
@@ -3430,6 +3431,8 @@ export default function FosterCareApplicationPage() {
                     <input
                       type="text"
                       name="consentEntityName"
+                      value={formData.consentEntityName}
+                      onChange={handleInputChange}
                       className="border-b border-gray-400 outline-none bg-transparent px-2 min-w-[250px]"
                       placeholder=""
                     />
