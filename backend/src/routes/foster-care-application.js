@@ -403,42 +403,42 @@ async function generateApplicationPDF(formData) {
     
     // Countries lived in (other than USA) - your 1-11
     // 1 = N/A checkbox
-    fillCheckbox(form, 'page3_field1', formData.previousCountryNA);
+    fillCheckbox(form, 'page3_field1', formData.internationalResidencyNA);
     
     // 2 = Country HEADING - DO NOT MAP (PDF error - editable header)
     // Leave page3_field2 empty!
     
-    // Row 1 (your 3, 4, 5)
-    if (formData.previousCountry && formData.previousCountry[0]) {
-      fillTextField(form, 'page3_field3', formData.previousCountry[0].country);   // 3 = Country row 1
-      fillTextField(form, 'page3_field4', formData.previousCountry[0].startDate); // 4 = Start row 1
-      fillTextField(form, 'page3_field5', formData.previousCountry[0].endDate);   // 5 = End row 1
+    // Row 1 (your 3, 4, 5) - frontend uses internationalResidency array
+    if (formData.internationalResidency && formData.internationalResidency[0]) {
+      fillTextField(form, 'page3_field3', formData.internationalResidency[0].country);   // 3 = Country row 1
+      fillTextField(form, 'page3_field4', formData.internationalResidency[0].startDate); // 4 = Start row 1
+      fillTextField(form, 'page3_field5', formData.internationalResidency[0].endDate);   // 5 = End row 1
     }
     // Row 2 (your 6, 7, 8)
-    if (formData.previousCountry && formData.previousCountry[1]) {
-      fillTextField(form, 'page3_field6', formData.previousCountry[1].country);   // 6 = Country row 2
-      fillTextField(form, 'page3_field7', formData.previousCountry[1].startDate); // 7 = Start row 2
-      fillTextField(form, 'page3_field8', formData.previousCountry[1].endDate);   // 8 = End row 2
+    if (formData.internationalResidency && formData.internationalResidency[1]) {
+      fillTextField(form, 'page3_field6', formData.internationalResidency[1].country);   // 6 = Country row 2
+      fillTextField(form, 'page3_field7', formData.internationalResidency[1].startDate); // 7 = Start row 2
+      fillTextField(form, 'page3_field8', formData.internationalResidency[1].endDate);   // 8 = End row 2
     }
     // Row 3 (your 9, 10, 11)
-    if (formData.previousCountry && formData.previousCountry[2]) {
-      fillTextField(form, 'page3_field9', formData.previousCountry[2].country);   // 9 = Country row 3
-      fillTextField(form, 'page3_field10', formData.previousCountry[2].startDate); // 10 = Start row 3
-      fillTextField(form, 'page3_field11', formData.previousCountry[2].endDate);   // 11 = End row 3
+    if (formData.internationalResidency && formData.internationalResidency[2]) {
+      fillTextField(form, 'page3_field9', formData.internationalResidency[2].country);   // 9 = Country row 3
+      fillTextField(form, 'page3_field10', formData.internationalResidency[2].startDate); // 10 = Start row 3
+      fillTextField(form, 'page3_field11', formData.internationalResidency[2].endDate);   // 11 = End row 3
     }
     
-    // Have you ever been convicted of a crime? (your 12, 13)
-    fillCheckbox(form, 'page3_field12', formData.convictedYes);  // 12 = Yes
-    fillCheckbox(form, 'page3_field13', formData.convictedNo);   // 13 = No
-    // Note: "If yes, explain" field (your 14) - no text field in PDF for this
+    // Have you ever been convicted of a crime? (your 12, 13) - frontend uses convictedOfCrime boolean
+    fillCheckbox(form, 'page3_field12', formData.convictedOfCrime === true);  // 12 = Yes
+    fillCheckbox(form, 'page3_field13', formData.convictedOfCrime === false); // 13 = No
+    // Note: "If yes, explain" - frontend uses convictedExplanation
     
-    // Consent and Signature checkboxes (your 15-19 = field14-19)
-    fillCheckbox(form, 'page3_field14', formData.consent1); // 15 = OKDHS will evaluate
-    fillCheckbox(form, 'page3_field15', formData.consent2); // 16 = child abuse and neglect
-    fillCheckbox(form, 'page3_field16', formData.consent3); // 17 = Restricted Registry
-    fillCheckbox(form, 'page3_field17', formData.consent4); // 18 = OSBI fingerprints
-    fillCheckbox(form, 'page3_field18', formData.consent5); // 19 = FBI fingerprints
-    fillCheckbox(form, 'page3_field19', formData.consent6); // (last consent checkbox)
+    // Consent and Signature checkboxes (your 15-19 = field14-19) - frontend uses consentXxx names
+    fillCheckbox(form, 'page3_field14', formData.consentBackgroundCheck);  // 15 = OKDHS will evaluate
+    fillCheckbox(form, 'page3_field15', formData.consentChildAbuseCheck);  // 16 = child abuse and neglect
+    fillCheckbox(form, 'page3_field16', formData.consentRestrictedRegistry); // 17 = Restricted Registry
+    fillCheckbox(form, 'page3_field17', formData.consentFingerprints);     // 18 = OSBI fingerprints
+    fillCheckbox(form, 'page3_field18', formData.consentFBICheck);         // 19 = FBI fingerprints
+    fillCheckbox(form, 'page3_field19', formData.consentFBIChallenge);     // (last consent checkbox)
     
     // ==========================================
     // PAGE 4 - More Child Welfare Options (22 checkboxes)
