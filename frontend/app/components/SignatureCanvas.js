@@ -33,7 +33,8 @@ const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColo
     },
     getDataURL: () => {
       if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
-        return sigPadRef.current.getTrimmedCanvas().toDataURL('image/png');
+        // Compress signature as JPEG with 70% quality
+        return sigPadRef.current.getTrimmedCanvas().toDataURL('image/jpeg', 0.7);
       }
       return null;
     }
@@ -47,7 +48,12 @@ const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColo
 
   const handleSave = () => {
     if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
-      const dataURL = sigPadRef.current.getTrimmedCanvas().toDataURL('image/png');
+      // Get canvas and compress image
+      const canvas = sigPadRef.current.getTrimmedCanvas();
+      
+      // Compress by reducing quality and converting to JPEG
+      const dataURL = canvas.toDataURL('image/jpeg', 0.7); // 70% quality JPEG
+      
       if (onSave) {
         onSave(dataURL);
       }

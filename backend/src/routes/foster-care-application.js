@@ -810,8 +810,16 @@ async function embedSignatureImage(pdfDoc, pageIndex, signatureDataURL, position
     const base64Data = signatureDataURL.split(',')[1];
     const imageBytes = Buffer.from(base64Data, 'base64');
     
-    // Embed the PNG image
-    const signatureImage = await pdfDoc.embedPng(imageBytes);
+    // Embed the image (supports both PNG and JPEG)
+    let signatureImage;
+    if (signatureDataURL.includes('image/png')) {
+      signatureImage = await pdfDoc.embedPng(imageBytes);
+    } else if (signatureDataURL.includes('image/jpeg') || signatureDataURL.includes('image/jpg')) {
+      signatureImage = await pdfDoc.embedJpg(imageBytes);
+    } else {
+      console.error('[PDF] Unsupported signature image format');
+      return;
+    }
     
     // Get the page
     const pages = pdfDoc.getPages();
