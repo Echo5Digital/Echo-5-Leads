@@ -372,27 +372,25 @@ async function generateApplicationPDF(formData) {
     // 42 = N/A Checkbox = page2_field44
     fillCheckbox(form, 'page2_field44', formData.previousResidencyNA);
     
-    // Row 1 (your 43=State, 45=Start, 46=End)
+    // page2_field45 = State HEADER - DO NOT MAP (PDF error - editable header like field2 on page3)
+    
+    // Row 1 (your 44=State, 45=Start, 46=End) - Data rows start from field46
     if (formData.previousResidency && formData.previousResidency[0]) {
-      fillTextField(form, 'page2_field45', formData.previousResidency[0].state);     // 43 = State row 1
-      fillTextField(form, 'page2_field47', formData.previousResidency[0].startDate); // 45 = Start row 1
-      fillTextField(form, 'page2_field48', formData.previousResidency[0].endDate);   // 46 = End row 1
+      fillTextField(form, 'page2_field46', formData.previousResidency[0].state);     // State row 1
+      fillTextField(form, 'page2_field47', formData.previousResidency[0].startDate); // Start row 1
+      fillTextField(form, 'page2_field48', formData.previousResidency[0].endDate);   // End row 1
     }
-    // Row 2 (your 44=State, 48=Start, 49=End) - Note: 44 appears below 43 in State column
+    // Row 2 (your 47=State, 48=Start, 49=End)
     if (formData.previousResidency && formData.previousResidency[1]) {
-      fillTextField(form, 'page2_field46', formData.previousResidency[1].state);     // 44 = State row 2
-      fillTextField(form, 'page2_field50', formData.previousResidency[1].startDate); // 48 = Start row 2
-      fillTextField(form, 'page2_field51', formData.previousResidency[1].endDate);   // 49 = End row 2
+      fillTextField(form, 'page2_field49', formData.previousResidency[1].state);     // State row 2
+      fillTextField(form, 'page2_field50', formData.previousResidency[1].startDate); // Start row 2
+      fillTextField(form, 'page2_field51', formData.previousResidency[1].endDate);   // End row 2
     }
-    // Row 3 (your 47=State, 51=Start, 52=End)
+    // Row 3 (your 50=State, 51=Start, 52=End)
     if (formData.previousResidency && formData.previousResidency[2]) {
-      fillTextField(form, 'page2_field49', formData.previousResidency[2].state);     // 47 = State row 3
-      fillTextField(form, 'page2_field53', formData.previousResidency[2].startDate); // 51 = Start row 3
-      fillTextField(form, 'page2_field54', formData.previousResidency[2].endDate);   // 52 = End row 3
-    }
-    // Row 4 (your 50=State)
-    if (formData.previousResidency && formData.previousResidency[3]) {
-      fillTextField(form, 'page2_field52', formData.previousResidency[3].state);     // 50 = State row 4
+      fillTextField(form, 'page2_field52', formData.previousResidency[2].state);     // State row 3
+      fillTextField(form, 'page2_field53', formData.previousResidency[2].startDate); // Start row 3
+      fillTextField(form, 'page2_field54', formData.previousResidency[2].endDate);   // End row 3
     }
     
     // Applicant Signature on Page 2 - embedded as image only, not text
@@ -400,35 +398,47 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page2_field54', formData.applicantSignatureDate);
     
     // ==========================================
-    // PAGE 3 - Child Welfare Purpose (Name Based)
-    // Text Fields: page3_field2-11 (for agency info)
-    // Checkboxes: page3_field1,12-19
+    // PAGE 3 - Countries Lived In & Consent Checkboxes
     // ==========================================
     
-    fillCheckbox(form, 'page3_field1', formData.childWelfareNameBased);
+    // Countries lived in (other than USA) - your 1-11
+    // 1 = N/A checkbox
+    fillCheckbox(form, 'page3_field1', formData.previousCountryNA);
     
-    // Adoption options
-    fillCheckbox(form, 'page3_field12', formData.adoption);
-    fillCheckbox(form, 'page3_field13', formData.indianChildWelfareAdoption);
-    fillCheckbox(form, 'page3_field14', formData.okdhsAdoption);
-    fillCheckbox(form, 'page3_field15', formData.ericasRule);
+    // 2 = Country HEADING - DO NOT MAP (PDF error - editable header)
+    // Leave page3_field2 empty!
     
-    // Foster Care options
-    fillCheckbox(form, 'page3_field16', formData.fosterCare);
-    fillCheckbox(form, 'page3_field17', formData.contractedResourceFamily);
-    fillCheckbox(form, 'page3_field18', formData.kinshipNonRelative);
-    fillCheckbox(form, 'page3_field19', formData.kinshipRelative);
+    // Row 1 (your 3, 4, 5)
+    if (formData.previousCountry && formData.previousCountry[0]) {
+      fillTextField(form, 'page3_field3', formData.previousCountry[0].country);   // 3 = Country row 1
+      fillTextField(form, 'page3_field4', formData.previousCountry[0].startDate); // 4 = Start row 1
+      fillTextField(form, 'page3_field5', formData.previousCountry[0].endDate);   // 5 = End row 1
+    }
+    // Row 2 (your 6, 7, 8)
+    if (formData.previousCountry && formData.previousCountry[1]) {
+      fillTextField(form, 'page3_field6', formData.previousCountry[1].country);   // 6 = Country row 2
+      fillTextField(form, 'page3_field7', formData.previousCountry[1].startDate); // 7 = Start row 2
+      fillTextField(form, 'page3_field8', formData.previousCountry[1].endDate);   // 8 = End row 2
+    }
+    // Row 3 (your 9, 10, 11)
+    if (formData.previousCountry && formData.previousCountry[2]) {
+      fillTextField(form, 'page3_field9', formData.previousCountry[2].country);   // 9 = Country row 3
+      fillTextField(form, 'page3_field10', formData.previousCountry[2].startDate); // 10 = Start row 3
+      fillTextField(form, 'page3_field11', formData.previousCountry[2].endDate);   // 11 = End row 3
+    }
     
-    // Agency information text fields
-    fillTextField(form, 'page3_field2', formData.representativeName);
-    fillTextField(form, 'page3_field3', formData.representativeTitle);
-    fillTextField(form, 'page3_field4', formData.representativeMailingAddress);
-    fillTextField(form, 'page3_field5', formData.representativeCity);
-    fillTextField(form, 'page3_field6', formData.representativeState);
-    fillTextField(form, 'page3_field7', formData.representativeZipCode);
-    fillTextField(form, 'page3_field8', formData.representativePhone);
-    fillTextField(form, 'page3_field9', formData.representativeFax);
-    fillTextField(form, 'page3_field10', formData.representativeEmail);
+    // Have you ever been convicted of a crime? (your 12, 13)
+    fillCheckbox(form, 'page3_field12', formData.convictedYes);  // 12 = Yes
+    fillCheckbox(form, 'page3_field13', formData.convictedNo);   // 13 = No
+    // Note: "If yes, explain" field (your 14) - no text field in PDF for this
+    
+    // Consent and Signature checkboxes (your 15-19 = field14-19)
+    fillCheckbox(form, 'page3_field14', formData.consent1); // 15 = OKDHS will evaluate
+    fillCheckbox(form, 'page3_field15', formData.consent2); // 16 = child abuse and neglect
+    fillCheckbox(form, 'page3_field16', formData.consent3); // 17 = Restricted Registry
+    fillCheckbox(form, 'page3_field17', formData.consent4); // 18 = OSBI fingerprints
+    fillCheckbox(form, 'page3_field18', formData.consent5); // 19 = FBI fingerprints
+    fillCheckbox(form, 'page3_field19', formData.consent6); // (last consent checkbox)
     
     // ==========================================
     // PAGE 4 - More Child Welfare Options (22 checkboxes)
