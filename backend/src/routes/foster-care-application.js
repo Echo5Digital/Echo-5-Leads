@@ -368,27 +368,25 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page2_field39', formData.faxNumber); // Fax number
     fillTextField(form, 'page2_field40', formData.email); // Email
     
-    // Previous Five Years Residency (your 42-52)
-    // 42 = N/A Checkbox = page2_field44
+    // Previous Five Years Residency
+    // N/A Checkbox = page2_field44
     fillCheckbox(form, 'page2_field44', formData.previousResidencyNA);
     
-    // page2_field45 = State HEADER - DO NOT MAP (PDF error - editable header like field2 on page3)
-    
-    // Row 1 (your 44=State, 45=Start, 46=End) - Data rows start from field46
+    // Row 1: State=field45, Start=field47, End=field48 (based on debug testing)
     if (formData.previousResidency && formData.previousResidency[0]) {
-      fillTextField(form, 'page2_field46', formData.previousResidency[0].state);     // State row 1
+      fillTextField(form, 'page2_field45', formData.previousResidency[0].state);     // State row 1
       fillTextField(form, 'page2_field47', formData.previousResidency[0].startDate); // Start row 1
       fillTextField(form, 'page2_field48', formData.previousResidency[0].endDate);   // End row 1
     }
-    // Row 2 (your 47=State, 48=Start, 49=End)
+    // Row 2: State=field46, Start=field50, End=field51 (based on debug testing)
     if (formData.previousResidency && formData.previousResidency[1]) {
-      fillTextField(form, 'page2_field49', formData.previousResidency[1].state);     // State row 2
+      fillTextField(form, 'page2_field46', formData.previousResidency[1].state);     // State row 2
       fillTextField(form, 'page2_field50', formData.previousResidency[1].startDate); // Start row 2
       fillTextField(form, 'page2_field51', formData.previousResidency[1].endDate);   // End row 2
     }
-    // Row 3 (your 50=State, 51=Start, 52=End)
+    // Row 3: State=field49, Start=field53, End=field54 (based on debug testing)
     if (formData.previousResidency && formData.previousResidency[2]) {
-      fillTextField(form, 'page2_field52', formData.previousResidency[2].state);     // State row 3
+      fillTextField(form, 'page2_field49', formData.previousResidency[2].state);     // State row 3
       fillTextField(form, 'page2_field53', formData.previousResidency[2].startDate); // Start row 3
       fillTextField(form, 'page2_field54', formData.previousResidency[2].endDate);   // End row 3
     }
