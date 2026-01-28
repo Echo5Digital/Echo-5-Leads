@@ -88,7 +88,26 @@ export default async function handler(req, res) {
       updatedAt: timestamp
     };
 
-    await leadsCollection.insertOne(lead);
+    // Try to insert lead, but don't fail if duplicate exists
+    try {
+      await leadsCollection.insertOne(lead);
+    } catch (error) {
+      if (error.code === 11000) {
+        // Duplicate key error - update existing lead instead
+        console.log('[Foster App] Duplicate lead detected, updating existing lead');
+        await leadsCollection.updateOne(
+          { email: formData.email, tenantId: tenant._id },
+          { 
+            $set: {
+              ...lead,
+              updatedAt: timestamp
+            }
+          }
+        );
+      } else {
+        throw error; // Re-throw if it's a different error
+      }
+    }
 
     // Send confirmation email to applicant with PDF attachment
     const applicantEmailSubject = 'Foster Care Application Received - Open Arms Foster Care';
