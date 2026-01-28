@@ -628,44 +628,44 @@ async function generateApplicationPDF(formData) {
     // 4 = Last name (applicant 2)
     fillTextField(form, 'page7_field4', formData.resourceLastName2);
     // 5 = Individual or agency name
-    fillTextField(form, 'page7_field5', formData.consentAgencyName);
+    fillTextField(form, 'page7_field5', formData.authorizedIndividualName);
     // 6 = Individual or agency address
-    fillTextField(form, 'page7_field6', formData.consentAgencyAddress);
+    fillTextField(form, 'page7_field6', formData.authorizedIndividualAddress);
     
     // Information to Include checkboxes (your 7-28, Yes/No pairs)
     // 7-8 = First and last name (Yes/No)
-    fillCheckbox(form, 'page7_field7', formData.shareFirstLastName === true);
-    fillCheckbox(form, 'page7_field8', formData.shareFirstLastName === false);
+    fillCheckbox(form, 'page7_field7', formData.includeFirstLastName === true);
+    fillCheckbox(form, 'page7_field8', formData.includeFirstLastName === false);
     // 9-10 = Phone number (Yes/No)
-    fillCheckbox(form, 'page7_field11', formData.sharePhoneNumber === true);
-    fillCheckbox(form, 'page7_field12', formData.sharePhoneNumber === false);
+    fillCheckbox(form, 'page7_field11', formData.includePhoneNumber === true);
+    fillCheckbox(form, 'page7_field12', formData.includePhoneNumber === false);
     // 11-12 = Identified church home (Yes/No)
-    fillCheckbox(form, 'page7_field15', formData.shareChurchHome === true);
-    fillCheckbox(form, 'page7_field16', formData.shareChurchHome === false);
+    fillCheckbox(form, 'page7_field15', formData.includeChurchHome === true);
+    fillCheckbox(form, 'page7_field16', formData.includeChurchHome === false);
     // 13-14 = Application provided (Yes/No)
-    fillCheckbox(form, 'page7_field19', formData.shareApplicationProvided === true);
-    fillCheckbox(form, 'page7_field20', formData.shareApplicationProvided === false);
+    fillCheckbox(form, 'page7_field19', formData.includeApplicationProvided === true);
+    fillCheckbox(form, 'page7_field20', formData.includeApplicationProvided === false);
     // 15-16 = Application completed (Yes/No)
-    fillCheckbox(form, 'page7_field23', formData.shareApplicationCompleted === true);
-    fillCheckbox(form, 'page7_field24', formData.shareApplicationCompleted === false);
+    fillCheckbox(form, 'page7_field23', formData.includeApplicationCompleted === true);
+    fillCheckbox(form, 'page7_field24', formData.includeApplicationCompleted === false);
     // 17-18 = Identified agency (Yes/No)
-    fillCheckbox(form, 'page7_field27', formData.shareIdentifiedAgency === true);
-    fillCheckbox(form, 'page7_field28', formData.shareIdentifiedAgency === false);
+    fillCheckbox(form, 'page7_field27', formData.includeAgency === true);
+    fillCheckbox(form, 'page7_field28', formData.includeAgency === false);
     // 19-20 = Initial paperwork completed (Yes/No)
-    fillCheckbox(form, 'page7_field9', formData.shareInitialPaperwork === true);
-    fillCheckbox(form, 'page7_field10', formData.shareInitialPaperwork === false);
+    fillCheckbox(form, 'page7_field9', formData.includeInitialPaperwork === true);
+    fillCheckbox(form, 'page7_field10', formData.includeInitialPaperwork === false);
     // 21-22 = Training started (Yes/No)
-    fillCheckbox(form, 'page7_field13', formData.shareTrainingStarted === true);
-    fillCheckbox(form, 'page7_field14', formData.shareTrainingStarted === false);
+    fillCheckbox(form, 'page7_field13', formData.includeTrainingStarted === true);
+    fillCheckbox(form, 'page7_field14', formData.includeTrainingStarted === false);
     // 23-24 = Training completed (Yes/No)
-    fillCheckbox(form, 'page7_field17', formData.shareTrainingCompleted === true);
-    fillCheckbox(form, 'page7_field18', formData.shareTrainingCompleted === false);
+    fillCheckbox(form, 'page7_field17', formData.includeTrainingCompleted === true);
+    fillCheckbox(form, 'page7_field18', formData.includeTrainingCompleted === false);
     // 25-26 = Home study started (Yes/No)
-    fillCheckbox(form, 'page7_field21', formData.shareHomeStudyStarted === true);
-    fillCheckbox(form, 'page7_field22', formData.shareHomeStudyStarted === false);
+    fillCheckbox(form, 'page7_field21', formData.includeHomeStudyStarted === true);
+    fillCheckbox(form, 'page7_field22', formData.includeHomeStudyStarted === false);
     // 27-28 = Home study completed (Yes/No)
-    fillCheckbox(form, 'page7_field25', formData.shareHomeStudyCompleted === true);
-    fillCheckbox(form, 'page7_field26', formData.shareHomeStudyCompleted === false);
+    fillCheckbox(form, 'page7_field25', formData.includeHomeStudyCompleted === true);
+    fillCheckbox(form, 'page7_field26', formData.includeHomeStudyCompleted === false);
     
     // ==========================================
     // PAGE 8 - Consent Signatures (your 1-5)
