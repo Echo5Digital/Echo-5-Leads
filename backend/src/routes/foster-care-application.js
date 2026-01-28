@@ -575,19 +575,44 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page5_field28', formData.trialReunificationSub);
     
     // ==========================================
-    // PAGE 6 - OKDHS Representative Info
-    // Text Fields: page6_field7-16
-    // Checkboxes: page6_field1-6
+    // PAGE 6 - Private Child Welfare + OKDHS Representative Info (your 1-16)
     // ==========================================
     
+    // Private Child Welfare checkboxes (your 1-6)
+    // 1 = Private Child Welfare (main category)
+    fillCheckbox(form, 'page6_field1', formData.privateChildWelfare);
+    // 2 = Private Adoption
+    fillCheckbox(form, 'page6_field2', formData.privateAdoption);
+    // 3 = Private adoption - name based
+    fillCheckbox(form, 'page6_field3', formData.privateAdoptionNameBased);
+    // 4 = Private domestic adoption - fingerprint based
+    fillCheckbox(form, 'page6_field4', formData.privateDomesticAdoptionFingerprint);
+    // 5 = Private guardianship - name based
+    fillCheckbox(form, 'page6_field5', formData.privateGuardianshipNameBased);
+    // 6 = Private international adoption - name based
+    fillCheckbox(form, 'page6_field6', formData.privateInternationalAdoptionNameBased);
+    
+    // OKDHS Representative or Requesting Authority text fields (your 7-16)
+    // 7 = Name
     fillTextField(form, 'page6_field7', formData.representativeName);
-    fillTextField(form, 'page6_field8', formData.representativeTitle);
-    fillTextField(form, 'page6_field9', formData.representativeMailingAddress);
+    // 8 = Mailing address (left field)
+    fillTextField(form, 'page6_field8', formData.representativeMailingAddress);
+    // 9 = Title (right field on same row)
+    fillTextField(form, 'page6_field9', formData.representativeTitle);
+    // 10 = City
     fillTextField(form, 'page6_field10', formData.representativeCity);
+    // 11 = State
     fillTextField(form, 'page6_field11', formData.representativeState);
+    // 12 = ZIP code
     fillTextField(form, 'page6_field12', formData.representativeZipCode);
-    fillTextField(form, 'page6_field13', formData.representativePhone);
-    fillTextField(form, 'page6_field14', formData.representativeFax);
+    // 13 = (additional field - possibly continuation of address)
+    fillTextField(form, 'page6_field13', formData.representativeAddress2);
+    // 14 = Phone number
+    fillTextField(form, 'page6_field14', formData.representativePhone);
+    // 15 = Fax number
+    fillTextField(form, 'page6_field15', formData.representativeFax);
+    // 16 = Email
+    fillTextField(form, 'page6_field16', formData.representativeEmail);
     fillTextField(form, 'page6_field15', formData.representativeEmail);
     fillTextField(form, 'page6_field16', formData.representativeDate);
     
