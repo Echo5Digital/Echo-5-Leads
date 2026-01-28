@@ -620,17 +620,17 @@ async function generateApplicationPDF(formData) {
     
     // Resource Applicant Information (your 1-6)
     // 1 = First name (applicant 1)
-    fillTextField(form, 'page7_field1', formData.resourceFirstName1);
+    fillTextField(form, 'page7_field1', formData.resourceFirstName1 || formData.applicant1FirstName || formData.firstName);
     // 2 = Last name (applicant 1)
-    fillTextField(form, 'page7_field2', formData.resourceLastName1);
+    fillTextField(form, 'page7_field2', formData.resourceLastName1 || formData.applicant1LastName || formData.lastName);
     // 3 = First name (applicant 2)
-    fillTextField(form, 'page7_field3', formData.resourceFirstName2);
+    fillTextField(form, 'page7_field3', formData.resourceFirstName2 || formData.applicant2FirstName || formData.spouseFirstName);
     // 4 = Last name (applicant 2)
-    fillTextField(form, 'page7_field4', formData.resourceLastName2);
+    fillTextField(form, 'page7_field4', formData.resourceLastName2 || formData.applicant2LastName || formData.spouseLastName);
     // 5 = Individual or agency name
-    fillTextField(form, 'page7_field5', formData.authorizedIndividualName);
+    fillTextField(form, 'page7_field5', formData.authorizedIndividualName || 'Open Arms Foster Care');
     // 6 = Individual or agency address
-    fillTextField(form, 'page7_field6', formData.authorizedIndividualAddress);
+    fillTextField(form, 'page7_field6', formData.authorizedIndividualAddress || formData.physicalAddress || formData.streetAddress);
     
     // Information to Include checkboxes (your 7-28, Yes/No pairs)
     // 7-8 = First and last name (Yes/No)
@@ -703,121 +703,140 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page9_field8', formData.mailingState);
     // 9 = Mailing ZIP (page9_field9 y:540)
     fillTextField(form, 'page9_field9', formData.mailingZipCode);
-    // 10 = Finding directions - Need to find correct field (maybe page10_field30 or similar)
-    fillTextField(form, 'page10_field30', formData.findingDirections);
-    // 11-12 = Home: Rent/Own checkboxes
-    fillCheckbox(form, 'page10_field11', formData.homeType === 'rent');
-    fillCheckbox(form, 'page10_field12', formData.homeType === 'own');
-    // 13 = Square footage
-    fillTextField(form, 'page10_field10', formData.squareFootage);
-    // 14 = Number of bedrooms
-    fillTextField(form, 'page10_field9', formData.numberOfBedrooms || formData.bedrooms);
+    // Finding directions to home (Text_2 field based on debug PDF)
+    fillTextField(form, 'Text_2', formData.findingDirections);
+    // Square footage (page9_field11 from debug PDF)
+    fillTextField(form, 'page9_field11', formData.squareFootage);
+    // Number of bedrooms - appears after square footage in General Info section
+    // Need to identify correct field - leaving as comment for now
+    // fillTextField(form, 'page9_field??', formData.numberOfBedrooms || formData.bedrooms);
     
-    // Resource Applicant 1 Information (your 15-33)
-    // 15 = First name (page9_field17 y:318 x:51 - leftmost)
-    fillTextField(form, 'page9_field17', formData.applicant1FirstName);
-    // 16 = Middle name (page9_field15 y:319 x:241 - middle)
+    // ==========================================
+    // RESOURCE APPLICANT 1 - Still on PDF Page 10 (uses page9_field*)
+    // Based on debug PDF screenshot showing actual field positions
+    // ==========================================
+    
+    // First name (page9_field17 from debug PDF)
+    fillTextField(form, 'page9_field17', formData.applicant1FirstName || formData.firstName);
+    // Middle name (page9_field15 from debug PDF)
     fillTextField(form, 'page9_field15', formData.applicant1MiddleName);
-    // 17 = Last name (page9_field16 y:319 x:361 - rightmost)
-    fillTextField(form, 'page9_field16', formData.applicant1LastName);
-    // 18 = Other names (page9_field18 y:284)
+    // Last name (page9_field16 from debug PDF)
+    fillTextField(form, 'page9_field16', formData.applicant1LastName || formData.lastName);
+    // Other names / maiden name (page9_field18 from debug PDF)
     fillTextField(form, 'page9_field18', formData.applicant1OtherNames);
-    // 19 = N/A checkbox (page9_field19 y:258)
-    fillCheckbox(form, 'page9_field19', formData.applicant1OtherNamesNA);
-    // 20 = Date of birth (page9_field21 y:233 x:51 - leftmost)
-    fillTextField(form, 'page9_field21', formData.applicant1DateOfBirth);
-    // 21 = Social Security number (page9_field22 y:234 x:224 - middle)
-    fillTextField(form, 'page9_field22', formData.applicant1SSN);
-    // 22 = Gender (page9_field20 y:235 x:398 - rightmost)
-    fillTextField(form, 'page9_field20', formData.applicant1Gender);
-    // 23 = Tribe N/A checkbox (page9_field24 y:186)
-    fillCheckbox(form, 'page9_field24', formData.applicant1TribeNA);
-    // 24 = Tribe name (page9_field23 y:199)
+    // Date of birth (page9_field21 from debug PDF)
+    fillTextField(form, 'page9_field21', formData.applicant1DateOfBirth || formData.dateOfBirth);
+    // Social Security number (page9_field22 from debug PDF)
+    fillTextField(form, 'page9_field22', formData.applicant1SSN || formData.ssn);
+    // Gender (page9_field20 from debug PDF)
+    fillTextField(form, 'page9_field20', formData.applicant1Gender || formData.gender);
+    // Tribe, if applicable (page9_field23 from debug PDF)
     fillTextField(form, 'page9_field23', formData.applicant1Tribe);
-    // 25 = Hispanic/Latino Yes checkbox (page9_field25 y:188)
-    fillCheckbox(form, 'page9_field25', formData.applicant1HispanicLatino === 'yes');
-    // 26 = Hispanic/Latino No checkbox (page9_field26 y:188)
-    fillCheckbox(form, 'page9_field26', formData.applicant1HispanicLatino === 'no');
-    // 27 = Race (page9_field27 y:164)
-    fillTextField(form, 'page9_field27', formData.applicant1Race);
-    // 28 = Work phone (page9_field30 y:127 x:52 - leftmost)
-    fillTextField(form, 'page9_field30', formData.applicant1WorkPhone);
-    // 29 = Cell phone (page9_field31 y:128 x:225 - middle)
-    fillTextField(form, 'page9_field31', formData.applicant1CellPhone);
-    // 30 = Home phone (page9_field32 y:129 x:397 - rightmost)
-    fillTextField(form, 'page9_field32', formData.applicant1HomePhone);
-    // 31 = Email address (page9_field33 y:92)
-    fillTextField(form, 'page9_field33', formData.applicant1Email);
-    // 32 = US Citizen Yes checkbox (page9_field28 y:152)
-    fillCheckbox(form, 'page9_field28', formData.applicant1USCitizen === 'yes');
-    // 33 = US Citizen No checkbox (page9_field29 y:152)
-    fillCheckbox(form, 'page9_field29', formData.applicant1USCitizen === 'no');
+    // Race (page9_field27 from debug PDF)
+    fillTextField(form, 'page9_field27', formData.applicant1Race || formData.race);
+    // Work phone (page9_field30 from debug PDF)
+    fillTextField(form, 'page9_field30', formData.applicant1WorkPhone || formData.workPhone);
+    // Cell phone (page9_field31 from debug PDF)
+    fillTextField(form, 'page9_field31', formData.applicant1CellPhone || formData.cellPhone);
+    // Home phone (page9_field32 from debug PDF)
+    fillTextField(form, 'page9_field32', formData.applicant1HomePhone || formData.homePhone);
+    // Email address (page9_field33 from debug PDF)
+    fillTextField(form, 'page9_field33', formData.applicant1Email || formData.email);
     
     // ==========================================
     // PAGE 11 - Applicant 1 Employment & Additional Information
+    // PDF Page 11 uses page10_field* (off-by-one naming)
+    // Based on debug PDF screenshot showing actual field positions
     // ==========================================
-    // PAGE 11 - Applicant 1 Employment & Additional Information
-    // ==========================================
     
-    // Field 1 = N/A checkbox for states lived
-    fillCheckbox(form, 'page11_field1', formData.applicant1StatesLivedNA);
+    // States lived in last 5 years (page10_field1 from debug PDF)
+    fillTextField(form, 'page10_field1', formData.applicant1StatesLived || formData.statesLived);
     
-    // Field 2-3 = Armed forces Yes/No checkboxes
-    fillCheckbox(form, 'page11_field2', formData.applicant1ArmedForces === 'yes');
-    fillCheckbox(form, 'page11_field3', formData.applicant1ArmedForces === 'no');
+    // Number of previous marriages (page10_field9 from debug PDF)
+    fillTextField(form, 'page10_field9', formData.applicant1PreviousMarriages || formData.previousMarriages);
     
-    // Field 6 = List each state you have lived in within the last five years
-    fillTextField(form, 'page11_field6', formData.applicant1StatesLived);
+    // Highest grade completed (page10_field10 from debug PDF)
+    fillTextField(form, 'page10_field10', formData.applicant1HighestGrade || formData.highestGrade);
     
-    // Field 7 = Marital status (Single/Unmarried couple/Married/Divorced/Widowed/Separated)
-    fillTextField(form, 'page11_field7', formData.applicant1MaritalStatus);
+    // Unemployed section (page10_field19, 20, 21 from debug PDF)
+    fillTextField(form, 'page10_field19', formData.applicant1UnemployedLabel);
+    fillTextField(form, 'page10_field20', formData.applicant1UnemployedSourceOfIncome || formData.unemployedSourceOfIncome);
+    fillTextField(form, 'page10_field21', formData.applicant1UnemployedTakeHome || formData.unemployedTakeHome);
     
-    // Field 8 = Number of previous marriages
-    fillTextField(form, 'page11_field8', formData.applicant1PreviousMarriages);
+    // Employed (Non Self-Employment) section
+    // Source of income (page10_field24 from debug PDF)
+    fillTextField(form, 'page10_field24', formData.applicant1EmployedIncome || formData.employedSourceOfIncome);
+    // Total approximate monthly take-home pay (page10_field25 from debug PDF)
+    fillTextField(form, 'page10_field25', formData.applicant1EmployedTakeHome || formData.employedTakeHome);
+    // Employer name (page10_field26 from debug PDF)
+    fillTextField(form, 'page10_field26', formData.applicant1EmployerName || formData.employerName);
+    // Job title (page10_field27 from debug PDF)
+    fillTextField(form, 'page10_field27', formData.applicant1JobTitle || formData.jobTitle);
+    // Supervisor's name (page10_field28 from debug PDF)
+    fillTextField(form, 'page10_field28', formData.applicant1SupervisorName || formData.supervisorName);
+    // Supervisor's phone number (page10_field29 from debug PDF)
+    fillTextField(form, 'page10_field29', formData.applicant1SupervisorPhone || formData.supervisorPhone);
+    // Supervisor's email address (page10_field30 from debug PDF)
+    fillTextField(form, 'page10_field30', formData.applicant1SupervisorEmail || formData.supervisorEmail);
     
-    // Field 9 = Highest grade completed
-    fillTextField(form, 'page11_field9', formData.applicant1HighestGrade);
+    // Self-Employment section
+    // Total approximate monthly take-home pay (page10_field31 from debug PDF)
+    fillTextField(form, 'page10_field31', formData.applicant1SelfEmployedTakeHome || formData.selfEmployedTakeHome);
     
-    // Field 10 = Employer name
-    fillTextField(form, 'page11_field10', formData.applicant1EmployerName);
-    
-    // Field 11 = Total approximate monthly take-home pay (Employed - Non Self)
-    fillTextField(form, 'page11_field11', formData.applicant1EmployedTakeHome);
-    
-    // Field 12 = Job title
-    fillTextField(form, 'page11_field12', formData.applicant1JobTitle);
-    
-    // Field 13-14 = Advanced degree Yes/No checkboxes
-    fillCheckbox(form, 'page11_field13', formData.applicant1AdvancedDegree === 'yes');
-    fillCheckbox(form, 'page11_field14', formData.applicant1AdvancedDegree === 'no');
-    
-    // Field 15 = Are you self-employed? Yes checkbox
-    fillCheckbox(form, 'page11_field15', formData.applicant1SelfEmployed === 'yes');
-    
-    // Field 16 = Source of income (Unemployed)
-    fillTextField(form, 'page11_field16', formData.applicant1UnemployedIncome);
-    
-    // Field 17 = Total approximate monthly take-home pay (Unemployed)
-    fillTextField(form, 'page11_field17', formData.applicant1UnemployedTakeHome);
-    
-    // Field 18 = Source of income (Employed - Non Self)
-    fillTextField(form, 'page11_field18', formData.applicant1EmployedIncome);
-    
-    // Field 19 = Supervisor's name
-    fillTextField(form, 'page11_field19', formData.applicant1SupervisorName);
-    
-    // Field 20 = Supervisor's phone number
-    fillTextField(form, 'page11_field20', formData.applicant1SupervisorPhone);
-    
-    // Field 21 = Supervisor's email address
-    fillTextField(form, 'page11_field21', formData.applicant1SupervisorEmail);
-    
-    // Fields 22-23 = SKIPPED per user request (PDF issue - not needed)
+    // TODO: Need to identify checkbox field names for:
+    // - N/A checkbox for states lived
+    // - Marital status checkboxes (Single/Unmarried couple/Married/Divorced/Widowed/Separated)
+    // - Advanced degree Yes/No
+    // - Armed forces Yes/No
+    // - Are you employed? Yes/No
+    // - Are you self-employed? Yes/No
     
     // ==========================================
-    // PAGE 12 - Applicant 2 Info (Spouse)
-    // Text Fields: 30 total
-    // Checkboxes: 2 total
+    // PAGE 12 - Household Members, Children Not in Home, References
+    // PDF Page 12 uses page11_field* (off-by-one naming)
+    // Based on debug PDF testing with real data
+    // ==========================================
+    
+    // N/A checkbox for Other Household Members
+    fillCheckbox(form, 'page11_field1', formData.householdMembersNA);
+    
+    // Household Member 1 (based on real data test)
+    if (formData.householdMembers && formData.householdMembers[0]) {
+      fillTextField(form, 'page11_field8', formData.householdMembers[0].firstName);       // First name
+      fillTextField(form, 'page11_field6', formData.householdMembers[0].middleName);      // Middle name
+      fillTextField(form, 'page11_field9', formData.householdMembers[0].lastName);        // Last name
+      fillTextField(form, 'page11_field7', formData.householdMembers[0].dateOfBirth);     // DOB
+      fillTextField(form, 'page11_field10', formData.householdMembers[0].gender);         // Gender
+      fillTextField(form, 'page11_field11', formData.householdMembers[0].ssn);            // SSN
+      fillTextField(form, 'page11_field12', formData.householdMembers[0].relationship);   // Relationship
+    }
+    
+    // K-12 school checkboxes
+    fillCheckbox(form, 'page11_field13', formData.householdMemberK12 === 'yes');  // Yes
+    fillCheckbox(form, 'page11_field14', formData.householdMemberK12 === 'no');   // No
+    
+    // N/A checkbox for Children Under 18 Not Living in Home
+    fillCheckbox(form, 'page11_field15', formData.childrenNotInHomeNA);
+    
+    // Child 1 Not Living in Home (based on real data test)
+    if (formData.childrenNotInHome && formData.childrenNotInHome[0]) {
+      fillTextField(form, 'page11_field16', formData.childrenNotInHome[0].firstName);     // First name
+      fillTextField(form, 'page11_field17', formData.childrenNotInHome[0].middleName);    // Middle name
+      fillTextField(form, 'page11_field19', formData.childrenNotInHome[0].lastName);      // Last name
+      fillTextField(form, 'page11_field18', formData.childrenNotInHome[0].dateOfBirth);   // DOB
+    }
+    
+    // Personal Reference 1 (based on real data test - all correct!)
+    if (formData.references && formData.references[0]) {
+      fillTextField(form, 'page11_field21', formData.references[0].firstName);            // First name
+      fillTextField(form, 'page11_field22', formData.references[0].lastName);             // Last name
+      fillTextField(form, 'page11_field20', formData.references[0].phone || formData.references[0].phoneNumber); // Phone
+      fillTextField(form, 'page11_field23', formData.references[0].relationship);         // Relationship
+    }
+    
+    // ==========================================
+    // PAGE 13 - Applicant 2 Info (Spouse)
+    // PDF Page 13 uses page12_field*
     // ==========================================
     
     fillTextField(form, 'page12_field1', formData.applicant2FirstName || formData.spouseFirstName);
