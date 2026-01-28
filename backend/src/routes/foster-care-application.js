@@ -368,6 +368,28 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page2_field39', formData.faxNumber); // Fax number
     fillTextField(form, 'page2_field40', formData.email); // Email
     
+    // Previous Five Years Residency (fields 39-48 in your numbering)
+    fillCheckbox(form, 'page2_field44', formData.previousResidencyNA); // N/A checkbox
+    
+    // Previous Residency Row 1
+    if (formData.previousResidency && formData.previousResidency[0]) {
+      fillTextField(form, 'page2_field41', formData.previousResidency[0].state);
+      fillTextField(form, 'page2_field42', formData.previousResidency[0].startDate);
+      fillTextField(form, 'page2_field43', formData.previousResidency[0].endDate);
+    }
+    // Previous Residency Row 2
+    if (formData.previousResidency && formData.previousResidency[1]) {
+      fillTextField(form, 'page2_field46', formData.previousResidency[1].state);
+      fillTextField(form, 'page2_field47', formData.previousResidency[1].startDate);
+      fillTextField(form, 'page2_field48', formData.previousResidency[1].endDate);
+    }
+    // Previous Residency Row 3
+    if (formData.previousResidency && formData.previousResidency[2]) {
+      fillTextField(form, 'page2_field49', formData.previousResidency[2].state);
+      fillTextField(form, 'page2_field50', formData.previousResidency[2].startDate);
+      fillTextField(form, 'page2_field51', formData.previousResidency[2].endDate);
+    }
+    
     // Applicant Signature on Page 2 - embedded as image only, not text
     // fillTextField(form, 'page2_field53', formData.applicantSignature); // Removed - now using image embedding
     fillTextField(form, 'page2_field54', formData.applicantSignatureDate);
