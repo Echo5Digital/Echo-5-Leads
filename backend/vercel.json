@@ -6,6 +6,9 @@
       "memory": 3008
     }
   },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.js" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -16,26 +19,5 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" }
       ]
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "methods": ["OPTIONS"],
-      "dest": "/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, X-Tenant-Key, Authorization"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.js"
-    }
-  ],
-  "build": {
-    "env": {
-      "VERCEL": "1"
-    }
-  }
+  ]
 }
