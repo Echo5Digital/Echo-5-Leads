@@ -1012,14 +1012,20 @@ async function generateApplicationPDF(formData) {
  * Safely fill a text field, ignoring if field doesn't exist
  */
 function fillTextField(form, fieldName, value) {
-  if (!value) return;
+  if (!value) {
+    console.log(`Skipping ${fieldName}: value is empty/falsy`);
+    return;
+  }
   try {
     const field = form.getTextField(fieldName);
     if (field) {
       field.setText(String(value));
+      console.log(`Filled ${fieldName}: ${value}`);
+    } else {
+      console.log(`Field ${fieldName} not found`);
     }
   } catch (e) {
-    // Field doesn't exist or is wrong type, skip it
+    console.log(`Error filling ${fieldName}:`, e.message);
   }
 }
 
