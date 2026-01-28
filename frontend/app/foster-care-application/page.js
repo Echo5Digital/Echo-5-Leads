@@ -43,6 +43,23 @@ export default function FosterCareApplicationPage() {
     driverSex: '',
     collisionReportDate: '',
     collisionReportCity: '',
+    
+    // Driver Records Request checkboxes (page7_field7-28)
+    driverRecordMVR: false,
+    driverRecordCollision: false,
+    driverRecordOther: false,
+    driverRecordOtherDetails: '',
+    personIsNamed: false,
+    personRequestingOther: false,
+    reasonGovernmentAgency: false,
+    reasonCourt: false,
+    reasonResearch: false,
+    reasonInsurance: false,
+    reasonInvestigator: false,
+    reasonEmployer: false,
+    reasonOther: false,
+    reasonOtherCitation: '',
+    
     aliases: [
       { firstName: '', middleName: '', lastName: '' },
       { firstName: '', middleName: '', lastName: '' },
@@ -447,6 +464,180 @@ export default function FosterCareApplicationPage() {
     setFormData(prev => ({ ...prev, references: updatedReferences }));
   };
 
+  // AUTO-FILL TEST DATA FUNCTION
+  const fillTestData = () => {
+    const testData = {
+      // Page 1 - Personal Information
+      firstName: 'John',
+      lastName: 'Doe',
+      middleName: 'Michael',
+      nicknames: 'Johnny',
+      sex: 'M',
+      dateOfBirth: '1985-06-15',
+      height: '6\'0"',
+      weight: '180',
+      cityOfBirth: 'Oklahoma City',
+      stateOfBirth: 'OK',
+      ssn: '123-45-6789',
+      hairColor: 'Brown',
+      eyeColor: 'Blue',
+      driversLicense: 'OK123456789',
+      dlState: 'OK',
+      driverSex: 'M',
+      noMiddleName: false,
+      
+      // Driver Records Request checkboxes
+      driverRecordMVR: true,
+      driverRecordCollision: false,
+      driverRecordOther: false,
+      driverRecordOtherDetails: '',
+      personIsNamed: true,
+      personRequestingOther: false,
+      reasonGovernmentAgency: false,
+      reasonCourt: false,
+      reasonResearch: false,
+      reasonInsurance: false,
+      reasonInvestigator: false,
+      reasonEmployer: false,
+      reasonOther: false,
+      reasonOtherCitation: '',
+      
+      // Aliases
+      aliases: [
+        { firstName: 'Jonathan', middleName: 'M', lastName: 'Doe' },
+        { firstName: '', middleName: '', lastName: '' },
+        { firstName: '', middleName: '', lastName: '' }
+      ],
+      
+      // Previous Residency
+      previousResidency: [
+        { state: 'TX', startDate: '2010-01-01', endDate: '2015-12-31' },
+        { state: 'CA', startDate: '2005-01-01', endDate: '2009-12-31' },
+        { state: '', startDate: '', endDate: '' }
+      ],
+      
+      // International Residency
+      internationalResidency: [
+        { country: '', startDate: '', endDate: '' },
+        { country: '', startDate: '', endDate: '' },
+        { country: '', startDate: '', endDate: '' }
+      ],
+      
+      // Criminal History
+      convictedOfCrime: false,
+      crimeExplanation: '',
+      
+      // Consent checkboxes
+      consentBackgroundCheck: true,
+      consentChildAbuseCheck: true,
+      consentRestrictedRegistry: true,
+      consentFingerprints: true,
+      consentFBICheck: true,
+      consentFBIChallenge: true,
+      privacyPolicyReviewed: true,
+      certifyInformation: true,
+      
+      // Background Check Purpose - checkboxes
+      childWelfareNameBased: true,
+      fosterCare: true,
+      traditionalFosterCare: true,
+      adoption: false,
+      guardianship: false,
+      contractedResourceFamily: true,
+      kinshipNonRelative: false,
+      kinshipRelative: false,
+      therapeuticFosterCare: false,
+      
+      // Child Welfare Fingerprint Based
+      childWelfareFingerprintBased: true,
+      fosterCareFingerprint: true,
+      
+      // Private Child Welfare
+      privateChildWelfare: false,
+      privateAdoption: false,
+      
+      // Information to Include checkboxes
+      includeFirstLastName: true,
+      includePhoneNumber: true,
+      includeChurchHome: false,
+      includeApplicationProvided: true,
+      includeApplicationCompleted: false,
+      includeAgency: true,
+      includeInitialPaperwork: false,
+      includeTrainingStarted: false,
+      includeTrainingCompleted: false,
+      includeHomeStudyStarted: false,
+      includeHomeStudyCompleted: false,
+      
+      // Background Information
+      criminalHistory: false,
+      childAbuseHistory: false,
+      substanceAbuseHistory: false,
+      specialNeedsWillingness: true,
+      agreeToTerms: true,
+      
+      // Representative Info
+      representativeName: 'Jane Smith',
+      representativeTitle: 'Case Worker',
+      representativeMailingAddress: '123 Main St',
+      representativeCity: 'Oklahoma City',
+      representativeState: 'OK',
+      representativeZipCode: '73102',
+      representativePhone: '(405) 555-1234',
+      representativeFax: '(405) 555-1235',
+      representativeEmail: 'jane.smith@agency.com',
+      
+      // Resource Family Application
+      familyName: 'Doe Family',
+      physicalAddress: '456 Oak Avenue',
+      physicalCity: 'Edmond',
+      physicalState: 'OK',
+      physicalZipCode: '73013',
+      homeType: 'own',
+      squareFootage: '2000',
+      numberOfBedrooms: '4',
+      
+      // Applicant 1
+      applicant1FirstName: 'John',
+      applicant1MiddleName: 'Michael',
+      applicant1LastName: 'Doe',
+      applicant1DateOfBirth: '1985-06-15',
+      applicant1SSN: '123-45-6789',
+      applicant1Gender: 'M',
+      applicant1CellPhone: '(405) 555-9876',
+      applicant1Email: 'john.doe@email.com',
+      applicant1USCitizen: 'yes',
+      
+      // Household
+      streetAddress: '456 Oak Avenue',
+      city: 'Edmond',
+      state: 'OK',
+      zipCode: '73013',
+      cellPhone: '(405) 555-9876',
+      email: 'john.doe@email.com',
+      bedrooms: '4',
+      bathrooms: '2',
+      residenceType: 'Single Family Home',
+      
+      // Motivation
+      reasonForFostering: 'Want to provide a loving home for children in need',
+      childCareExperience: '5 years of experience with foster care',
+      preferredAgeRange: '5-12 years',
+      
+      // Emergency Contact
+      emergencyName: 'Sarah Doe',
+      emergencyPhone: '(405) 555-5555',
+      emergencyRelationship: 'Sister',
+      
+      // Keep signatures empty - user will fill manually
+      applicantSignature: '',
+      applicantSignatureDate: new Date().toISOString().split('T')[0],
+    };
+    
+    setFormData(prev => ({ ...prev, ...testData }));
+    alert('✅ Test data filled! Signatures left blank for you to draw.');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -475,6 +666,18 @@ export default function FosterCareApplicationPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* TEST BUTTON - REMOVE IN PRODUCTION */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          type="button"
+          onClick={fillTestData}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-bold text-sm flex items-center gap-2"
+        >
+          <span>🚀</span>
+          Auto-Fill Test Data
+        </button>
+      </div>
+      
       <div className="max-w-4xl mx-auto px-8 py-12">
         {currentPage === 1 && (
           <>
@@ -632,11 +835,23 @@ export default function FosterCareApplicationPage() {
                 
                 <div className="space-y-2 text-[11px] mb-4">
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="driverRecordMVR"
+                      checked={formData.driverRecordMVR}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Oklahoma driving record summary (Motor Vehicle Report, or MVR) [State law limits this summary to three years]</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="driverRecordCollision"
+                      checked={formData.driverRecordCollision}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Collision Report. Provide Date: 
                       <input
                         type="date"
@@ -655,12 +870,21 @@ export default function FosterCareApplicationPage() {
                     </span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="driverRecordOther"
+                      checked={formData.driverRecordOther}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Other Driving Record(s) [please specify record by type and date]:</span>
                   </label>
                   <div className="ml-6">
                     <input
                       type="text"
+                      name="driverRecordOtherDetails"
+                      value={formData.driverRecordOtherDetails}
+                      onChange={handleInputChange}
                       className="w-full border-b border-gray-400 outline-none bg-transparent text-[11px]"
                     />
                   </div>
@@ -733,11 +957,23 @@ export default function FosterCareApplicationPage() {
                 </p>
                 <div className="flex gap-8 text-[11px] mb-4">
                   <label className="flex items-center">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5" />
+                    <input 
+                      type="checkbox" 
+                      name="personIsNamed"
+                      checked={formData.personIsNamed}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5" 
+                    />
                     <span>I am the person named in the record(s) sought.</span>
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5" />
+                    <input 
+                      type="checkbox" 
+                      name="personRequestingOther"
+                      checked={formData.personRequestingOther}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5" 
+                    />
                     <span>I am requesting the record(s) of another person.</span>
                   </label>
                 </div>
@@ -751,35 +987,80 @@ export default function FosterCareApplicationPage() {
 
                 <div className="space-y-1.5">
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonGovernmentAgency"
+                      checked={formData.reasonGovernmentAgency}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Government Agency (federal, state, or local, including court or law enforcement): for carrying out its functions †</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonCourt"
+                      checked={formData.reasonCourt}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>In Use in connection with any court, administrative, arbitral, or self-regulatory body; service of process; investigation in anticipation of litigation; execution or enforcement of judgment; or pursuant to the order of a court</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonResearch"
+                      checked={formData.reasonResearch}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Research Activities or Statistical Reports: personal information shall not be published, re-disclosed, or used to contact individuals †</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonInsurance"
+                      checked={formData.reasonInsurance}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Insurance Company, Insurance Support Organizations, Self-insured Entity: for claims investigation, anti-fraud, rating, or underwriting activities †</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonInvestigator"
+                      checked={formData.reasonInvestigator}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Licensed Private Investigative Agency or Licensed Security Service: for any purpose permitted under 18 U.S.C. § 2721, subsection (b) †</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonEmployer"
+                      checked={formData.reasonEmployer}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span>Employer of Commercial Driver License Holder: to obtain or verify information required under 49 U.S.C., Chapter 313 †</span>
                   </label>
                   <label className="flex items-start">
-                    <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <input 
+                      type="checkbox" 
+                      name="reasonOther"
+                      checked={formData.reasonOther}
+                      onChange={handleInputChange}
+                      className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" 
+                    />
                     <span className="flex items-center gap-2">
                       Other: for use specifically authorized under the law of the State of Oklahoma related to the public safety Statutory citation:
                       <input
                         type="text"
+                        name="reasonOtherCitation"
+                        value={formData.reasonOtherCitation}
+                        onChange={handleInputChange}
                         className="flex-1 border-b border-gray-400 outline-none bg-transparent text-[11px] min-w-[200px]"
                       />
                     </span>

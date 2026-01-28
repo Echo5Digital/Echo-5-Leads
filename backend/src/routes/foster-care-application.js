@@ -423,44 +423,71 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page6_field16', formData.representativeDate);
     
     // ==========================================
-    // PAGE 7 - Records Request and Consent to Release (Driver Records)
-    // Text Fields: page7_field1-6
-    // Checkboxes: page7_field7-28
+    // PAGE 1 (DRIVER RECORDS) - Records Request and Consent to Release
+    // Based on DEBUG PDF field labels
     // ==========================================
     
-    // Driver's Name (full name)
-    const fullName = `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
-    fillTextField(form, 'page7_field1', fullName);
+    // Driver information table at top
+    fillTextField(form, 'page1_field8', fullName); // Driver's Name
+    // Sex field is page1_field1 checkbox - skip for now, use radio or text elsewhere
+    fillTextField(form, 'page1_field10', formData.driversLicense); // Driver License Number
+    fillTextField(form, 'page1_field11', formData.dateOfBirth); // Date of Birth
     
-    // Sex
-    fillTextField(form, 'page7_field2', formData.driverSex || formData.sex);
+    // Check the following applicable statement checkboxes
+    // page1_field2 = "I am the person named in the record(s) sought"
+    // page1_field3 = "I am requesting the record(s) of another person"
     
-    // Driver License Number
-    fillTextField(form, 'page7_field3', formData.driversLicense);
+    // Consent to Release by Person Named in Request
+    fillTextField(form, 'page1_field22', fullName); // Printed Name of Person Named in Request
+    fillTextField(form, 'page1_field23', fullName); // Signature field (will be image overlay)
     
-    // Date of Birth
-    fillTextField(form, 'page7_field4', formData.dateOfBirth);
+    // Affirmation of Person Making Request  
+    fillTextField(form, 'page1_field24', fullName); // Printed Name of Person Making Request
+    fillTextField(form, 'page1_field25', fullName); // Signature field (will be image overlay)
+    fillTextField(form, 'page1_field26', formData.agencyName || ''); // Agency/Company Name
+    fillTextField(form, 'page1_field27', formData.applicantSignatureDate); // Date
+    fillTextField(form, 'page1_field28', formData.physicalAddress || formData.streetAddress || ''); // Address
+    fillTextField(form, 'page1_field29', `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
     
-    // Printed Name (use actual name for printed name field)
-    fillTextField(form, 'page7_field5', fullName);
-    // Signature field removed - now using image embedding
-    
-    // Driver record request checkboxes
-    fillCheckbox(form, 'page7_field7', formData.oklahomaDrivingRecord);
-    fillCheckbox(form, 'page7_field8', formData.collisionReport);
-    fillCheckbox(form, 'page7_field9', formData.otherDrivingRecord);
-    fillCheckbox(form, 'page7_field10', formData.iAmPersonNamed);
-    fillCheckbox(form, 'page7_field11', formData.requestingRecordOfAnother);
-    fillCheckbox(form, 'page7_field12', formData.governmentAgency);
-    fillCheckbox(form, 'page7_field13', formData.legalUse);
-    fillCheckbox(form, 'page7_field14', formData.researchActivities);
-    fillCheckbox(form, 'page7_field15', formData.insuranceCompany);
-    fillCheckbox(form, 'page7_field16', formData.licensedInvestigator);
-    fillCheckbox(form, 'page7_field17', formData.commercialDriverEmployer);
-    fillCheckbox(form, 'page7_field18', formData.otherAuthorized);
+    // Driver record request checkboxes (page1_field4 through page1_field20)
+    fillCheckbox(form, 'page1_field20', formData.otherDrivingRecord); // Other checkbox
+    // Note: Other checkboxes on page 1 (page1_field2-19) can be mapped as needed
     
     // ==========================================
-    // PAGE 8 - Consent Entity Name
+    // PAGE 8 - Driver Records Request Checkboxes (page7_field7-28)
+    // Text Fields: page7_field1-6 (collision details, other records details)
+    // Checkboxes: page7_field7-28 (record types, person status, reasons)
+    // ==========================================
+    
+    // Text fields for collision and other record details
+    fillTextField(form, 'page7_field1', formData.collisionReportDate);
+    fillTextField(form, 'page7_field2', formData.collisionReportCity);
+    fillTextField(form, 'page7_field3', formData.driverRecordOtherDetails);
+    
+    // Driver record types (3 checkboxes)
+    fillCheckbox(form, 'page7_field7', formData.driverRecordMVR); // Oklahoma driving record summary (MVR)
+    fillCheckbox(form, 'page7_field8', formData.driverRecordCollision); // Collision Report
+    fillCheckbox(form, 'page7_field9', formData.driverRecordOther); // Other Driving Record(s)
+    
+    // Person status (2 checkboxes)
+    fillCheckbox(form, 'page7_field10', formData.personIsNamed); // I am the person named in the record(s) sought
+    fillCheckbox(form, 'page7_field11', formData.personRequestingOther); // I am requesting the record(s) of another person
+    
+    // Reasons for requesting (7 checkboxes)
+    fillCheckbox(form, 'page7_field12', formData.reasonGovernmentAgency); // Government Agency
+    fillCheckbox(form, 'page7_field13', formData.reasonCourt); // Court/Administrative/Arbitral
+    fillCheckbox(form, 'page7_field14', formData.reasonResearch); // Research Activities
+    fillCheckbox(form, 'page7_field15', formData.reasonInsurance); // Insurance Company
+    fillCheckbox(form, 'page7_field16', formData.reasonInvestigator); // Licensed Private Investigative Agency
+    fillCheckbox(form, 'page7_field17', formData.reasonEmployer); // Employer of Commercial Driver License Holder
+    fillCheckbox(form, 'page7_field18', formData.reasonOther); // Other
+    fillTextField(form, 'page7_field19', formData.reasonOtherCitation); // Other - Statutory citation text
+    
+    // Note: page7_field20-28 appear to be additional checkboxes that may not be currently used
+    // If needed, they can be mapped to additional form fields in the future
+    
+    // ==========================================
+    // PAGE 8/9 - Consent Entity Name  
     // Text Fields: page8_field1, Date_2, Date_3
     // ==========================================
     
@@ -469,7 +496,7 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'Date_3', formData.applicant2ConsentDate);
     
     // ==========================================
-    // PAGE 9 - Resource Family Application
+    // PAGE 10 - Resource Family Application
     // Text Fields: 24 total for address and home info
     // Checkboxes: page9_field13,14,19,24,25,26,28,29
     // ==========================================
@@ -664,9 +691,10 @@ async function generateApplicationPDF(formData) {
     // You may need to experiment with x, y coordinates to align properly
     // PDF coordinates start from bottom-left corner
     
-    // Embed main applicant signature (Page 2)
+    // Embed main applicant signature (Page 3 - PDF page index 2)
+    // PAGE 3 has page2_field53 (signature) and page2_field54 (date) fields
     if (formData.applicantSignature && formData.applicantSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 1, formData.applicantSignature, {
+      await embedSignatureImage(pdfDoc, 2, formData.applicantSignature, {
         x: 50,  // Adjust these coordinates based on your PDF
         y: 150,
         width: 200,
@@ -674,9 +702,10 @@ async function generateApplicationPDF(formData) {
       });
     }
     
-    // Embed consent signatures (Page 8-9)
+    // Embed consent signatures (Page 9 - PDF page index 8)
+    // PAGE 9 has Signature_2 and Signature_3 fields
     if (formData.applicant1ConsentSignature && formData.applicant1ConsentSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 7, formData.applicant1ConsentSignature, {
+      await embedSignatureImage(pdfDoc, 8, formData.applicant1ConsentSignature, {
         x: 50,
         y: 200,
         width: 180,
@@ -685,7 +714,7 @@ async function generateApplicationPDF(formData) {
     }
     
     if (formData.applicant2ConsentSignature && formData.applicant2ConsentSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 7, formData.applicant2ConsentSignature, {
+      await embedSignatureImage(pdfDoc, 8, formData.applicant2ConsentSignature, {
         x: 50,
         y: 100,
         width: 180,
@@ -693,22 +722,23 @@ async function generateApplicationPDF(formData) {
       });
     }
     
-    // Embed driver records request signatures (Page 7 - adjust page index if different)
+    // Embed driver records request signatures (PAGE 1 - Driver Records page)
+    // Based on DEBUG PDF, signatures are page1_field23 and page1_field25
     if (formData.personNamedSignature && formData.personNamedSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 6, formData.personNamedSignature, {
-        x: 320,
-        y: 650,
+      await embedSignatureImage(pdfDoc, 1, formData.personNamedSignature, {
+        x: 360,
+        y: 330,
         width: 180,
-        height: 40
+        height: 35
       });
     }
     
     if (formData.personMakingSignature && formData.personMakingSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 6, formData.personMakingSignature, {
-        x: 320,
-        y: 520,
+      await embedSignatureImage(pdfDoc, 1, formData.personMakingSignature, {
+        x: 360,
+        y: 190,
         width: 180,
-        height: 40
+        height: 35
       });
     }
     
