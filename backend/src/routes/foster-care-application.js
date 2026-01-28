@@ -223,7 +223,13 @@ View in Dashboard: ${process.env.FRONTEND_URL || 'https://leads.echo5software.co
 
   } catch (error) {
     console.error('Foster care application error:', error);
-    res.status(500).json({ error: 'Failed to process application' });
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to process application',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
 
