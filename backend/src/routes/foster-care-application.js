@@ -715,43 +715,43 @@ async function generateApplicationPDF(formData) {
     
     // Resource Applicant 1 Information (your 15-33)
     // 15 = First name (page9_field17 y:318 x:51 - leftmost)
-    fillTextField(form, 'page9_field17', formData.resourceFirstName1);
+    fillTextField(form, 'page9_field17', formData.applicant1FirstName);
     // 16 = Middle name (page9_field15 y:319 x:241 - middle)
-    fillTextField(form, 'page9_field15', formData.resourceMiddleName1);
+    fillTextField(form, 'page9_field15', formData.applicant1MiddleName);
     // 17 = Last name (page9_field16 y:319 x:361 - rightmost)
-    fillTextField(form, 'page9_field16', formData.resourceLastName1);
+    fillTextField(form, 'page9_field16', formData.applicant1LastName);
     // 18 = Other names (page9_field18 y:284)
     fillTextField(form, 'page9_field18', formData.applicant1OtherNames);
     // 19 = N/A checkbox (page9_field19 y:258)
     fillCheckbox(form, 'page9_field19', formData.applicant1OtherNamesNA);
     // 20 = Date of birth (page9_field21 y:233 x:51 - leftmost)
-    fillTextField(form, 'page9_field21', formData.resourceDOB1);
+    fillTextField(form, 'page9_field21', formData.applicant1DateOfBirth);
     // 21 = Social Security number (page9_field22 y:234 x:224 - middle)
-    fillTextField(form, 'page9_field22', formData.resourceSSN1);
+    fillTextField(form, 'page9_field22', formData.applicant1SSN);
     // 22 = Gender (page9_field20 y:235 x:398 - rightmost)
-    fillTextField(form, 'page9_field20', formData.resourceGender1);
+    fillTextField(form, 'page9_field20', formData.applicant1Gender);
     // 23 = Tribe N/A checkbox (page9_field24 y:186)
-    fillCheckbox(form, 'page9_field24', formData.tribeNA);
+    fillCheckbox(form, 'page9_field24', formData.applicant1TribeNA);
     // 24 = Tribe name (page9_field23 y:199)
-    fillTextField(form, 'page9_field23', formData.tribeName);
+    fillTextField(form, 'page9_field23', formData.applicant1Tribe);
     // 25 = Hispanic/Latino Yes checkbox (page9_field25 y:188)
-    fillCheckbox(form, 'page9_field25', formData.hispanicLatino === true);
+    fillCheckbox(form, 'page9_field25', formData.applicant1HispanicLatino === 'yes');
     // 26 = Hispanic/Latino No checkbox (page9_field26 y:188)
-    fillCheckbox(form, 'page9_field26', formData.hispanicLatino === false);
+    fillCheckbox(form, 'page9_field26', formData.applicant1HispanicLatino === 'no');
     // 27 = Race (page9_field27 y:164)
-    fillTextField(form, 'page9_field27', formData.race);
+    fillTextField(form, 'page9_field27', formData.applicant1Race);
     // 28 = Work phone (page9_field30 y:127 x:52 - leftmost)
-    fillTextField(form, 'page9_field30', formData.resourceWorkPhone1);
+    fillTextField(form, 'page9_field30', formData.applicant1WorkPhone);
     // 29 = Cell phone (page9_field31 y:128 x:225 - middle)
-    fillTextField(form, 'page9_field31', formData.resourceCellPhone1);
+    fillTextField(form, 'page9_field31', formData.applicant1CellPhone);
     // 30 = Home phone (page9_field32 y:129 x:397 - rightmost)
-    fillTextField(form, 'page9_field32', formData.resourceHomePhone1);
+    fillTextField(form, 'page9_field32', formData.applicant1HomePhone);
     // 31 = Email address (page9_field33 y:92)
-    fillTextField(form, 'page9_field33', formData.resourceEmail1);
+    fillTextField(form, 'page9_field33', formData.applicant1Email);
     // 32 = US Citizen Yes checkbox (page9_field28 y:152)
-    fillCheckbox(form, 'page9_field28', formData.usCitizen === true);
+    fillCheckbox(form, 'page9_field28', formData.applicant1USCitizen === 'yes');
     // 33 = US Citizen No checkbox (page9_field29 y:152)
-    fillCheckbox(form, 'page9_field29', formData.usCitizen === false);
+    fillCheckbox(form, 'page9_field29', formData.applicant1USCitizen === 'no');
     
     // ==========================================
     // PAGE 11 - Applicant 1 Employment & Additional Information
