@@ -593,20 +593,20 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page6_field6', formData.privateInternationalAdoptionNameBased);
     
     // OKDHS Representative or Requesting Authority text fields (your 7-16)
-    // 7 = Name
-    fillTextField(form, 'page6_field7', formData.representativeName);
-    // 8 = Mailing address (left field)
-    fillTextField(form, 'page6_field8', formData.representativeMailingAddress);
-    // 9 = Title (right field on same row)
+    // 7 = UE ID# field (labeled as "Name" in PDF but actually for UE ID)
+    fillTextField(form, 'page6_field7', formData.ueId);
+    // 8 = Name (left field in Name/Title row)
+    fillTextField(form, 'page6_field8', formData.representativeName);
+    // 9 = Title (right field in Name/Title row)
     fillTextField(form, 'page6_field9', formData.representativeTitle);
-    // 10 = City
-    fillTextField(form, 'page6_field10', formData.representativeCity);
-    // 11 = State
-    fillTextField(form, 'page6_field11', formData.representativeState);
-    // 12 = ZIP code
-    fillTextField(form, 'page6_field12', formData.representativeZipCode);
-    // 13 = (additional field - possibly continuation of address)
-    fillTextField(form, 'page6_field13', formData.representativeAddress2);
+    // 10 = Mailing address
+    fillTextField(form, 'page6_field10', formData.representativeMailingAddress);
+    // 11 = City
+    fillTextField(form, 'page6_field11', formData.representativeCity);
+    // 12 = State (note: field12 and field13 positions are swapped in PDF)
+    fillTextField(form, 'page6_field12', formData.representativeState);
+    // 13 = ZIP code
+    fillTextField(form, 'page6_field13', formData.representativeZipCode);
     // 14 = Phone number
     fillTextField(form, 'page6_field14', formData.representativePhone);
     // 15 = Fax number
