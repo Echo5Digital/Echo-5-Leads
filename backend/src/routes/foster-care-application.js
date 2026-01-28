@@ -368,33 +368,31 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page2_field39', formData.faxNumber); // Fax number
     fillTextField(form, 'page2_field40', formData.email); // Email
     
-    // Previous Five Years Residency
-    // N/A Checkbox (your 42) = page2_field44
+    // Previous Five Years Residency (your 42-52)
+    // 42 = N/A Checkbox = page2_field44
     fillCheckbox(form, 'page2_field44', formData.previousResidencyNA);
     
-    // Row 1 (your 43, 44, 45): State=field45, NO Start field, End=field48
+    // Row 1 (your 43=State, 45=Start, 46=End)
     if (formData.previousResidency && formData.previousResidency[0]) {
-      fillTextField(form, 'page2_field45', formData.previousResidency[0].state);   // State row 1
-      // No Start date field for Row 1 in PDF
-      fillTextField(form, 'page2_field48', formData.previousResidency[0].endDate); // End row 1
+      fillTextField(form, 'page2_field45', formData.previousResidency[0].state);     // 43 = State row 1
+      fillTextField(form, 'page2_field47', formData.previousResidency[0].startDate); // 45 = Start row 1
+      fillTextField(form, 'page2_field48', formData.previousResidency[0].endDate);   // 46 = End row 1
     }
-    // Row 2 (your 46, 47, 48): State=field46, Start=field47, NO End field
+    // Row 2 (your 44=State, 48=Start, 49=End) - Note: 44 appears below 43 in State column
     if (formData.previousResidency && formData.previousResidency[1]) {
-      fillTextField(form, 'page2_field46', formData.previousResidency[1].state);     // State row 2
-      fillTextField(form, 'page2_field47', formData.previousResidency[1].startDate); // Start row 2
-      // No End date field for Row 2 in PDF
+      fillTextField(form, 'page2_field46', formData.previousResidency[1].state);     // 44 = State row 2
+      fillTextField(form, 'page2_field50', formData.previousResidency[1].startDate); // 48 = Start row 2
+      fillTextField(form, 'page2_field51', formData.previousResidency[1].endDate);   // 49 = End row 2
     }
-    // Row 3 (your 49, 50, 51)
+    // Row 3 (your 47=State, 51=Start, 52=End)
     if (formData.previousResidency && formData.previousResidency[2]) {
-      fillTextField(form, 'page2_field49', formData.previousResidency[2].state);     // State row 3
-      fillTextField(form, 'page2_field50', formData.previousResidency[2].startDate); // Start row 3
-      fillTextField(form, 'page2_field51', formData.previousResidency[2].endDate);   // End row 3
+      fillTextField(form, 'page2_field49', formData.previousResidency[2].state);     // 47 = State row 3
+      fillTextField(form, 'page2_field53', formData.previousResidency[2].startDate); // 51 = Start row 3
+      fillTextField(form, 'page2_field54', formData.previousResidency[2].endDate);   // 52 = End row 3
     }
-    // Row 4 (extra row: 52, 53, 54)
+    // Row 4 (your 50=State)
     if (formData.previousResidency && formData.previousResidency[3]) {
-      fillTextField(form, 'page2_field52', formData.previousResidency[3].state);     // State row 4
-      fillTextField(form, 'page2_field53', formData.previousResidency[3].startDate); // Start row 4
-      fillTextField(form, 'page2_field54', formData.previousResidency[3].endDate);   // End row 4
+      fillTextField(form, 'page2_field52', formData.previousResidency[3].state);     // 50 = State row 4
     }
     
     // Applicant Signature on Page 2 - embedded as image only, not text
