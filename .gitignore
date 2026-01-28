@@ -8,7 +8,7 @@ dist/
 *.log
 *.tmp
 
-# WordPress plugin - keep local but don't track in git (prevents Vercel PHP detection)
+# WordPress plugin - keep local but don't track in git (prevents Vercel PHP detection).
 wp-plugin/echo5-leads-connector/*.php
 wp-plugin/echo5-leads-connector/*.txt
 
