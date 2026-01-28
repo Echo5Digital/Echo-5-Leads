@@ -393,9 +393,8 @@ async function generateApplicationPDF(formData) {
       fillTextField(form, 'page2_field54', formData.previousResidency[2].endDate);   // End row 3
     }
     
-    // Applicant Signature on Page 2 - embedded as image only, not text
-    // fillTextField(form, 'page2_field53', formData.applicantSignature); // Removed - now using image embedding
-    fillTextField(form, 'page2_field54', formData.applicantSignatureDate);
+    // Applicant Signature on Page 2 - embedded as image only, no text fields
+    // Signature is handled by embedSignatureImage() function, no field mapping needed here
     
     // ==========================================
     // PAGE 3 - Countries Lived In & Consent Checkboxes
@@ -433,42 +432,75 @@ async function generateApplicationPDF(formData) {
     // Note: "If yes, explain" - frontend uses convictedExplanation
     
     // Consent and Signature checkboxes (your 15-19 = field14-19) - frontend uses consentXxx names
-    fillCheckbox(form, 'page3_field14', formData.consentBackgroundCheck);  // 15 = OKDHS will evaluate
-    fillCheckbox(form, 'page3_field15', formData.consentChildAbuseCheck);  // 16 = child abuse and neglect
-    fillCheckbox(form, 'page3_field16', formData.consentRestrictedRegistry); // 17 = Restricted Registry
-    fillCheckbox(form, 'page3_field17', formData.consentFingerprints);     // 18 = OSBI fingerprints
-    fillCheckbox(form, 'page3_field18', formData.consentFBICheck);         // 19 = FBI fingerprints
-    fillCheckbox(form, 'page3_field19', formData.consentFBIChallenge);     // (last consent checkbox)
+    fillCheckbox(form, 'page3_field14', formData.consentBackgroundCheck);  // OKDHS will evaluate
+    fillCheckbox(form, 'page3_field15', formData.consentChildAbuseCheck);  // child abuse and neglect
+    fillCheckbox(form, 'page3_field16', formData.consentRestrictedRegistry); // Restricted Registry
+    fillCheckbox(form, 'page3_field17', formData.consentFingerprints);     // OSBI fingerprints
+    fillCheckbox(form, 'page3_field18', formData.consentFBICheck);         // FBI fingerprints
+    fillCheckbox(form, 'page3_field19', formData.consentFBIChallenge);     // FBI challenge
     
     // ==========================================
-    // PAGE 4 - More Child Welfare Options (22 checkboxes)
+    // BOTTOM OF PAGE 3 / TOP OF PAGE 4 - Background Check Purpose
+    // User's numbering from screenshot (your 1-24+)
     // ==========================================
     
-    fillCheckbox(form, 'page4_field1', formData.therapeuticFosterCare);
-    fillCheckbox(form, 'page4_field4', formData.traditionalFosterCare);
-    fillCheckbox(form, 'page4_field5', formData.guardianship);
-    fillCheckbox(form, 'page4_field6', formData.icwTribalGuardianship);
-    fillCheckbox(form, 'page4_field7', formData.okdhsGuardianship);
-    fillCheckbox(form, 'page4_field8', formData.ipap);
-    fillCheckbox(form, 'page4_field9', formData.indianChildWelfareFoster);
-    fillCheckbox(form, 'page4_field10', formData.reissueChildWelfare);
-    fillCheckbox(form, 'page4_field11', formData.reissuePreviousOnly);
-    fillCheckbox(form, 'page4_field12', formData.safetyPlanMonitor);
-    fillCheckbox(form, 'page4_field13', formData.okdhsTrialReunification);
-    fillCheckbox(form, 'page4_field14', formData.volunteer);
-    fillCheckbox(form, 'page4_field15', formData.childWelfareFingerprintBased);
-    fillCheckbox(form, 'page4_field16', formData.adoptionFingerprint);
-    fillCheckbox(form, 'page4_field17', formData.icwTribalAdoptionFingerprint);
-    fillCheckbox(form, 'page4_field18', formData.okdhsAdoptionFingerprint);
-    fillCheckbox(form, 'page4_field19', formData.fosterCareFingerprint);
-    fillCheckbox(form, 'page4_field20', formData.rfpAgency);
-    fillCheckbox(form, 'page4_field21', formData.ddsSpecializedFosterCare);
-    fillCheckbox(form, 'page4_field22', formData.emergencyAfterHours);
-    fillCheckbox(form, 'page4_field23', formData.icwTribalFosterCareFingerprint);
-    fillCheckbox(form, 'page4_field24', formData.okdhsFosterCareFingerprint);
+    // 1 = Privacy policy checkbox (top of next section)
+    fillCheckbox(form, 'page4_field1', formData.privacyPolicyAccepted);
     
-    // Signature Date
-    fillTextField(form, 'Date_1', formData.applicantSignatureDate);
+    // 2 = Signature line (no fillable field - embedded as image)
+    // 3 = Date next to signature - need to find which field this is
+    
+    // Background Check Purpose checkboxes (your 4 onwards)
+    // 4 = Child Welfare Name Based (main category)
+    fillCheckbox(form, 'page4_field4', formData.childWelfareNameBased);
+    
+    // 5 = Adoption
+    fillCheckbox(form, 'page4_field5', formData.adoption);
+    // 6 = Indian Child Welfare (ICW) or tribal adoption  
+    fillCheckbox(form, 'page4_field6', formData.indianChildWelfareAdoption);
+    // 7 = OKDHS adoption
+    fillCheckbox(form, 'page4_field7', formData.okdhsAdoption);
+    
+    // 8 = Erica's Rule
+    fillCheckbox(form, 'page4_field8', formData.ericasRule);
+    // 9 = Erica's rule (sub-checkbox)
+    fillCheckbox(form, 'page4_field9', formData.ericasRuleSub);
+    
+    // 10 = Foster Care (main category)
+    fillCheckbox(form, 'page4_field10', formData.fosterCare);
+    // 11 = Contracted resource family partnership (RFP)
+    fillCheckbox(form, 'page4_field11', formData.contractedResourceFamily);
+    // 12 = Kinship - non-relative
+    fillCheckbox(form, 'page4_field12', formData.kinshipNonRelative);
+    // 13 = Kinship - relative
+    fillCheckbox(form, 'page4_field13', formData.kinshipRelative);
+    // 14 = Therapeutic foster care (TFC)
+    fillCheckbox(form, 'page4_field14', formData.therapeuticFosterCare);
+    // 15 = Traditional foster care
+    fillCheckbox(form, 'page4_field15', formData.traditionalFosterCare);
+    
+    // 16 = Guardianship
+    fillCheckbox(form, 'page4_field16', formData.guardianship);
+    // 17 = ICW or tribal guardianship
+    fillCheckbox(form, 'page4_field17', formData.icwTribalGuardianship);
+    // 18 = OKDHS guardianship
+    fillCheckbox(form, 'page4_field18', formData.okdhsGuardianship);
+    
+    // 19 = Immediate Protective Action Plan (IPAP)
+    fillCheckbox(form, 'page4_field19', formData.ipap);
+    // 20 = Immediate Protective Action Plan (IPAP) sub
+    fillCheckbox(form, 'page4_field20', formData.ipapSub);
+    
+    // 21 = Indian Child Welfare (ICW) or tribal foster care
+    fillCheckbox(form, 'page4_field21', formData.indianChildWelfareFoster);
+    
+    // 22 = Re-issue child welfare name based result within last 30 calendar days
+    fillCheckbox(form, 'page4_field22', formData.reissueChildWelfare);
+    // 23 = Re-issue previous results only
+    fillCheckbox(form, 'page4_field23', formData.reissuePreviousOnly);
+    
+    // 24 = (last checkbox on this section)
+    fillCheckbox(form, 'page4_field24', formData.safetyPlanMonitor);
     
     // ==========================================
     // PAGE 5 - More Fingerprint Options (28 checkboxes)
