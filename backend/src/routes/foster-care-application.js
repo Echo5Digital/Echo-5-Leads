@@ -99,7 +99,20 @@ export default async function handler(req, res) {
           { email: formData.email, tenantId: tenant._id },
           { 
             $set: {
-              ...lead,
+              firstName: formData.firstName || '',
+              lastName: formData.lastName || '',
+              phone: formData.cellPhone || '',
+              source: 'Foster Care Application Form',
+              status: 'New',
+              stage: 'New',
+              leadType: 'Foster Care Application',
+              customFields: {
+                applicationType: 'Foster Parent',
+                hasSpouse: formData.hasSpouse,
+                preferredAgeRange: formData.preferredAgeRange,
+                residenceType: formData.residenceType,
+                applicationId: applicationId.toString()
+              },
               updatedAt: timestamp
             }
           }
@@ -456,6 +469,70 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page6_field14', formData.representativeFax);
     fillTextField(form, 'page6_field15', formData.representativeEmail);
     fillTextField(form, 'page6_field16', formData.representativeDate);
+    
+    // ==========================================
+    // PAGE 1 (DRIVER RECORDS) - Records Request and Consent to Release
+    // Based on DEBUG PDF field labels
+    // ==========================================
+    
+    // Driver information table at top
+    fillTextField(form, 'page1_field8', fullName); // Driver's Name
+    // Sex field is page1_field1 checkbox - skip for now, use radio or text elsewhere
+    fillTextField(form, 'page1_field10', formData.driversLicense); // Driver License Number
+    fillTextField(form, 'page1_field11', formData.dateOfBirth); // Date of Birth
+    
+    // Check the following applicable statement checkboxes
+    // page1_field2 = "I am the person named in the record(s) sought"
+    // page1_field3 = "I am requesting the record(s) of another person"
+    
+    // Consent to Release by Person Named in Request
+    fillTextField(form, 'page1_field22', fullName); // Printed Name of Person Named in Request
+    fillTextField(form, 'page1_field23', fullName); // Signature field (will be image overlay)
+    
+    // Affirmation of Person Making Request  
+    fillTextField(form, 'page1_field24', fullName); // Printed Name of Person Making Request
+    fillTextField(form, 'page1_field25', fullName); // Signature field (will be image overlay)
+    fillTextField(form, 'page1_field26', formData.agencyName || ''); // Agency/Company Name
+    fillTextField(form, 'page1_field27', formData.applicantSignatureDate); // Date
+    fillTextField(form, 'page1_field28', formData.physicalAddress || formData.streetAddress || ''); // Address
+    fillTextField(form, 'page1_field29', `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
+    
+    // Driver record request checkboxes (page1_field4 through page1_field20)
+    fillCheckbox(form, 'page1_field20', formData.otherDrivingRecord); // Other checkbox
+    // Note: Other checkboxes on page 1 (page1_field2-19) can be mapped as needed
+    
+    // ==========================================
+    // PAGE 8 - Driver Records Request Checkboxes (page7_field7-28)
+    // Text Fields: page7_field1-6 (collision details, other records details)
+    // Checkboxes: page7_field7-28 (record types, person status, reasons)
+    // ==========================================
+    
+    // Text fields for collision and other record details
+    fillTextField(form, 'page7_field1', formData.collisionReportDate);
+    fillTextField(form, 'page7_field2', formData.collisionReportCity);
+    fillTextField(form, 'page7_field3', formData.driverRecordOtherDetails);
+    
+    // Driver record types (3 checkboxes)
+    fillCheckbox(form, 'page7_field7', formData.driverRecordMVR); // Oklahoma driving record summary (MVR)
+    fillCheckbox(form, 'page7_field8', formData.driverRecordCollision); // Collision Report
+    fillCheckbox(form, 'page7_field9', formData.driverRecordOther); // Other Driving Record(s)
+    
+    // Person status (2 checkboxes)
+    fillCheckbox(form, 'page7_field10', formData.personIsNamed); // I am the person named in the record(s) sought
+    fillCheckbox(form, 'page7_field11', formData.personRequestingOther); // I am requesting the record(s) of another person
+    
+    // Reasons for requesting (7 checkboxes)
+    fillCheckbox(form, 'page7_field12', formData.reasonGovernmentAgency); // Government Agency
+    fillCheckbox(form, 'page7_field13', formData.reasonCourt); // Court/Administrative/Arbitral
+    fillCheckbox(form, 'page7_field14', formData.reasonResearch); // Research Activities
+    fillCheckbox(form, 'page7_field15', formData.reasonInsurance); // Insurance Company
+    fillCheckbox(form, 'page7_field16', formData.reasonInvestigator); // Licensed Private Investigative Agency
+    fillCheckbox(form, 'page7_field17', formData.reasonEmployer); // Employer of Commercial Driver License Holder
+    fillCheckbox(form, 'page7_field18', formData.reasonOther); // Other
+    fillTextField(form, 'page7_field19', formData.reasonOtherCitation); // Other - Statutory citation text
+    
+    // Note: page7_field20-28 appear to be additional checkboxes that may not be currently used
+    // If needed, they can be mapped to additional form fields in the future
     
     // ==========================================
     // PAGE 8/9 - Consent Entity Name  
