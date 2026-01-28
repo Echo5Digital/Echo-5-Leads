@@ -787,13 +787,28 @@ async function generateApplicationPDF(formData) {
     // Total approximate monthly take-home pay (page10_field31 from debug PDF)
     fillTextField(form, 'page10_field31', formData.applicant1SelfEmployedTakeHome || formData.selfEmployedTakeHome);
     
-    // TODO: Need to identify checkbox field names for:
-    // - N/A checkbox for states lived
-    // - Marital status checkboxes (Single/Unmarried couple/Married/Divorced/Widowed/Separated)
-    // - Advanced degree Yes/No
-    // - Armed forces Yes/No
-    // - Are you employed? Yes/No
-    // - Are you self-employed? Yes/No
+    // Page 11 Checkboxes (based on debug PDF testing)
+    // N/A checkbox for states lived
+    fillCheckbox(form, 'page10_field2', formData.statesLivedNA);
+    // Marital status checkboxes
+    fillCheckbox(form, 'page10_field3', formData.maritalStatus === 'single');
+    fillCheckbox(form, 'page10_field4', formData.maritalStatus === 'unmarried couple');
+    fillCheckbox(form, 'page10_field5', formData.maritalStatus === 'married');
+    fillCheckbox(form, 'page10_field6', formData.maritalStatus === 'divorced');
+    fillCheckbox(form, 'page10_field7', formData.maritalStatus === 'widowed');
+    fillCheckbox(form, 'page10_field8', formData.maritalStatus === 'separated');
+    // Advanced degree Yes/No
+    fillCheckbox(form, 'page10_field11', formData.advancedDegree === 'yes' || formData.advancedDegree === true);
+    fillCheckbox(form, 'page10_field12', formData.advancedDegree === 'no' || formData.advancedDegree === false);
+    // Armed forces Yes/No
+    fillCheckbox(form, 'page10_field13', formData.armedForces === 'yes' || formData.armedForces === true);
+    fillCheckbox(form, 'page10_field14', formData.armedForces === 'no' || formData.armedForces === false);
+    // Are you employed? Yes/No
+    fillCheckbox(form, 'page10_field15', formData.isEmployed === 'yes' || formData.isEmployed === true);
+    fillCheckbox(form, 'page10_field16', formData.isEmployed === 'no' || formData.isEmployed === false);
+    // Are you self-employed? Yes/No
+    fillCheckbox(form, 'page10_field17', formData.isSelfEmployed === 'yes' || formData.isSelfEmployed === true);
+    fillCheckbox(form, 'page10_field18', formData.isSelfEmployed === 'no' || formData.isSelfEmployed === false);
     
     // ==========================================
     // PAGE 12 - Household Members, Children Not in Home, References
