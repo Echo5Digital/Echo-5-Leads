@@ -251,102 +251,109 @@ async function generateApplicationPDF(formData) {
     console.log('[PDF] Filling government PDF template with form data...');
     
     // ==========================================
-    // PAGE 1 - Oklahoma State Bureau of Investigation (OSBI)
-    // Background Check Authorization Form
-    // Text Fields: page1_field2,3,6,8,9,10,11,20,22,23,24,25,26,27,28,29
-    // Checkboxes: page1_field1,4,5,12,13,14,15,16,17,18,19,21
+    // PAGE 1 - DRIVER RECORDS REQUEST (Service Oklahoma)
+    // Records Request and Consent to Release
+    // ==========================================
+    
+    // Driver record request checkboxes at top
+    fillCheckbox(form, 'page1_field1', formData.driverRecordMVR); // Oklahoma driving record summary (MVR)
+    fillTextField(form, 'page1_field2', formData.collisionReportDate); // Collision Report Date
+    fillTextField(form, 'page1_field3', formData.collisionReportCity); // City/County
+    fillCheckbox(form, 'page1_field4', formData.driverRecordCollision); // Collision Report checkbox
+    fillCheckbox(form, 'page1_field5', formData.driverRecordOther); // Other Driving Records checkbox
+    fillTextField(form, 'page1_field6', formData.driverRecordOtherDetails); // Other Driving Records details
+    
+    // Driver information table
+    fillTextField(form, 'page1_field8', fullName); // Driver's Name
+    fillTextField(form, 'page1_field9', formData.driverSex || formData.sex); // Sex
+    fillTextField(form, 'page1_field10', formData.driversLicense); // Driver License Number
+    fillTextField(form, 'page1_field11', formData.dateOfBirth); // Date of Birth
+    
+    // Check the following applicable statement
+    fillCheckbox(form, 'page1_field12', formData.personIsNamed); // I am the person named
+    fillCheckbox(form, 'page1_field13', formData.personRequestingOther); // I am requesting records of another
+    
+    // Reasons checkboxes
+    fillCheckbox(form, 'page1_field14', formData.reasonGovernmentAgency); // Government Agency
+    fillCheckbox(form, 'page1_field15', formData.reasonCourt); // Legal/Court
+    fillCheckbox(form, 'page1_field16', formData.reasonResearch); // Research Activities
+    fillCheckbox(form, 'page1_field17', formData.reasonInsurance); // Insurance Company
+    fillCheckbox(form, 'page1_field18', formData.reasonInvestigator); // Licensed Private Investigator
+    fillCheckbox(form, 'page1_field19', formData.reasonEmployer); // Employer of Commercial Driver
+    fillTextField(form, 'page1_field20', formData.reasonOtherCitation); // Other reason text
+    fillCheckbox(form, 'page1_field21', formData.reasonOther); // Other checkbox
+    
+    // Consent to Release by Person Named in Request
+    fillTextField(form, 'page1_field22', fullName); // Printed Name of Person Named in Request
+    fillTextField(form, 'page1_field23', fullName); // Signature of Person Named in Request
+    
+    // Affirmation of Person Making Request
+    fillTextField(form, 'page1_field24', fullName); // Printed Name of Person Making Request
+    fillTextField(form, 'page1_field25', fullName); // Signature of Person Making Request
+    fillTextField(form, 'page1_field26', formData.agencyName || ''); // Agency/Company Name
+    fillTextField(form, 'page1_field27', formData.applicantSignatureDate); // Date
+    fillTextField(form, 'page1_field28', formData.physicalAddress || formData.streetAddress || ''); // Address
+    fillTextField(form, 'page1_field29', `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
+    
+    // ==========================================
+    // PAGE 2 - BACKGROUND CHECK (Applicant Information)
+    // Oklahoma Human Services - Request for Background Check
     // ==========================================
     
     // Applicant's personal information
-    fillTextField(form, 'page1_field2', formData.firstName);
-    fillTextField(form, 'page1_field3', formData.lastName);
-    fillTextField(form, 'page1_field6', formData.middleName);
-    fillTextField(form, 'page1_field8', formData.nicknames);
-    fillTextField(form, 'page1_field9', formData.dateOfBirth);
-    fillTextField(form, 'page1_field10', formData.ssn);
-    fillTextField(form, 'page1_field11', formData.driversLicense);
+    fillTextField(form, 'page2_field2', formData.firstName); // First name
+    fillTextField(form, 'page2_field3', formData.middleName); // Middle Name
+    fillTextField(form, 'page2_field1', formData.lastName); // Last name
     
-    // Physical description
-    fillTextField(form, 'page1_field20', formData.sex);
-    fillTextField(form, 'page1_field22', formData.height);
-    fillTextField(form, 'page1_field23', formData.weight);
-    fillTextField(form, 'page1_field24', formData.hairColor);
-    fillTextField(form, 'page1_field25', formData.eyeColor);
-    fillTextField(form, 'page1_field26', formData.cityOfBirth);
-    fillTextField(form, 'page1_field27', formData.stateOfBirth);
-    fillTextField(form, 'page1_field28', formData.dlState);
-    fillTextField(form, 'page1_field29', formData.driverSex);
-    
-    // Checkboxes for Page 1
-    fillCheckbox(form, 'page1_field1', formData.noMiddleName);
-    
-    // ==========================================
-    // PAGE 2 - Aliases, Previous Addresses, Criminal History
-    // Text Fields: 48 total
-    // Checkboxes: page2_field4,5,26,27,44
-    // ==========================================
-    
-    // Alias 1
+    // Aliases (5 rows)
     if (formData.aliases && formData.aliases[0]) {
-      fillTextField(form, 'page2_field1', formData.aliases[0].firstName);
-      fillTextField(form, 'page2_field2', formData.aliases[0].middleName);
-      fillTextField(form, 'page2_field3', formData.aliases[0].lastName);
+      fillTextField(form, 'page2_field6', formData.aliases[0].firstName);
+      fillTextField(form, 'page2_field7', formData.aliases[0].middleName);
+      fillTextField(form, 'page2_field8', formData.aliases[0].lastName);
     }
-    // Alias 2
     if (formData.aliases && formData.aliases[1]) {
-      fillTextField(form, 'page2_field6', formData.aliases[1].firstName);
-      fillTextField(form, 'page2_field7', formData.aliases[1].middleName);
-      fillTextField(form, 'page2_field8', formData.aliases[1].lastName);
+      fillTextField(form, 'page2_field9', formData.aliases[1].firstName);
+      fillTextField(form, 'page2_field10', formData.aliases[1].middleName);
+      fillTextField(form, 'page2_field11', formData.aliases[1].lastName);
     }
-    // Alias 3
     if (formData.aliases && formData.aliases[2]) {
-      fillTextField(form, 'page2_field9', formData.aliases[2].firstName);
-      fillTextField(form, 'page2_field10', formData.aliases[2].middleName);
-      fillTextField(form, 'page2_field11', formData.aliases[2].lastName);
+      fillTextField(form, 'page2_field12', formData.aliases[2].firstName);
+      fillTextField(form, 'page2_field13', formData.aliases[2].middleName);
+      fillTextField(form, 'page2_field14', formData.aliases[2].lastName);
+    }
+    if (formData.aliases && formData.aliases[3]) {
+      fillTextField(form, 'page2_field15', formData.aliases[3].firstName);
+      fillTextField(form, 'page2_field16', formData.aliases[3].middleName);
+      fillTextField(form, 'page2_field17', formData.aliases[3].lastName);
+    }
+    if (formData.aliases && formData.aliases[4]) {
+      fillTextField(form, 'page2_field18', formData.aliases[4].firstName);
+      fillTextField(form, 'page2_field19', formData.aliases[4].middleName);
+      fillTextField(form, 'page2_field20', formData.aliases[4].lastName);
     }
     
-    // Previous Residency (State, Start Date, End Date for each row)
-    if (formData.previousResidency) {
-      if (formData.previousResidency[0]) {
-        fillTextField(form, 'page2_field12', formData.previousResidency[0].state);
-        fillTextField(form, 'page2_field13', formData.previousResidency[0].startDate);
-        fillTextField(form, 'page2_field14', formData.previousResidency[0].endDate);
-      }
-      if (formData.previousResidency[1]) {
-        fillTextField(form, 'page2_field15', formData.previousResidency[1].state);
-        fillTextField(form, 'page2_field16', formData.previousResidency[1].startDate);
-        fillTextField(form, 'page2_field17', formData.previousResidency[1].endDate);
-      }
-      if (formData.previousResidency[2]) {
-        fillTextField(form, 'page2_field18', formData.previousResidency[2].state);
-        fillTextField(form, 'page2_field19', formData.previousResidency[2].startDate);
-        fillTextField(form, 'page2_field20', formData.previousResidency[2].endDate);
-      }
-    }
+    // Nickname(s)
+    fillTextField(form, 'page2_field21', formData.nicknames);
     
-    // International Residency
-    if (formData.internationalResidency) {
-      if (formData.internationalResidency[0]) {
-        fillTextField(form, 'page2_field21', formData.internationalResidency[0].country);
-        fillTextField(form, 'page2_field23', formData.internationalResidency[0].startDate);
-        fillTextField(form, 'page2_field24', formData.internationalResidency[0].endDate);
-      }
-      if (formData.internationalResidency[1]) {
-        fillTextField(form, 'page2_field25', formData.internationalResidency[1].country);
-        fillTextField(form, 'page2_field28', formData.internationalResidency[1].startDate);
-        fillTextField(form, 'page2_field29', formData.internationalResidency[1].endDate);
-      }
-    }
+    // Personal details
+    fillTextField(form, 'page2_field23', formData.dateOfBirth); // Date of birth
+    fillTextField(form, 'page2_field24', formData.height); // Height
+    fillTextField(form, 'page2_field25', formData.weight); // Weight
+    fillTextField(form, 'page2_field28', `${formData.cityOfBirth || ''}, ${formData.stateOfBirth || ''}`.trim()); // City and state of birth
+    fillTextField(form, 'page2_field29', formData.ssn); // Social Security number
+    fillTextField(form, 'page2_field30', formData.hairColor); // Hair color
+    fillTextField(form, 'page2_field31', formData.dlState); // State DL issued
+    fillTextField(form, 'page2_field32', formData.eyeColor); // Eye color
+    fillTextField(form, 'page2_field33', formData.driversLicense); // Driver license (DL) number
     
-    // Criminal History
-    fillCheckbox(form, 'page2_field44', formData.convictedOfCrime);
-    fillTextField(form, 'page2_field45', formData.crimeExplanation);
-    
-    // Consent/Authorization checkboxes
-    fillCheckbox(form, 'page2_field4', formData.consentBackgroundCheck);
-    fillCheckbox(form, 'page2_field5', formData.consentChildAbuseCheck);
-    fillCheckbox(form, 'page2_field26', formData.consentRestrictedRegistry);
-    fillCheckbox(form, 'page2_field27', formData.consentFingerprints);
+    // Mailing address
+    fillTextField(form, 'page2_field36', formData.mailingAddress || formData.physicalAddress || formData.streetAddress); // Mailing address
+    fillTextField(form, 'page2_field34', formData.mailingCity || formData.physicalCity || formData.city); // City
+    fillTextField(form, 'page2_field35', formData.mailingState || formData.physicalState || formData.state); // State
+    fillTextField(form, 'page2_field37', formData.mailingZipCode || formData.physicalZipCode || formData.zipCode); // ZIP code
+    fillTextField(form, 'page2_field38', formData.homePhone || formData.cellPhone); // Phone number
+    fillTextField(form, 'page2_field39', formData.faxNumber); // Fax number
+    fillTextField(form, 'page2_field40', formData.email); // Email
     
     // Applicant Signature on Page 2 - embedded as image only, not text
     // fillTextField(form, 'page2_field53', formData.applicantSignature); // Removed - now using image embedding
@@ -449,70 +456,6 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page6_field14', formData.representativeFax);
     fillTextField(form, 'page6_field15', formData.representativeEmail);
     fillTextField(form, 'page6_field16', formData.representativeDate);
-    
-    // ==========================================
-    // PAGE 1 (DRIVER RECORDS) - Records Request and Consent to Release
-    // Based on DEBUG PDF field labels
-    // ==========================================
-    
-    // Driver information table at top
-    fillTextField(form, 'page1_field8', fullName); // Driver's Name
-    // Sex field is page1_field1 checkbox - skip for now, use radio or text elsewhere
-    fillTextField(form, 'page1_field10', formData.driversLicense); // Driver License Number
-    fillTextField(form, 'page1_field11', formData.dateOfBirth); // Date of Birth
-    
-    // Check the following applicable statement checkboxes
-    // page1_field2 = "I am the person named in the record(s) sought"
-    // page1_field3 = "I am requesting the record(s) of another person"
-    
-    // Consent to Release by Person Named in Request
-    fillTextField(form, 'page1_field22', fullName); // Printed Name of Person Named in Request
-    fillTextField(form, 'page1_field23', fullName); // Signature field (will be image overlay)
-    
-    // Affirmation of Person Making Request  
-    fillTextField(form, 'page1_field24', fullName); // Printed Name of Person Making Request
-    fillTextField(form, 'page1_field25', fullName); // Signature field (will be image overlay)
-    fillTextField(form, 'page1_field26', formData.agencyName || ''); // Agency/Company Name
-    fillTextField(form, 'page1_field27', formData.applicantSignatureDate); // Date
-    fillTextField(form, 'page1_field28', formData.physicalAddress || formData.streetAddress || ''); // Address
-    fillTextField(form, 'page1_field29', `${formData.physicalCity || formData.city || ''}, ${formData.physicalState || formData.state || ''} ${formData.physicalZipCode || formData.zipCode || ''}`.trim()); // City, State Zip
-    
-    // Driver record request checkboxes (page1_field4 through page1_field20)
-    fillCheckbox(form, 'page1_field20', formData.otherDrivingRecord); // Other checkbox
-    // Note: Other checkboxes on page 1 (page1_field2-19) can be mapped as needed
-    
-    // ==========================================
-    // PAGE 8 - Driver Records Request Checkboxes (page7_field7-28)
-    // Text Fields: page7_field1-6 (collision details, other records details)
-    // Checkboxes: page7_field7-28 (record types, person status, reasons)
-    // ==========================================
-    
-    // Text fields for collision and other record details
-    fillTextField(form, 'page7_field1', formData.collisionReportDate);
-    fillTextField(form, 'page7_field2', formData.collisionReportCity);
-    fillTextField(form, 'page7_field3', formData.driverRecordOtherDetails);
-    
-    // Driver record types (3 checkboxes)
-    fillCheckbox(form, 'page7_field7', formData.driverRecordMVR); // Oklahoma driving record summary (MVR)
-    fillCheckbox(form, 'page7_field8', formData.driverRecordCollision); // Collision Report
-    fillCheckbox(form, 'page7_field9', formData.driverRecordOther); // Other Driving Record(s)
-    
-    // Person status (2 checkboxes)
-    fillCheckbox(form, 'page7_field10', formData.personIsNamed); // I am the person named in the record(s) sought
-    fillCheckbox(form, 'page7_field11', formData.personRequestingOther); // I am requesting the record(s) of another person
-    
-    // Reasons for requesting (7 checkboxes)
-    fillCheckbox(form, 'page7_field12', formData.reasonGovernmentAgency); // Government Agency
-    fillCheckbox(form, 'page7_field13', formData.reasonCourt); // Court/Administrative/Arbitral
-    fillCheckbox(form, 'page7_field14', formData.reasonResearch); // Research Activities
-    fillCheckbox(form, 'page7_field15', formData.reasonInsurance); // Insurance Company
-    fillCheckbox(form, 'page7_field16', formData.reasonInvestigator); // Licensed Private Investigative Agency
-    fillCheckbox(form, 'page7_field17', formData.reasonEmployer); // Employer of Commercial Driver License Holder
-    fillCheckbox(form, 'page7_field18', formData.reasonOther); // Other
-    fillTextField(form, 'page7_field19', formData.reasonOtherCitation); // Other - Statutory citation text
-    
-    // Note: page7_field20-28 appear to be additional checkboxes that may not be currently used
-    // If needed, they can be mapped to additional form fields in the future
     
     // ==========================================
     // PAGE 8/9 - Consent Entity Name  
