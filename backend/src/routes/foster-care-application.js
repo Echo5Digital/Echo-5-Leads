@@ -245,6 +245,9 @@ async function generateApplicationPDF(formData) {
     // Get the form from the PDF
     const form = pdfDoc.getForm();
     
+    // Build the full name from form data
+    const fullName = `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+    
     console.log('[PDF] Filling government PDF template with form data...');
     
     // ==========================================
