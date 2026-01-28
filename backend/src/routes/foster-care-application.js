@@ -715,21 +715,21 @@ async function generateApplicationPDF(formData) {
     
     // Resource Applicant 1 Information (your 15-33)
     // 15 = First name (page9_field17 y:318 x:51 - leftmost)
-    fillTextField(form, 'page9_field17', formData.resourceFirstName1 || formData.firstName);
+    fillTextField(form, 'page9_field17', formData.resourceFirstName1);
     // 16 = Middle name (page9_field15 y:319 x:241 - middle)
-    fillTextField(form, 'page9_field15', formData.resourceMiddleName1 || formData.middleName);
+    fillTextField(form, 'page9_field15', formData.resourceMiddleName1);
     // 17 = Last name (page9_field16 y:319 x:361 - rightmost)
-    fillTextField(form, 'page9_field16', formData.resourceLastName1 || formData.lastName);
+    fillTextField(form, 'page9_field16', formData.resourceLastName1);
     // 18 = Other names (page9_field18 y:284)
     fillTextField(form, 'page9_field18', formData.applicant1OtherNames);
     // 19 = N/A checkbox (page9_field19 y:258)
     fillCheckbox(form, 'page9_field19', formData.applicant1OtherNamesNA);
     // 20 = Date of birth (page9_field21 y:233 x:51 - leftmost)
-    fillTextField(form, 'page9_field21', formData.resourceDOB1 || formData.dateOfBirth);
+    fillTextField(form, 'page9_field21', formData.resourceDOB1);
     // 21 = Social Security number (page9_field22 y:234 x:224 - middle)
-    fillTextField(form, 'page9_field22', formData.resourceSSN1 || formData.ssn);
+    fillTextField(form, 'page9_field22', formData.resourceSSN1);
     // 22 = Gender (page9_field20 y:235 x:398 - rightmost)
-    fillTextField(form, 'page9_field20', formData.resourceGender1 || formData.gender);
+    fillTextField(form, 'page9_field20', formData.resourceGender1);
     // 23 = Tribe N/A checkbox (page9_field24 y:186)
     fillCheckbox(form, 'page9_field24', formData.tribeNA);
     // 24 = Tribe name (page9_field23 y:199)
@@ -741,13 +741,13 @@ async function generateApplicationPDF(formData) {
     // 27 = Race (page9_field27 y:164)
     fillTextField(form, 'page9_field27', formData.race);
     // 28 = Work phone (page9_field30 y:127 x:52 - leftmost)
-    fillTextField(form, 'page9_field30', formData.resourceWorkPhone1 || formData.workPhone);
+    fillTextField(form, 'page9_field30', formData.resourceWorkPhone1);
     // 29 = Cell phone (page9_field31 y:128 x:225 - middle)
-    fillTextField(form, 'page9_field31', formData.resourceCellPhone1 || formData.cellPhone);
+    fillTextField(form, 'page9_field31', formData.resourceCellPhone1);
     // 30 = Home phone (page9_field32 y:129 x:397 - rightmost)
-    fillTextField(form, 'page9_field32', formData.resourceHomePhone1 || formData.homePhone);
+    fillTextField(form, 'page9_field32', formData.resourceHomePhone1);
     // 31 = Email address (page9_field33 y:92)
-    fillTextField(form, 'page9_field33', formData.resourceEmail1 || formData.email);
+    fillTextField(form, 'page9_field33', formData.resourceEmail1);
     // 32 = US Citizen Yes checkbox (page9_field28 y:152)
     fillCheckbox(form, 'page9_field28', formData.usCitizen === true);
     // 33 = US Citizen No checkbox (page9_field29 y:152)
