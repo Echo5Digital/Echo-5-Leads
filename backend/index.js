@@ -1,4 +1,4 @@
-// Backend API Server - Updated Jan 28, 2026
+// Backend API Server - Updated Jan 28, 2026.
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
