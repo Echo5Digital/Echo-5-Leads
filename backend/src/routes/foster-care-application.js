@@ -429,7 +429,9 @@ async function generateApplicationPDF(formData) {
     // Have you ever been convicted of a crime? (your 12, 13) - frontend uses convictedOfCrime boolean
     fillCheckbox(form, 'page3_field12', formData.convictedOfCrime === true);  // 12 = Yes
     fillCheckbox(form, 'page3_field13', formData.convictedOfCrime === false); // 13 = No
-    // Note: "If yes, explain" - frontend uses convictedExplanation
+    
+    // 14 = "If yes, explain:" - multiline text field (frontend uses crimeExplanation)
+    fillTextField(form, 'Text_1', formData.crimeExplanation);
     
     // Consent and Signature checkboxes (your 15-19 = field14-19) - frontend uses consentXxx names
     fillCheckbox(form, 'page3_field14', formData.consentBackgroundCheck);  // OKDHS will evaluate
