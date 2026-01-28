@@ -493,36 +493,86 @@ async function generateApplicationPDF(formData) {
     // 20 = Immediate Protective Action Plan (IPAP) sub
     fillCheckbox(form, 'page4_field20', formData.ipapSub);
     
-    // 21 = Indian Child Welfare (ICW) or tribal foster care
+    // 21 = Indian Child Welfare (ICW) or tribal foster care (main)
     fillCheckbox(form, 'page4_field21', formData.indianChildWelfareFoster);
+    // 22 = Indian Child Welfare (ICW) or tribal foster care (sub)
+    fillCheckbox(form, 'page4_field22', formData.indianChildWelfareFosterSub);
     
-    // 22 = Re-issue child welfare name based result within last 30 calendar days
-    fillCheckbox(form, 'page4_field22', formData.reissueChildWelfare);
-    // 23 = Re-issue previous results only
-    fillCheckbox(form, 'page4_field23', formData.reissuePreviousOnly);
-    
-    // 24 = (last checkbox on this section)
-    fillCheckbox(form, 'page4_field24', formData.safetyPlanMonitor);
+    // 23 = Re-issue child welfare name based result within last 30 calendar days
+    fillCheckbox(form, 'page4_field23', formData.reissueChildWelfare);
+    // 24 = Re-issue previous results only
+    fillCheckbox(form, 'page4_field24', formData.reissuePreviousOnly);
     
     // ==========================================
-    // PAGE 5 - More Fingerprint Options (28 checkboxes)
+    // PAGE 5 - Fingerprint-Based Options (28 checkboxes, your 1-28)
     // ==========================================
     
-    fillCheckbox(form, 'page5_field1', formData.therapeuticFosterCareFingerprint);
-    fillCheckbox(form, 'page5_field2', formData.guardianshipFingerprint);
-    fillCheckbox(form, 'page5_field3', formData.icwTribalGuardianshipFingerprint);
-    fillCheckbox(form, 'page5_field4', formData.okdhsGuardianshipFingerprint);
-    fillCheckbox(form, 'page5_field5', formData.hostHomes);
-    fillCheckbox(form, 'page5_field6', formData.ipapSafetyPlan);
-    fillCheckbox(form, 'page5_field7', formData.reissueChildWelfareFingerprint);
-    fillCheckbox(form, 'page5_field8', formData.reissueFingerprintPreviousOnly);
-    fillCheckbox(form, 'page5_field9', formData.trialReunification);
-    fillCheckbox(form, 'page5_field10', formData.privateChildWelfare);
-    fillCheckbox(form, 'page5_field11', formData.privateAdoption);
-    fillCheckbox(form, 'page5_field12', formData.privateAdoptionNameBased);
-    fillCheckbox(form, 'page5_field13', formData.privateDomesticAdoptionFingerprint);
-    fillCheckbox(form, 'page5_field14', formData.privateGuardianshipNameBased);
-    fillCheckbox(form, 'page5_field15', formData.privateInternationalAdoptionNameBased);
+    // 1 = Safety Plan Monitor
+    fillCheckbox(form, 'page5_field1', formData.safetyPlanMonitor);
+    // 2 = Safety Plan Monitor (sub)
+    fillCheckbox(form, 'page5_field2', formData.safetyPlanMonitorSub);
+    
+    // 3 = OKDHS trial reunification
+    fillCheckbox(form, 'page5_field3', formData.okdhsTrialReunification);
+    // 4 = OKDHS trial Reunification (sub)
+    fillCheckbox(form, 'page5_field4', formData.okdhsTrialReunificationSub);
+    
+    // 5 = Volunteer
+    fillCheckbox(form, 'page5_field5', formData.volunteer);
+    // 6 = Volunteer (sub)
+    fillCheckbox(form, 'page5_field6', formData.volunteerSub);
+    
+    // 7 = Child Welfare Fingerprint Based (main category)
+    fillCheckbox(form, 'page5_field7', formData.childWelfareFingerprintBased);
+    
+    // 8 = Adoption
+    fillCheckbox(form, 'page5_field8', formData.adoptionFingerprint);
+    // 9 = Indian Child Welfare (ICW) or tribal adoption
+    fillCheckbox(form, 'page5_field9', formData.icwTribalAdoptionFingerprint);
+    // 10 = OKDHS adoption
+    fillCheckbox(form, 'page5_field10', formData.okdhsAdoptionFingerprint);
+    
+    // 11 = Foster Care
+    fillCheckbox(form, 'page5_field11', formData.fosterCareFingerprint);
+    // 12 = Contracted resource family partnership (RFP) agency
+    fillCheckbox(form, 'page5_field12', formData.rfpAgency);
+    // 13 = Developmental Disability Services (DDS) specialized foster care
+    fillCheckbox(form, 'page5_field13', formData.ddsSpecializedFosterCare);
+    // 14 = Emergency after hours placement-follow up (Purpose Code X)
+    fillCheckbox(form, 'page5_field14', formData.emergencyAfterHours);
+    // 15 = Indian Child Welfare (ICW) or tribal foster care
+    fillCheckbox(form, 'page5_field15', formData.icwTribalFosterCareFingerprint);
+    // 16 = OKDHS foster care
+    fillCheckbox(form, 'page5_field16', formData.okdhsFosterCareFingerprint);
+    // 17 = Therapeutic foster care (TFC)
+    fillCheckbox(form, 'page5_field17', formData.therapeuticFosterCareFingerprint);
+    
+    // 18 = Guardianship
+    fillCheckbox(form, 'page5_field18', formData.guardianshipFingerprint);
+    // 19 = Indian Child Welfare (ICW) or tribal guardianship
+    fillCheckbox(form, 'page5_field19', formData.icwTribalGuardianshipFingerprint);
+    // 20 = OKDHS guardianship
+    fillCheckbox(form, 'page5_field20', formData.okdhsGuardianshipFingerprint);
+    
+    // 21 = Host Homes
+    fillCheckbox(form, 'page5_field21', formData.hostHomes);
+    // 22 = Host homes (sub)
+    fillCheckbox(form, 'page5_field22', formData.hostHomesSub);
+    
+    // 23 = Immediate Protective Action Plan (IPAP) or Safety Plan
+    fillCheckbox(form, 'page5_field23', formData.ipapSafetyPlan);
+    // 24 = Immediate Protective Action Plan (IPAP) or Safety Plan (sub)
+    fillCheckbox(form, 'page5_field24', formData.ipapSafetyPlanSub);
+    
+    // 25 = Re-issue child welfare fingerprint result within last five years
+    fillCheckbox(form, 'page5_field25', formData.reissueChildWelfareFingerprint);
+    // 26 = Re-issue previous results only
+    fillCheckbox(form, 'page5_field26', formData.reissueFingerprintPreviousOnly);
+    
+    // 27 = Trial reunification
+    fillCheckbox(form, 'page5_field27', formData.trialReunification);
+    // 28 = Trial Reunification (sub)
+    fillCheckbox(form, 'page5_field28', formData.trialReunificationSub);
     
     // ==========================================
     // PAGE 6 - OKDHS Representative Info
