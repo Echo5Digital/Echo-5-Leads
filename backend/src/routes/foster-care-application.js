@@ -754,27 +754,42 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page9_field29', formData.usCitizen === false);
     
     // ==========================================
-    // PAGE 11 - Applicant 1 Employment & History
-    // Text Fields: 15 total
-    // Checkboxes: 6 total
+    // PAGE 11 - Applicant 1 Employment & Additional Information
+    // Note: Fields 22 and 23 are skipped (PDF issue - not needed)
     // ==========================================
     
-    fillTextField(form, 'page11_field6', formData.applicant1StatesLived);
-    fillTextField(form, 'page11_field7', formData.applicant1Employer || formData.employer);
-    fillTextField(form, 'page11_field8', formData.applicant1Occupation || formData.occupation);
-    fillTextField(form, 'page11_field9', formData.applicant1WorkAddress || formData.workAddress);
-    fillTextField(form, 'page11_field10', formData.applicant1WorkCity);
-    fillTextField(form, 'page11_field11', formData.applicant1WorkState);
-    fillTextField(form, 'page11_field12', formData.applicant1WorkZipCode);
-    fillTextField(form, 'page11_field16', formData.applicant1GrossIncome || formData.grossIncome);
-    fillTextField(form, 'page11_field17', formData.applicant1WorkYears || formData.workYears);
-    fillTextField(form, 'page11_field18', formData.applicant1MaritalStatus);
-    fillTextField(form, 'page11_field19', formData.applicant1HighestGrade);
-    fillTextField(form, 'page11_field20', formData.applicant1AdvancedDegree);
-    
+    // 1 = States lived N/A checkbox (page11_field1 y:726)
     fillCheckbox(form, 'page11_field1', formData.applicant1StatesLivedNA);
+    // 2 = Are you employed? Yes (page11_field2 y:726)
     fillCheckbox(form, 'page11_field2', formData.applicant1Employed === 'yes');
+    // 3 = Are you self-employed? Yes (page11_field3 y:697)
     fillCheckbox(form, 'page11_field3', formData.applicant1SelfEmployed === 'yes');
+    // 4-7 = Unemployed section (page11_field6-9 y:562-564)
+    fillTextField(form, 'page11_field6', formData.applicant1UnemployedIncome);
+    fillTextField(form, 'page11_field7', formData.applicant1UnemployedTakeHome);
+    fillTextField(form, 'page11_field8', formData.applicant1EmployedIncome);
+    fillTextField(form, 'page11_field9', formData.applicant1EmployedTakeHome);
+    // 8-10 = Employed section (page11_field10-12 y:528-529)
+    fillTextField(form, 'page11_field10', formData.applicant1EmployerName || formData.employer);
+    fillTextField(form, 'page11_field11', formData.applicant1JobTitle);
+    fillTextField(form, 'page11_field12', formData.applicant1SupervisorName);
+    // 11-12 = Armed forces checkboxes (page11_field13-14 y:495)
+    fillCheckbox(form, 'page11_field13', formData.applicant1ArmedForces === 'yes');
+    fillCheckbox(form, 'page11_field14', formData.applicant1ArmedForces === 'no');
+    // 13 = Self-employment checkbox (page11_field15 y:470)
+    fillCheckbox(form, 'page11_field15', formData.applicant1SelfEmployed === 'yes');
+    // 14-17 = Additional fields (page11_field16-19 y:375-377)
+    fillTextField(form, 'page11_field16', formData.applicant1SupervisorPhone);
+    fillTextField(form, 'page11_field17', formData.applicant1SupervisorEmail);
+    fillTextField(form, 'page11_field18', formData.applicant1SelfEmployedTakeHome);
+    fillTextField(form, 'page11_field19', formData.applicant1SelfEmployedContact);
+    // 18 = Additional Information (page11_field20 y:146)
+    fillTextField(form, 'page11_field20', formData.applicant1AdditionalInfo);
+    // 19 = States lived (page11_field21 y:144)
+    fillTextField(form, 'page11_field21', formData.applicant1StatesLived);
+    // Fields 22 and 23 are SKIPPED (PDF issue - not needed)
+    // page11_field22 y:146 - SKIP
+    // page11_field23 y:111 - SKIP
     
     // ==========================================
     // PAGE 12 - Applicant 2 Info (Spouse)
