@@ -755,41 +755,64 @@ async function generateApplicationPDF(formData) {
     
     // ==========================================
     // PAGE 11 - Applicant 1 Employment & Additional Information
-    // Note: Fields 22 and 23 are skipped (PDF issue - not needed)
+    // ==========================================
+    // PAGE 11 - Applicant 1 Employment & Additional Information
     // ==========================================
     
-    // 1 = States lived N/A checkbox (page11_field1 y:726)
+    // Field 1 = N/A checkbox for states lived
     fillCheckbox(form, 'page11_field1', formData.applicant1StatesLivedNA);
-    // 2 = Are you employed? Yes (page11_field2 y:726)
-    fillCheckbox(form, 'page11_field2', formData.applicant1Employed === 'yes');
-    // 3 = Are you self-employed? Yes (page11_field3 y:697)
-    fillCheckbox(form, 'page11_field3', formData.applicant1SelfEmployed === 'yes');
-    // 4-7 = Unemployed section (page11_field6-9 y:562-564)
-    fillTextField(form, 'page11_field6', formData.applicant1UnemployedIncome);
-    fillTextField(form, 'page11_field7', formData.applicant1UnemployedTakeHome);
-    fillTextField(form, 'page11_field8', formData.applicant1EmployedIncome);
-    fillTextField(form, 'page11_field9', formData.applicant1EmployedTakeHome);
-    // 8-10 = Employed section (page11_field10-12 y:528-529)
-    fillTextField(form, 'page11_field10', formData.applicant1EmployerName || formData.employer);
-    fillTextField(form, 'page11_field11', formData.applicant1JobTitle);
-    fillTextField(form, 'page11_field12', formData.applicant1SupervisorName);
-    // 11-12 = Armed forces checkboxes (page11_field13-14 y:495)
-    fillCheckbox(form, 'page11_field13', formData.applicant1ArmedForces === 'yes');
-    fillCheckbox(form, 'page11_field14', formData.applicant1ArmedForces === 'no');
-    // 13 = Self-employment checkbox (page11_field15 y:470)
+    
+    // Field 2-3 = Armed forces Yes/No checkboxes
+    fillCheckbox(form, 'page11_field2', formData.applicant1ArmedForces === 'yes');
+    fillCheckbox(form, 'page11_field3', formData.applicant1ArmedForces === 'no');
+    
+    // Field 6 = List each state you have lived in within the last five years
+    fillTextField(form, 'page11_field6', formData.applicant1StatesLived);
+    
+    // Field 7 = Marital status (Single/Unmarried couple/Married/Divorced/Widowed/Separated)
+    fillTextField(form, 'page11_field7', formData.applicant1MaritalStatus);
+    
+    // Field 8 = Number of previous marriages
+    fillTextField(form, 'page11_field8', formData.applicant1PreviousMarriages);
+    
+    // Field 9 = Highest grade completed
+    fillTextField(form, 'page11_field9', formData.applicant1HighestGrade);
+    
+    // Field 10 = Employer name
+    fillTextField(form, 'page11_field10', formData.applicant1EmployerName);
+    
+    // Field 11 = Total approximate monthly take-home pay (Employed - Non Self)
+    fillTextField(form, 'page11_field11', formData.applicant1EmployedTakeHome);
+    
+    // Field 12 = Job title
+    fillTextField(form, 'page11_field12', formData.applicant1JobTitle);
+    
+    // Field 13-14 = Advanced degree Yes/No checkboxes
+    fillCheckbox(form, 'page11_field13', formData.applicant1AdvancedDegree === 'yes');
+    fillCheckbox(form, 'page11_field14', formData.applicant1AdvancedDegree === 'no');
+    
+    // Field 15 = Are you self-employed? Yes checkbox
     fillCheckbox(form, 'page11_field15', formData.applicant1SelfEmployed === 'yes');
-    // 14-17 = Additional fields (page11_field16-19 y:375-377)
-    fillTextField(form, 'page11_field16', formData.applicant1SupervisorPhone);
-    fillTextField(form, 'page11_field17', formData.applicant1SupervisorEmail);
-    fillTextField(form, 'page11_field18', formData.applicant1SelfEmployedTakeHome);
-    fillTextField(form, 'page11_field19', formData.applicant1SelfEmployedContact);
-    // 18 = Additional Information (page11_field20 y:146)
-    fillTextField(form, 'page11_field20', formData.applicant1AdditionalInfo);
-    // 19 = States lived (page11_field21 y:144)
-    fillTextField(form, 'page11_field21', formData.applicant1StatesLived);
-    // Fields 22 and 23 are SKIPPED (PDF issue - not needed)
-    // page11_field22 y:146 - SKIP
-    // page11_field23 y:111 - SKIP
+    
+    // Field 16 = Source of income (Unemployed)
+    fillTextField(form, 'page11_field16', formData.applicant1UnemployedIncome);
+    
+    // Field 17 = Total approximate monthly take-home pay (Unemployed)
+    fillTextField(form, 'page11_field17', formData.applicant1UnemployedTakeHome);
+    
+    // Field 18 = Source of income (Employed - Non Self)
+    fillTextField(form, 'page11_field18', formData.applicant1EmployedIncome);
+    
+    // Field 19 = Supervisor's name
+    fillTextField(form, 'page11_field19', formData.applicant1SupervisorName);
+    
+    // Field 20 = Supervisor's phone number
+    fillTextField(form, 'page11_field20', formData.applicant1SupervisorPhone);
+    
+    // Field 21 = Supervisor's email address
+    fillTextField(form, 'page11_field21', formData.applicant1SupervisorEmail);
+    
+    // Fields 22-23 = SKIPPED per user request (PDF issue - not needed)
     
     // ==========================================
     // PAGE 12 - Applicant 2 Info (Spouse)
