@@ -320,8 +320,8 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page2_field26', formData.consentRestrictedRegistry);
     fillCheckbox(form, 'page2_field27', formData.consentFingerprints);
     
-    // Applicant Signature on Page 2
-    fillTextField(form, 'page2_field53', formData.applicantSignature);
+    // Applicant Signature on Page 2 - embedded as image only, not text
+    // fillTextField(form, 'page2_field53', formData.applicantSignature); // Removed - now using image embedding
     fillTextField(form, 'page2_field54', formData.applicantSignatureDate);
     
     // ==========================================
@@ -441,9 +441,9 @@ async function generateApplicationPDF(formData) {
     // Date of Birth
     fillTextField(form, 'page7_field4', formData.dateOfBirth);
     
-    // Printed Name and Signature
-    fillTextField(form, 'page7_field5', formData.applicantSignature);
-    fillTextField(form, 'page7_field6', formData.applicantSignature);
+    // Printed Name (use actual name for printed name field)
+    fillTextField(form, 'page7_field5', fullName);
+    // Signature field removed - now using image embedding
     
     // Driver record request checkboxes
     fillCheckbox(form, 'page7_field7', formData.oklahomaDrivingRecord);
@@ -651,9 +651,107 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'Text_1', formData.reasonForFostering);
     fillTextField(form, 'Text_2', formData.childCareExperience);
     fillTextField(form, 'Text_3', formData.preferredAgeRange);
-    fillTextField(form, 'Text_4', formData.emergencyName + ' - ' + formData.emergencyPhone);
+    const emergencyContact = [formData.emergencyName, formData.emergencyPhone].filter(Boolean).join(' - ');
+    fillTextField(form, 'Text_4', emergencyContact);
     
     console.log('[PDF] Government PDF filled successfully');
+    
+    // ==========================================
+    // EMBED SIGNATURE IMAGES
+    // ==========================================
+    
+    // Note: These positions need to be adjusted based on your actual PDF template
+    // You may need to experiment with x, y coordinates to align properly
+    // PDF coordinates start from bottom-left corner
+    
+    // Embed main applicant signature (Page 2)
+    if (formData.applicantSignature && formData.applicantSignature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 1, formData.applicantSignature, {
+        x: 50,  // Adjust these coordinates based on your PDF
+        y: 150,
+        width: 200,
+        height: 50
+      });
+    }
+    
+    // Embed consent signatures (Page 8-9)
+    if (formData.applicant1ConsentSignature && formData.applicant1ConsentSignature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 7, formData.applicant1ConsentSignature, {
+        x: 50,
+        y: 200,
+        width: 180,
+        height: 45
+      });
+    }
+    
+    if (formData.applicant2ConsentSignature && formData.applicant2ConsentSignature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 7, formData.applicant2ConsentSignature, {
+        x: 50,
+        y: 100,
+        width: 180,
+        height: 45
+      });
+    }
+    
+    // Embed driver records request signatures (Page 7 - adjust page index if different)
+    if (formData.personNamedSignature && formData.personNamedSignature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 6, formData.personNamedSignature, {
+        x: 320,
+        y: 650,
+        width: 180,
+        height: 40
+      });
+    }
+    
+    if (formData.personMakingSignature && formData.personMakingSignature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 6, formData.personMakingSignature, {
+        x: 320,
+        y: 520,
+        width: 180,
+        height: 40
+      });
+    }
+    
+    // Embed resource family application signatures (Page 14)
+    if (formData.applicant1Signature && formData.applicant1Signature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 13, formData.applicant1Signature, {
+        x: 50,
+        y: 400,
+        width: 200,
+        height: 50
+      });
+    }
+    
+    if (formData.applicant2Signature && formData.applicant2Signature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 13, formData.applicant2Signature, {
+        x: 50,
+        y: 330,
+        width: 200,
+        height: 50
+      });
+    }
+    
+    // Embed adult household member signatures (Page 14)
+    const adultMemberPositions = [
+      { y: 260 },
+      { y: 190 },
+      { y: 120 },
+      { y: 50 }
+    ];
+    
+    for (let i = 1; i <= 4; i++) {
+      const signature = formData[`adultMember${i}Signature`];
+      if (signature && signature.startsWith('data:image')) {
+        await embedSignatureImage(pdfDoc, 13, signature, {
+          x: 50,
+          y: adultMemberPositions[i - 1].y,
+          width: 180,
+          height: 40
+        });
+      }
+    }
+    
+    console.log('[PDF] Signature images embedded successfully');
     
     // Save and return the filled PDF
     const pdfBytes = await pdfDoc.save();
@@ -692,5 +790,45 @@ function fillCheckbox(form, fieldName, value) {
     }
   } catch (e) {
     // Field doesn't exist or is wrong type, skip it
+  }
+}
+
+/**
+ * Embed a signature image (base64 data URL) into the PDF at specified location
+ * @param {PDFDocument} pdfDoc - The PDF document
+ * @param {number} pageIndex - The page number (0-indexed)
+ * @param {string} signatureDataURL - The base64 data URL of the signature
+ * @param {object} position - {x, y, width, height} position on the page
+ */
+async function embedSignatureImage(pdfDoc, pageIndex, signatureDataURL, position) {
+  if (!signatureDataURL || !signatureDataURL.startsWith('data:image')) {
+    return; // Not a valid signature image
+  }
+
+  try {
+    // Extract base64 data from data URL
+    const base64Data = signatureDataURL.split(',')[1];
+    const imageBytes = Buffer.from(base64Data, 'base64');
+    
+    // Embed the PNG image
+    const signatureImage = await pdfDoc.embedPng(imageBytes);
+    
+    // Get the page
+    const pages = pdfDoc.getPages();
+    const page = pages[pageIndex];
+    
+    // Draw the signature image
+    const { width, height } = position;
+    page.drawImage(signatureImage, {
+      x: position.x,
+      y: position.y,
+      width: width,
+      height: height,
+    });
+    
+    console.log(`[PDF] Embedded signature on page ${pageIndex + 1}`);
+  } catch (error) {
+    console.error('[PDF] Error embedding signature image:', error);
+    // Continue without the signature rather than failing
   }
 }

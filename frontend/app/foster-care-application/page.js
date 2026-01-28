@@ -1,12 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import SignatureCanvas from '../components/SignatureCanvas';
 
 export default function FosterCareApplicationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // Signature refs for all signature fields
+  const signatureRef = useRef(null);
+  const consent1SignatureRef = useRef(null);
+  const consent2SignatureRef = useRef(null);
+  const personNamedSignatureRef = useRef(null);
+  const personMakingSignatureRef = useRef(null);
+  const applicant1SignatureRef = useRef(null);
+  const applicant2SignatureRef = useRef(null);
+  const adultMember1SignatureRef = useRef(null);
+  const adultMember2SignatureRef = useRef(null);
+  const adultMember3SignatureRef = useRef(null);
+  const adultMember4SignatureRef = useRef(null);
 
   const [formData, setFormData] = useState({
     // Personal Information
@@ -266,6 +280,10 @@ export default function FosterCareApplicationPage() {
     adultMember3SignatureDate: '',
     adultMember4Signature: '',
     adultMember4SignatureDate: '',
+    
+    // Driver Records Request Signatures
+    personNamedSignature: '',
+    personMakingSignature: '',
     
     // Page 15 - Agency Use Only
     assessmentFosterHome: false,
@@ -621,19 +639,18 @@ export default function FosterCareApplicationPage() {
                     <input type="checkbox" className="mr-2 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                     <span>Collision Report. Provide Date: 
                       <input
-                        type="text"
+                        type="date"
                         name="collisionReportDate"
                         value={formData.collisionReportDate}
                         onChange={handleInputChange}
-                        className="border-b border-gray-400 outline-none bg-transparent px-2 w-32 text-[11px]"
-                        placeholder="MM/DD/YYYY"
+                        className="border border-gray-400 rounded px-2 py-1 w-36 text-[11px] ml-1"
                       /> City/County: 
                       <input
                         type="text"
                         name="collisionReportCity"
                         value={formData.collisionReportCity}
                         onChange={handleInputChange}
-                        className="border-b border-gray-400 outline-none bg-transparent px-2 w-40 text-[11px]"
+                        className="border-b border-gray-400 outline-none bg-transparent px-2 w-40 text-[11px] ml-1"
                       />
                     </span>
                   </label>
@@ -657,7 +674,7 @@ export default function FosterCareApplicationPage() {
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold">Driver's Name</th>
-                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-16">Sex</th>
+                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-24">Sex</th>
                       <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-40">Driver License Number</th>
                       <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-32">Date of Birth</th>
                     </tr>
@@ -674,15 +691,17 @@ export default function FosterCareApplicationPage() {
                         />
                       </td>
                       <td className="border border-gray-400 px-2 py-2">
-                        <input
-                          type="text"
+                        <select
                           name="driverSex"
                           value={formData.driverSex || ''}
                           onChange={handleInputChange}
-                          maxLength="1"
-                          className="w-full outline-none bg-transparent text-[11px]"
-                          placeholder="M/F"
-                        />
+                          className="w-full h-8 px-2 text-base text-black font-semibold bg-white border-2 border-gray-400 rounded focus:border-blue-500 focus:outline-none"
+                        >
+                          <option value="">Select</option>
+                          <option value="M">M</option>
+                          <option value="F">F</option>
+                          <option value="X">X</option>
+                        </select>
                       </td>
                       <td className="border border-gray-400 px-2 py-2">
                         <input
@@ -787,10 +806,22 @@ export default function FosterCareApplicationPage() {
                         </td>
                         <td className="border border-gray-400 px-2 py-3 w-1/2">
                           <div className="mb-1">Signature of Person Named in Request</div>
-                          <input
-                            type="text"
-                            className="w-full border-b border-gray-400 outline-none bg-transparent mt-2"
-                          />
+                          <div className="mt-2">
+                            <SignatureCanvas
+                              ref={personNamedSignatureRef}
+                              width={350}
+                              height={100}
+                              onSave={(dataURL) => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  personNamedSignature: dataURL
+                                }));
+                              }}
+                            />
+                            {formData.personNamedSignature && (
+                              <div className="mt-1 text-xs text-green-700">✓ Saved</div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -822,10 +853,22 @@ export default function FosterCareApplicationPage() {
                       </td>
                       <td className="border border-gray-400 px-2 py-3 w-1/2">
                         <div className="font-semibold mb-1">Signature of Person Making Request</div>
-                        <input
-                          type="text"
-                          className="w-full border-b border-gray-400 outline-none bg-transparent mt-4"
-                        />
+                        <div className="mt-2">
+                          <SignatureCanvas
+                            ref={personMakingSignatureRef}
+                            width={350}
+                            height={100}
+                            onSave={(dataURL) => {
+                              setFormData(prev => ({
+                                ...prev,
+                                personMakingSignature: dataURL
+                              }));
+                            }}
+                          />
+                          {formData.personMakingSignature && (
+                            <div className="mt-1 text-xs text-green-700">✓ Saved</div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                     <tr>
@@ -1576,28 +1619,24 @@ export default function FosterCareApplicationPage() {
 
               {/* Signature Section */}
               <div className="mb-6">
-                <div className="grid grid-cols-2 gap-4 text-[11px]">
-                  <div>
-                    <label className="block mb-1 font-semibold text-gray-800">Signature</label>
-                    <input
-                      type="text"
-                      name="applicantSignature"
-                      value={formData.applicantSignature}
-                      onChange={handleInputChange}
-                      className="w-full border-b-2 border-gray-400 px-2 py-2 outline-none bg-transparent"
-                    />
+                <label className="block mb-2 font-semibold text-gray-800 text-[11px]">Signature</label>
+                <SignatureCanvas
+                  ref={signatureRef}
+                  width={500}
+                  height={150}
+                  onSave={(dataURL) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      applicantSignature: dataURL,
+                      applicantSignatureDate: new Date().toISOString().split('T')[0]
+                    }));
+                  }}
+                />
+                {formData.applicantSignature && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                    ✓ Signature saved (Date: {formData.applicantSignatureDate})
                   </div>
-                  <div>
-                    <label className="block mb-1 font-semibold text-gray-800">Date</label>
-                    <input
-                      type="date"
-                      name="applicantSignatureDate"
-                      value={formData.applicantSignatureDate}
-                      onChange={handleInputChange}
-                      className="w-full border-b-2 border-gray-400 px-2 py-2 outline-none bg-transparent"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Background Check Purpose Section */}
@@ -3095,59 +3134,51 @@ export default function FosterCareApplicationPage() {
 
                 <div className="space-y-6">
                   {/* First Applicant Signature */}
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">
-                        Applicant signature
-                      </label>
-                      <input
-                        type="text"
-                        name="applicant1ConsentSignature"
-                        value={formData.applicant1ConsentSignature}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">
-                        Date
-                      </label>
-                      <input
-                        type="date"
-                        name="applicant1ConsentDate"
-                        value={formData.applicant1ConsentDate}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
+                  <div>
+                    <label className="block mb-2 font-semibold text-gray-800 text-[11px]">
+                      Applicant 1 Signature
+                    </label>
+                    <SignatureCanvas
+                      ref={consent1SignatureRef}
+                      width={450}
+                      height={120}
+                      onSave={(dataURL) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          applicant1ConsentSignature: dataURL,
+                          applicant1ConsentDate: new Date().toISOString().split('T')[0]
+                        }));
+                      }}
+                    />
+                    {formData.applicant1ConsentSignature && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                        ✓ Signature saved (Date: {formData.applicant1ConsentDate})
+                      </div>
+                    )}
                   </div>
 
                   {/* Second Applicant Signature */}
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">
-                        Applicant signature
-                      </label>
-                      <input
-                        type="text"
-                        name="applicant2ConsentSignature"
-                        value={formData.applicant2ConsentSignature}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">
-                        Date
-                      </label>
-                      <input
-                        type="date"
-                        name="applicant2ConsentDate"
-                        value={formData.applicant2ConsentDate}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
+                  <div>
+                    <label className="block mb-2 font-semibold text-gray-800 text-[11px]">
+                      Applicant 2 Signature
+                    </label>
+                    <SignatureCanvas
+                      ref={consent2SignatureRef}
+                      width={450}
+                      height={120}
+                      onSave={(dataURL) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          applicant2ConsentSignature: dataURL,
+                          applicant2ConsentDate: new Date().toISOString().split('T')[0]
+                        }));
+                      }}
+                    />
+                    {formData.applicant2ConsentSignature && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                        ✓ Signature saved (Date: {formData.applicant2ConsentDate})
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -5018,79 +5049,83 @@ export default function FosterCareApplicationPage() {
 
                 {/* Applicant Signatures */}
                 <div className="space-y-4 mb-6">
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Applicant signature</label>
-                      <input
-                        type="text"
-                        name="applicant1Signature"
-                        value={formData.applicant1Signature}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Date</label>
-                      <input
-                        type="date"
-                        name="applicant1SignatureDate"
-                        value={formData.applicant1SignatureDate}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
+                  <div>
+                    <label className="block mb-2 font-semibold text-gray-800 text-[11px]">Applicant 1 Signature</label>
+                    <SignatureCanvas
+                      ref={applicant1SignatureRef}
+                      width={450}
+                      height={120}
+                      onSave={(dataURL) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          applicant1Signature: dataURL,
+                          applicant1SignatureDate: new Date().toISOString().split('T')[0]
+                        }));
+                      }}
+                    />
+                    {formData.applicant1Signature && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                        ✓ Signature saved (Date: {formData.applicant1SignatureDate})
+                      </div>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Applicant signature</label>
-                      <input
-                        type="text"
-                        name="applicant2Signature"
-                        value={formData.applicant2Signature}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Date</label>
-                      <input
-                        type="date"
-                        name="applicant2SignatureDate"
-                        value={formData.applicant2SignatureDate}
-                        onChange={handleInputChange}
-                        className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                      />
-                    </div>
+                  <div>
+                    <label className="block mb-2 font-semibold text-gray-800 text-[11px]">Applicant 2 Signature</label>
+                    <SignatureCanvas
+                      ref={applicant2SignatureRef}
+                      width={450}
+                      height={120}
+                      onSave={(dataURL) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          applicant2Signature: dataURL,
+                          applicant2SignatureDate: new Date().toISOString().split('T')[0]
+                        }));
+                      }}
+                    />
+                    {formData.applicant2Signature && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                        ✓ Signature saved (Date: {formData.applicant2SignatureDate})
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Adult Household Member Signatures */}
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map((num) => (
-                    <div key={num} className="grid grid-cols-2 gap-8">
-                      <div>
-                        <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Adult household member signature</label>
-                        <input
-                          type="text"
-                          name={`adultMember${num}Signature`}
-                          value={formData[`adultMember${num}Signature`]}
-                          onChange={handleInputChange}
-                          className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
+                <div className="space-y-6">
+                  {[1, 2, 3, 4].map((num) => {
+                    const refMap = {
+                      1: adultMember1SignatureRef,
+                      2: adultMember2SignatureRef,
+                      3: adultMember3SignatureRef,
+                      4: adultMember4SignatureRef
+                    };
+                    return (
+                      <div key={num}>
+                        <label className="block mb-2 font-semibold text-gray-800 text-[11px]">
+                          Adult Household Member {num} Signature
+                        </label>
+                        <SignatureCanvas
+                          ref={refMap[num]}
+                          width={450}
+                          height={100}
+                          onSave={(dataURL) => {
+                            setFormData(prev => ({
+                              ...prev,
+                              [`adultMember${num}Signature`]: dataURL,
+                              [`adultMember${num}SignatureDate`]: new Date().toISOString().split('T')[0]
+                            }));
+                          }}
                         />
+                        {formData[`adultMember${num}Signature`] && (
+                          <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                            ✓ Signature saved (Date: {formData[`adultMember${num}SignatureDate`]})
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Date</label>
-                        <input
-                          type="date"
-                          name={`adultMember${num}SignatureDate`}
-                          value={formData[`adultMember${num}SignatureDate`]}
-                          onChange={handleInputChange}
-                          className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-[11px]"
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
