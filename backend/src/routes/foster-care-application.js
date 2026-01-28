@@ -685,8 +685,19 @@ async function generateApplicationPDF(formData) {
     // ==========================================
     
     // General Information (your 1-14)
-    // 1 = Finding directions to home (page10_field1 y:722 - large text area at top)
-    fillTextField(form, 'page10_field1', formData.findingDirections);
+    // NOTE: page10_field1 is on physical page 11 (employment page), NOT the General Info page
+    // The General Information section doesn't have dedicated fields in the PDF template
+    // These fields (findingDirections, familyName, squareFootage, numberOfBedrooms) 
+    // are NOT in the "OA 2024 Parent Application.pdf" template
+    // They will need to be added to a different section or skipped
+    
+    // Skipping General Information fields that don't exist in PDF:
+    // - familyName
+    // - findingDirections  
+    // - squareFootage
+    // - numberOfBedrooms
+    // - homeType (rent/own)
+    
     // 2 = Physical address (page9_field2 y:574)
     fillTextField(form, 'page9_field2', formData.physicalAddress || formData.streetAddress);
     // 3 = Physical city (page9_field3 y:575)
@@ -703,15 +714,8 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page9_field8', formData.mailingState);
     // 9 = Mailing ZIP (page9_field9 y:540)
     fillTextField(form, 'page9_field9', formData.mailingZipCode);
-    // 10 = Family name (page9_field1 y:612)
-    fillTextField(form, 'page9_field1', formData.familyName || fullName);
-    // 11-12 = Home: Rent/Own checkboxes (page10_field11/12 y:625/626)
-    fillCheckbox(form, 'page10_field11', formData.homeType === 'rent');
-    fillCheckbox(form, 'page10_field12', formData.homeType === 'own');
-    // 13 = Square footage (page10_field10 y:624)
-    fillTextField(form, 'page10_field10', formData.squareFootage);
-    // 14 = Number of bedrooms (page10_field9 y:650)
-    fillTextField(form, 'page10_field9', formData.numberOfBedrooms || formData.bedrooms);
+    // Fields 10-14 (familyName, findingDirections, homeType, squareFootage, numberOfBedrooms)
+    // are skipped - they don't exist in this PDF template
     
     // Resource Applicant 1 Information (your 15-33)
     // 15 = First name (page9_field17 y:318 x:51 - leftmost)
