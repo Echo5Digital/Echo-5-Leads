@@ -1004,23 +1004,30 @@ async function generateApplicationPDF(formData) {
     }
     
     // Embed driver records request signatures (PAGE 1 - Driver Records page)
-    // page1_field23: Signature of Person Named in Request - x=316, y=395
-    // page1_field25: Signature of Person Making Request - x=317, y=205
+    // page1_field23: Signature of Person Named in Request - x=316, y=395, w=267, h=15
+    // page1_field25: Signature of Person Making Request - x=317, y=205, w=268, h=16
+    console.log('[PDF DEBUG] personNamedSignature exists:', !!formData.personNamedSignature);
+    console.log('[PDF DEBUG] personNamedSignature starts with data:image:', formData.personNamedSignature?.startsWith('data:image'));
+    console.log('[PDF DEBUG] personMakingSignature exists:', !!formData.personMakingSignature);
+    console.log('[PDF DEBUG] personMakingSignature starts with data:image:', formData.personMakingSignature?.startsWith('data:image'));
+    
     if (formData.personNamedSignature && formData.personNamedSignature.startsWith('data:image')) {
+      console.log('[PDF] Embedding personNamedSignature on page index 1');
       await embedSignatureImage(pdfDoc, 1, formData.personNamedSignature, {
-        x: 320,
+        x: 316,
         y: 395,
-        width: 200,
-        height: 20
+        width: 267,
+        height: 15
       });
     }
     
     if (formData.personMakingSignature && formData.personMakingSignature.startsWith('data:image')) {
+      console.log('[PDF] Embedding personMakingSignature on page index 1');
       await embedSignatureImage(pdfDoc, 1, formData.personMakingSignature, {
-        x: 320,
+        x: 317,
         y: 205,
-        width: 200,
-        height: 20
+        width: 268,
+        height: 16
       });
     }
     

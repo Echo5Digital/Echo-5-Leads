@@ -33,8 +33,8 @@ const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColo
     },
     getDataURL: () => {
       if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
-        // Compress signature as JPEG with 70% quality
-        return sigPadRef.current.getTrimmedCanvas().toDataURL('image/jpeg', 0.7);
+        // Use PNG format for better PDF compatibility
+        return sigPadRef.current.getTrimmedCanvas().toDataURL('image/png');
       }
       return null;
     }
@@ -48,11 +48,11 @@ const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColo
 
   const handleSave = () => {
     if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
-      // Get canvas and compress image
+      // Get canvas and save as PNG for better PDF compatibility
       const canvas = sigPadRef.current.getTrimmedCanvas();
       
-      // Compress by reducing quality and converting to JPEG
-      const dataURL = canvas.toDataURL('image/jpeg', 0.7); // 70% quality JPEG
+      // Use PNG format for better compatibility with pdf-lib
+      const dataURL = canvas.toDataURL('image/png');
       
       if (onSave) {
         onSave(dataURL);
