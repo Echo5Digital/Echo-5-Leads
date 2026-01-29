@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { applicationId } = req.query;
+    const { applicationId } = req.params;
 
     if (!applicationId) {
       return res.status(400).json({ error: 'Application ID is required' });
