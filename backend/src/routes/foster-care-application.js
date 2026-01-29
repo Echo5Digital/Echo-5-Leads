@@ -963,98 +963,109 @@ async function generateApplicationPDF(formData) {
     // EMBED SIGNATURE IMAGES
     // ==========================================
     
-    // Note: These positions need to be adjusted based on your actual PDF template
-    // You may need to experiment with x, y coordinates to align properly
-    // PDF coordinates start from bottom-left corner
+    // SIGNATURE POSITIONS - Based on actual PDF field analysis:
+    // Signature_1 (Page 5, index 4): x=52, y=608 - Main applicant signature
+    // Signature_2 (Page 9, index 8): x=49, y=444 - Consent signature 1
+    // Signature_3 (Page 9, index 8): x=49, y=409 - Consent signature 2
+    // Signature_4 (Page 14, index 13): x=48, y=407 - Applicant 1 signature
+    // Signature_5 (Page 14, index 13): x=48, y=371 - Applicant 2 signature
+    // Signature_6 (Page 14, index 13): x=307, y=407 - Adult member 1 signature
+    // Signature_7 (Page 14, index 13): x=307, y=371 - Adult member 2 signature
     
-    // Embed main applicant signature (Page 3 - PDF page index 2)
-    // PAGE 3 has page2_field53 (signature) and page2_field54 (date) fields
+    // Embed main applicant signature (Page 5 - PDF page index 4)
+    // Signature_1: x=52, y=608
     if (formData.applicantSignature && formData.applicantSignature.startsWith('data:image')) {
-      await embedSignatureImage(pdfDoc, 2, formData.applicantSignature, {
-        x: 50,  // Adjust these coordinates based on your PDF
-        y: 150,
+      await embedSignatureImage(pdfDoc, 4, formData.applicantSignature, {
+        x: 52,
+        y: 608,
         width: 200,
-        height: 50
+        height: 20
       });
     }
     
     // Embed consent signatures (Page 9 - PDF page index 8)
-    // PAGE 9 has Signature_2 and Signature_3 fields
+    // Signature_2: x=49, y=444, Signature_3: x=49, y=409
     if (formData.applicant1ConsentSignature && formData.applicant1ConsentSignature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 8, formData.applicant1ConsentSignature, {
-        x: 50,
-        y: 200,
-        width: 180,
-        height: 45
+        x: 49,
+        y: 444,
+        width: 200,
+        height: 20
       });
     }
     
     if (formData.applicant2ConsentSignature && formData.applicant2ConsentSignature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 8, formData.applicant2ConsentSignature, {
-        x: 50,
-        y: 100,
-        width: 180,
-        height: 45
+        x: 49,
+        y: 409,
+        width: 200,
+        height: 20
       });
     }
     
     // Embed driver records request signatures (PAGE 1 - Driver Records page)
-    // Based on DEBUG PDF, signatures are page1_field23 and page1_field25
+    // page1_field23: Signature of Person Named in Request - x=316, y=395
+    // page1_field25: Signature of Person Making Request - x=317, y=205
     if (formData.personNamedSignature && formData.personNamedSignature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 1, formData.personNamedSignature, {
-        x: 360,
-        y: 330,
-        width: 180,
-        height: 35
+        x: 320,
+        y: 395,
+        width: 200,
+        height: 20
       });
     }
     
     if (formData.personMakingSignature && formData.personMakingSignature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 1, formData.personMakingSignature, {
-        x: 360,
-        y: 190,
-        width: 180,
-        height: 35
+        x: 320,
+        y: 205,
+        width: 200,
+        height: 20
       });
     }
     
-    // Embed resource family application signatures (Page 14)
+    // Embed resource family application signatures (Page 14 - index 13)
+    // Signature_4: x=48, y=407 - Applicant 1
+    // Signature_5: x=48, y=371 - Applicant 2
+    // Signature_6: x=307, y=407 - Adult member 1 (right column)
+    // Signature_7: x=307, y=371 - Adult member 2 (right column)
     if (formData.applicant1Signature && formData.applicant1Signature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 13, formData.applicant1Signature, {
-        x: 50,
-        y: 400,
-        width: 200,
-        height: 50
+        x: 48,
+        y: 407,
+        width: 175,
+        height: 20
       });
     }
     
     if (formData.applicant2Signature && formData.applicant2Signature.startsWith('data:image')) {
       await embedSignatureImage(pdfDoc, 13, formData.applicant2Signature, {
-        x: 50,
-        y: 330,
-        width: 200,
-        height: 50
+        x: 48,
+        y: 371,
+        width: 175,
+        height: 20
       });
     }
     
-    // Embed adult household member signatures (Page 14)
-    const adultMemberPositions = [
-      { y: 260 },
-      { y: 190 },
-      { y: 120 },
-      { y: 50 }
-    ];
+    // Embed adult household member signatures (Page 14 - right column)
+    // Signature_6: x=307, y=407 - Adult member 1
+    // Signature_7: x=307, y=371 - Adult member 2
+    if (formData.adultMember1Signature && formData.adultMember1Signature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 13, formData.adultMember1Signature, {
+        x: 307,
+        y: 407,
+        width: 175,
+        height: 20
+      });
+    }
     
-    for (let i = 1; i <= 4; i++) {
-      const signature = formData[`adultMember${i}Signature`];
-      if (signature && signature.startsWith('data:image')) {
-        await embedSignatureImage(pdfDoc, 13, signature, {
-          x: 50,
-          y: adultMemberPositions[i - 1].y,
-          width: 180,
-          height: 40
-        });
-      }
+    if (formData.adultMember2Signature && formData.adultMember2Signature.startsWith('data:image')) {
+      await embedSignatureImage(pdfDoc, 13, formData.adultMember2Signature, {
+        x: 307,
+        y: 371,
+        width: 175,
+        height: 20
+      });
     }
     
     console.log('[PDF] Signature images embedded successfully');
