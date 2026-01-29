@@ -761,7 +761,7 @@ async function generateApplicationPDF(formData) {
     
     // Unemployed section (page10_field19, 20, 21 from debug PDF)
     fillTextField(form, 'page10_field19', formData.applicant1UnemployedLabel || formData.unemployedStartDate);
-    fillTextField(form, 'page10_field20', formData.applicant1UnemployedSourceOfIncome || formData.unemployedSourceOfIncome);
+    fillTextField(form, 'page10_field20', formData.applicant1UnemployedIncome || formData.applicant1UnemployedSourceOfIncome || formData.unemployedSourceOfIncome);
     fillTextField(form, 'page10_field21', formData.applicant1UnemployedTakeHome || formData.unemployedTakeHome);
     
     // Employed (Non Self-Employment) section
@@ -789,26 +789,31 @@ async function generateApplicationPDF(formData) {
     
     // Page 11 Checkboxes (based on debug PDF testing)
     // N/A checkbox for states lived
-    fillCheckbox(form, 'page10_field2', formData.statesLivedNA);
+    fillCheckbox(form, 'page10_field2', formData.applicant1StatesLivedNA || formData.statesLivedNA);
     // Marital status checkboxes
-    fillCheckbox(form, 'page10_field3', formData.maritalStatus === 'single');
-    fillCheckbox(form, 'page10_field4', formData.maritalStatus === 'unmarried couple');
-    fillCheckbox(form, 'page10_field5', formData.maritalStatus === 'married');
-    fillCheckbox(form, 'page10_field6', formData.maritalStatus === 'divorced');
-    fillCheckbox(form, 'page10_field7', formData.maritalStatus === 'widowed');
-    fillCheckbox(form, 'page10_field8', formData.maritalStatus === 'separated');
+    const maritalStatus = formData.applicant1MaritalStatus || formData.maritalStatus || '';
+    fillCheckbox(form, 'page10_field3', maritalStatus === 'single');
+    fillCheckbox(form, 'page10_field4', maritalStatus === 'unmarried couple');
+    fillCheckbox(form, 'page10_field5', maritalStatus === 'married');
+    fillCheckbox(form, 'page10_field6', maritalStatus === 'divorced');
+    fillCheckbox(form, 'page10_field7', maritalStatus === 'widowed');
+    fillCheckbox(form, 'page10_field8', maritalStatus === 'separated');
     // Advanced degree Yes/No
-    fillCheckbox(form, 'page10_field11', formData.advancedDegree === 'yes' || formData.advancedDegree === true);
-    fillCheckbox(form, 'page10_field12', formData.advancedDegree === 'no' || formData.advancedDegree === false);
+    const advancedDegree = formData.applicant1AdvancedDegree || formData.advancedDegree || '';
+    fillCheckbox(form, 'page10_field11', advancedDegree === 'yes');
+    fillCheckbox(form, 'page10_field12', advancedDegree === 'no');
     // Armed forces Yes/No
-    fillCheckbox(form, 'page10_field13', formData.armedForces === 'yes' || formData.armedForces === true);
-    fillCheckbox(form, 'page10_field14', formData.armedForces === 'no' || formData.armedForces === false);
+    const armedForces = formData.applicant1ArmedForces || formData.armedForces || '';
+    fillCheckbox(form, 'page10_field13', armedForces === 'yes');
+    fillCheckbox(form, 'page10_field14', armedForces === 'no');
     // Are you employed? Yes/No
-    fillCheckbox(form, 'page10_field15', formData.isEmployed === 'yes' || formData.isEmployed === true);
-    fillCheckbox(form, 'page10_field16', formData.isEmployed === 'no' || formData.isEmployed === false);
+    const isEmployed = formData.applicant1Employed || formData.isEmployed || '';
+    fillCheckbox(form, 'page10_field15', isEmployed === 'yes');
+    fillCheckbox(form, 'page10_field16', isEmployed === 'no');
     // Are you self-employed? Yes/No
-    fillCheckbox(form, 'page10_field17', formData.isSelfEmployed === 'yes' || formData.isSelfEmployed === true);
-    fillCheckbox(form, 'page10_field18', formData.isSelfEmployed === 'no' || formData.isSelfEmployed === false);
+    const isSelfEmployed = formData.applicant1SelfEmployed || formData.isSelfEmployed || '';
+    fillCheckbox(form, 'page10_field17', isSelfEmployed === 'yes');
+    fillCheckbox(form, 'page10_field18', isSelfEmployed === 'no');
     
     // Additional Information Section (bottom of page 11)
     // Q1: Have you ever applied to foster, adopt, or provide in home daycare in any state?
