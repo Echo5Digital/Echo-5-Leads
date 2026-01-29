@@ -157,6 +157,9 @@ export default function FosterCareApplicationPage() {
     privateGuardianshipNameBased: false,
     privateInternationalAdoptionNameBased: false,
     
+    // UE ID
+    ueId: '',
+    
     // OKDHS Representative
     representativeName: '',
     representativeTitle: '',
@@ -582,6 +585,9 @@ export default function FosterCareApplicationPage() {
       substanceAbuseHistory: false,
       specialNeedsWillingness: true,
       agreeToTerms: true,
+      
+      // UE ID
+      ueId: '12345',
       
       // Representative Info
       representativeName: 'Jane Smith',
@@ -2723,6 +2729,8 @@ export default function FosterCareApplicationPage() {
                   <input
                     type="text"
                     name="ueId"
+                    value={formData.ueId}
+                    onChange={handleInputChange}
                     className="border-b border-gray-400 outline-none bg-transparent w-48 px-2"
                   />
                 </div>
