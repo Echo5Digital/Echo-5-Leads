@@ -945,6 +945,8 @@ async function generateApplicationPDF(formData) {
     // SIGNATURE DATES (Special Fields)
     // ==========================================
     
+    // Date_1 is on Page 5 (index 4) next to Signature_1 (applicantSignature)
+    fillTextField(form, 'Date_1', formData.applicantSignatureDate);
     fillTextField(form, 'Date_4', formData.applicant1SignatureDate || formData.signatureDate);
     fillTextField(form, 'Date_5', formData.applicant2SignatureDate);
     fillTextField(form, 'Date_6', formData.adultMember1SignatureDate);
@@ -974,7 +976,10 @@ async function generateApplicationPDF(formData) {
     
     // Embed main applicant signature (Page 5 - PDF page index 4)
     // Signature_1: x=52, y=608
+    console.log('[PDF DEBUG] applicantSignature exists:', !!formData.applicantSignature);
+    console.log('[PDF DEBUG] applicantSignature starts with data:image:', formData.applicantSignature?.startsWith('data:image'));
     if (formData.applicantSignature && formData.applicantSignature.startsWith('data:image')) {
+      console.log('[PDF] Embedding applicantSignature on page index 4 (Page 5)');
       await embedSignatureImage(pdfDoc, 4, formData.applicantSignature, {
         x: 52,
         y: 608,
