@@ -38,6 +38,7 @@ import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 import fosterCareApplicationRoute from './src/routes/foster-care-application.js';
 import fosterCareApplicationPdfRoute from './src/routes/foster-care-application-pdf.js';
 import shareFosterApplicationRoute from './src/routes/share-foster-application.js';
+import downloadFosterApplicationRoute from './src/routes/download-foster-application.js';
 
 // Auth routes
 import loginRoute from './src/routes/auth-login.js';
@@ -146,6 +147,7 @@ app.get('/api/sla/overdue', slaOverdueRoute);
 app.post('/api/foster-care-application', fosterCareApplicationRoute);
 app.get('/api/foster-care-application/:id/pdf', fosterCareApplicationPdfRoute);
 app.post('/api/share-foster-application', shareFosterApplicationRoute);
+app.get('/api/download-foster-application/:applicationId', downloadFosterApplicationRoute);
 
 // Error handling
 app.use((err, req, res, next) => {

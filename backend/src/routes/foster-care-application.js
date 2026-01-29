@@ -65,9 +65,8 @@ export default async function handler(req, res) {
 
     await applicationsCollection.insertOne(application);
 
-    // Also create a lead entry for tracking
-    const lead = {
-      tenantId: tenant._id,
+    // Create or update lead entry for tracking using upsert
+    const leadData = {
       firstName: formData.firstName || '',
       lastName: formData.lastName || '',
       email: formData.email || '',
@@ -83,44 +82,22 @@ export default async function handler(req, res) {
         residenceType: formData.residenceType,
         applicationId: applicationId.toString()
       },
-      submittedAt: timestamp,
-      createdAt: timestamp,
       updatedAt: timestamp
     };
 
-    // Try to insert lead, but don't fail if duplicate exists
-    try {
-      await leadsCollection.insertOne(lead);
-    } catch (error) {
-      if (error.code === 11000) {
-        // Duplicate key error - update existing lead instead
-        console.log('[Foster App] Duplicate lead detected, updating existing lead');
-        await leadsCollection.updateOne(
-          { email: formData.email, tenantId: tenant._id },
-          { 
-            $set: {
-              firstName: formData.firstName || '',
-              lastName: formData.lastName || '',
-              phone: formData.cellPhone || '',
-              source: 'Foster Care Application Form',
-              status: 'New',
-              stage: 'New',
-              leadType: 'Foster Care Application',
-              customFields: {
-                applicationType: 'Foster Parent',
-                hasSpouse: formData.hasSpouse,
-                preferredAgeRange: formData.preferredAgeRange,
-                residenceType: formData.residenceType,
-                applicationId: applicationId.toString()
-              },
-              updatedAt: timestamp
-            }
-          }
-        );
-      } else {
-        throw error; // Re-throw if it's a different error
-      }
-    }
+    // Use upsert to create or update the lead
+    await leadsCollection.updateOne(
+      { email: formData.email, tenantId: tenant._id },
+      { 
+        $set: leadData,
+        $setOnInsert: { 
+          tenantId: tenant._id,
+          createdAt: timestamp,
+          submittedAt: timestamp
+        }
+      },
+      { upsert: true }
+    );
 
     // Send confirmation email to applicant with PDF attachment
     const applicantEmailSubject = 'Foster Care Application Received - Open Arms Foster Care';

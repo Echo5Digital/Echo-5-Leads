@@ -282,6 +282,19 @@ export default function LeadsListPage() {
     }
   }
 
+  function handleDownloadForm(lead) {
+    const applicationId = lead.customFields?.applicationId;
+    
+    if (!applicationId) {
+      alert('No completed application form found for this lead.');
+      return;
+    }
+
+    // Open download URL in new tab/window
+    const downloadUrl = leadsApi.downloadFosterApplicationUrl(applicationId);
+    window.open(downloadUrl, '_blank');
+  }
+
   async function handleAddMetaActivity(e) {
     e.preventDefault();
     if (!leadDetails?._id) {
@@ -848,6 +861,15 @@ export default function LeadsListPage() {
                           >
                             Send Form
                           </button>
+                          {lead.customFields?.applicationId && (
+                            <button
+                              onClick={() => handleDownloadForm(lead)}
+                              className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                              title="Download completed application"
+                            >
+                              Download
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
                             className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
@@ -1042,6 +1064,15 @@ export default function LeadsListPage() {
                           >
                             Send Form
                           </button>
+                          {lead.customFields?.applicationId && (
+                            <button
+                              onClick={() => handleDownloadForm(lead)}
+                              className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200"
+                              title="Download completed application"
+                            >
+                              Download
+                            </button>
+                          )}
                           <button
                             onClick={() => handleViewDetails(lead)}
                             className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"

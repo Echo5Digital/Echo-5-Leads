@@ -15,7 +15,8 @@ async function apiRequest(endpoint, options = {}) {
     endpoint.includes('/api/dashboard') || // Dashboard stats should use token
     endpoint.includes('/api/tenant') || // Tenant config should use token
     endpoint.startsWith('/api/leads') ||  // Include all leads operations for proper authentication
-    endpoint.includes('/api/share-foster-application')  // Share form functionality
+    endpoint.includes('/api/share-foster-application') ||  // Share form functionality
+    endpoint.includes('/api/download-foster-application')  // Download completed forms
   );
   
   const headers = {
@@ -149,6 +150,11 @@ export const leadsApi = {
         formUrl
       }),
     });
+  },
+
+  // Download foster care application PDF
+  downloadFosterApplicationUrl(applicationId) {
+    return `${API_URL}/api/download-foster-application/${applicationId}`;
   },
 };
 
