@@ -679,18 +679,6 @@ export default function FosterCareApplicationPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* TEST BUTTON - REMOVE IN PRODUCTION */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          type="button"
-          onClick={fillTestData}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-bold text-sm flex items-center gap-2"
-        >
-          <span>🚀</span>
-          Auto-Fill Test Data
-        </button>
-      </div>
-      
       <div className="max-w-4xl mx-auto px-8 py-12">
         {currentPage === 1 && (
           <>
