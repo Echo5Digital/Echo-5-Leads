@@ -139,8 +139,10 @@ export const leadsApi = {
   },
 
   // Send foster care application form to lead
-  async sendFormToLead(recipientEmail, recipientName, message = '') {
-    const formUrl = 'https://echo-5-leads.vercel.app/foster-care-application';
+  async sendFormToLead(recipientEmail, recipientName, message = '', leadId = null) {
+    const formUrl = leadId 
+      ? `https://echo-5-leads.vercel.app/foster-care-application?leadId=${leadId}`
+      : 'https://echo-5-leads.vercel.app/foster-care-application';
     return apiRequest('/api/share-foster-application', {
       method: 'POST',
       body: JSON.stringify({

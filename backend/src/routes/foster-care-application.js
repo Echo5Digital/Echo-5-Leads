@@ -23,6 +23,7 @@ export default async function handler(req, res) {
 
   try {
     const formData = req.body;
+    const leadId = req.query?.leadId; // Get leadId from query params if provided
 
     // No validation - accept all submissions
 
@@ -65,39 +66,25 @@ export default async function handler(req, res) {
 
     await applicationsCollection.insertOne(application);
 
-    // Create or update lead entry for tracking using upsert
-    const leadData = {
-      firstName: formData.firstName || '',
-      lastName: formData.lastName || '',
-      email: formData.email || '',
-      phone: formData.cellPhone || '',
-      source: 'Foster Care Application Form',
-      status: 'New',
-      stage: 'New',
-      leadType: 'Foster Care Application',
-      customFields: {
-        applicationType: 'Foster Parent',
-        hasSpouse: formData.hasSpouse,
-        preferredAgeRange: formData.preferredAgeRange,
-        residenceType: formData.residenceType,
-        applicationId: applicationId.toString()
-      },
-      updatedAt: timestamp
-    };
-
-    // Use upsert to create or update the lead
-    await leadsCollection.updateOne(
-      { email: formData.email, tenantId: tenant._id },
-      { 
-        $set: leadData,
-        $setOnInsert: { 
-          tenantId: tenant._id,
-          createdAt: timestamp,
-          submittedAt: timestamp
-        }
-      },
-      { upsert: true }
-    );
+    // Only update the lead if leadId is provided (form was sent to specific lead)
+    // Don't create new leads from form submissions
+    if (leadId) {
+      try {
+        await leadsCollection.updateOne(
+          { _id: new ObjectId(leadId), tenantId: tenant._id },
+          { 
+            $set: {
+              'customFields.applicationId': applicationId.toString(),
+              updatedAt: timestamp
+            }
+          }
+        );
+        console.log(`[Foster App] Updated lead ${leadId} with applicationId`);
+      } catch (error) {
+        console.error(`[Foster App] Failed to update lead ${leadId}:`, error);
+      }
+    }
+    // If no leadId, don't create/update any lead - just save the application
 
     // Send confirmation email to applicant with PDF attachment
     const applicantEmailSubject = 'Foster Care Application Received - Open Arms Foster Care';
@@ -180,7 +167,7 @@ The complete application PDF is attached.
 
 Please review and follow up with the applicant within 5 business days.
 
-View in Dashboard: ${process.env.FRONTEND_URL || 'https://leads.echo5software.com'}/leads?id=${lead._id}
+Application ID: ${applicationId}
     `.trim();
 
     // Send notification email to admin/case workers

@@ -275,7 +275,7 @@ export default function LeadsListPage() {
     alert('Your request is being processed. You will be notified once completed.');
 
     try {
-      await leadsApi.sendFormToLead(email, name);
+      await leadsApi.sendFormToLead(email, name, '', lead._id);
       alert(`✓ Form sent successfully!\n\nThe application form has been sent to ${email}. The recipient will receive an email with a link to complete the form.`);
     } catch (err) {
       alert('Error sending form: ' + err.message);

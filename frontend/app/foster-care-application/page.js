@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import SignatureCanvas from '../components/SignatureCanvas';
 
 export default function FosterCareApplicationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const leadId = searchParams.get('leadId'); // Get leadId from URL
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -657,7 +659,11 @@ export default function FosterCareApplicationPage() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/api/foster-care-application`, {
+      const url = leadId 
+        ? `${apiUrl}/api/foster-care-application?leadId=${leadId}`
+        : `${apiUrl}/api/foster-care-application`;
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
