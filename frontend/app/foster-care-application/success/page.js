@@ -138,12 +138,6 @@ function SuccessContent() {
           </div>
 
           <div className="space-y-3">
-            <button
-              onClick={() => router.push('/')}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-semibold"
-            >
-              Return to Home
-            </button>
             <p className="text-sm text-gray-500">
               Questions? Contact us at{' '}
               <a href="mailto:amber.price@openarmsfostercare.com" className="text-blue-600 hover:underline">

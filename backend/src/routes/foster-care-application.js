@@ -881,20 +881,21 @@ async function generateApplicationPDF(formData) {
     fillTextField(form, 'page12_field27', formData.spouseGrossIncome);
     
     // ==========================================
-    // PAGE 13 - References
-    // Text Fields: 5 total
-    // Checkboxes: 2 total
+    // PAGE 14 (index 13) - Signature and Agreement / Declaration
+    // The page13_field3-7 are on this page for the "Subscribed on this... day of..." section
+    // page13_field1, page13_field2 = checkboxes at top
+    // page13_field3 = day (Subscribed on this ___ day)
+    // page13_field4 = month (day of ___)
+    // page13_field5 = year (20___)
+    // page13_field6 = city
+    // page13_field7 = state
     // ==========================================
     
-    if (formData.references && formData.references[0]) {
-      fillTextField(form, 'page13_field3', formData.references[0].firstName + ' ' + formData.references[0].lastName);
-      fillTextField(form, 'page13_field4', formData.references[0].phoneNumber || formData.references[0].phone);
-      fillTextField(form, 'page13_field5', formData.references[0].relationship);
-    }
-    if (formData.references && formData.references[1]) {
-      fillTextField(form, 'page13_field6', formData.references[1].firstName + ' ' + formData.references[1].lastName);
-      fillTextField(form, 'page13_field7', formData.references[1].phoneNumber || formData.references[1].phone);
-    }
+    fillTextField(form, 'page13_field3', formData.signatureDay || '');  // day
+    fillTextField(form, 'page13_field4', formData.signatureMonth || '');  // month
+    fillTextField(form, 'page13_field5', formData.signatureYear || '');  // year (just 2 digits after 20)
+    fillTextField(form, 'page13_field6', formData.signatureCity || formData.physicalCity || formData.city || '');  // city
+    fillTextField(form, 'page13_field7', formData.signatureState || formData.physicalState || formData.state || '');  // state
     
     // ==========================================
     // PAGE 14 - Background Questions
