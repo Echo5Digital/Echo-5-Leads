@@ -591,8 +591,8 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page6_field6', formData.privateInternationalAdoptionNameBased);
     
     // OKDHS Representative or Requesting Authority text fields (your 7-16)
-    // 7 = UE ID# field - NOTE: Frontend doesn't have this in formData, leave blank
-    // fillTextField(form, 'page6_field7', formData.ueId);
+    // 7 = UE ID# field
+    fillTextField(form, 'page6_field7', formData.ueId);
     // 8 = Name (left field in Name/Title row)
     fillTextField(form, 'page6_field8', formData.representativeName);
     // 9 = Title (right field in Name/Title row)
