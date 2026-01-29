@@ -990,7 +990,10 @@ async function generateApplicationPDF(formData) {
     
     // Embed consent signatures (Page 9 - PDF page index 8)
     // Signature_2: x=49, y=444, Signature_3: x=49, y=409
+    console.log('[PDF DEBUG] applicant1ConsentSignature exists:', !!formData.applicant1ConsentSignature);
+    console.log('[PDF DEBUG] applicant2ConsentSignature exists:', !!formData.applicant2ConsentSignature);
     if (formData.applicant1ConsentSignature && formData.applicant1ConsentSignature.startsWith('data:image')) {
+      console.log('[PDF] Embedding applicant1ConsentSignature on page index 8 (Page 9)');
       await embedSignatureImage(pdfDoc, 8, formData.applicant1ConsentSignature, {
         x: 49,
         y: 444,
@@ -1000,6 +1003,7 @@ async function generateApplicationPDF(formData) {
     }
     
     if (formData.applicant2ConsentSignature && formData.applicant2ConsentSignature.startsWith('data:image')) {
+      console.log('[PDF] Embedding applicant2ConsentSignature on page index 8 (Page 9)');
       await embedSignatureImage(pdfDoc, 8, formData.applicant2ConsentSignature, {
         x: 49,
         y: 409,
@@ -1041,7 +1045,14 @@ async function generateApplicationPDF(formData) {
     // Signature_5: x=48, y=371 - Applicant 2
     // Signature_6: x=307, y=407 - Adult member 1 (right column)
     // Signature_7: x=307, y=371 - Adult member 2 (right column)
+    console.log('[PDF DEBUG] Page 14 signatures:');
+    console.log('  applicant1Signature:', !!formData.applicant1Signature);
+    console.log('  applicant2Signature:', !!formData.applicant2Signature);
+    console.log('  adultMember1Signature:', !!formData.adultMember1Signature);
+    console.log('  adultMember2Signature:', !!formData.adultMember2Signature);
+    
     if (formData.applicant1Signature && formData.applicant1Signature.startsWith('data:image')) {
+      console.log('[PDF] Embedding applicant1Signature on page index 13 (Page 14)');
       await embedSignatureImage(pdfDoc, 13, formData.applicant1Signature, {
         x: 48,
         y: 407,
