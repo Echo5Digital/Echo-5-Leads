@@ -810,6 +810,20 @@ async function generateApplicationPDF(formData) {
     fillCheckbox(form, 'page10_field17', formData.isSelfEmployed === 'yes' || formData.isSelfEmployed === true);
     fillCheckbox(form, 'page10_field18', formData.isSelfEmployed === 'no' || formData.isSelfEmployed === false);
     
+    // Additional Information Section (bottom of page 11)
+    // Q1: Have you ever applied to foster, adopt, or provide in home daycare in any state?
+    fillCheckbox(form, 'page10_field32', formData.applicant1PreviousFosterApply === 'yes');  // Yes
+    fillCheckbox(form, 'page10_field33', formData.applicant1PreviousFosterApply === 'no');   // No
+    // Q2: been arrested or had criminal charges filed?
+    fillCheckbox(form, 'page10_field34', formData.applicant1ArrestedCharges === 'yes');      // Yes
+    fillCheckbox(form, 'page10_field35', formData.applicant1ArrestedCharges === 'no');       // No
+    // Q3: entered a plea of guilty or nolo contendere to a crime?
+    fillCheckbox(form, 'page10_field36', formData.applicant1PleaGuilty === 'yes');           // Yes
+    fillCheckbox(form, 'page10_field37', formData.applicant1PleaGuilty === 'no');            // No
+    // Q4: been investigated for child physical abuse, sexual abuse, or neglect?
+    fillCheckbox(form, 'page10_field38', formData.applicant1InvestigatedAbuse === 'yes');    // Yes
+    fillCheckbox(form, 'page10_field39', formData.applicant1InvestigatedAbuse === 'no');     // No
+    
     // ==========================================
     // PAGE 12 - Household Members, Children Not in Home, References
     // PDF Page 12 uses page11_field* (off-by-one naming)
