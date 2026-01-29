@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 function LayoutContent({ children }) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/unauthorized';
-  const isPublicForm = pathname === '/foster-care-application' || pathname === '/share-foster-application';
+  const isPublicForm = pathname?.startsWith('/foster-care-application') || pathname === '/share-foster-application';
 
   // Don't show sidebar on auth pages or public forms
   if (isAuthPage || isPublicForm) {
