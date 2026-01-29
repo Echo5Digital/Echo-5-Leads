@@ -679,36 +679,36 @@ export default function FosterCareApplicationPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 overflow-x-hidden">
         {currentPage === 1 && (
-          <>
+          <div className="w-full overflow-x-hidden">
             {/* Service Oklahoma Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 sm:mb-8">
               <div className="flex items-center justify-center mb-4">
-                <div className="mr-4">
-                  <svg viewBox="0 0 100 100" className="w-20 h-20">
+                <div className="mr-2 sm:mr-4">
+                  <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-20 sm:h-20">
                     <circle cx="50" cy="50" r="45" fill="none" stroke="#004B87" strokeWidth="2"/>
                     <polygon points="50,20 55,40 75,40 60,52 65,70 50,58 35,70 40,52 25,40 45,40" fill="#004B87"/>
                     <text x="50" y="85" textAnchor="middle" fontSize="12" fill="#004B87" fontWeight="bold">SERVICE</text>
                   </svg>
                 </div>
               </div>
-              <h1 className="text-3xl font-light text-gray-700 tracking-[0.3em] mb-1">
+              <h1 className="text-xl sm:text-3xl font-light text-gray-700 tracking-[0.2em] sm:tracking-[0.3em] mb-1">
                 SERVICE
               </h1>
-              <h2 className="text-4xl font-light text-[#004B87] tracking-[0.2em] mb-4">
+              <h2 className="text-2xl sm:text-4xl font-light text-[#004B87] tracking-[0.15em] sm:tracking-[0.2em] mb-2 sm:mb-4">
                 OKLAHOMA
               </h2>
-              <div className="text-sm text-gray-700 mb-1">Driver License Services - Records Management Division</div>
-              <div className="text-base font-bold text-gray-900 uppercase">
+              <div className="text-xs sm:text-sm text-gray-700 mb-1">Driver License Services - Records Management Division</div>
+              <div className="text-sm sm:text-base font-bold text-gray-900 uppercase px-2">
                 RECORDS REQUEST AND CONSENT TO RELEASE
               </div>
             </div>
 
             {/* Form Instructions */}
-            <div className="mb-12">
-              <h2 className="text-base font-bold text-gray-900 mb-4">Form Instructions</h2>
-              <div className="space-y-4 text-[13px] leading-relaxed text-gray-800">
+            <div className="mb-8 sm:mb-12">
+              <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Form Instructions</h2>
+              <div className="space-y-3 sm:space-y-4 text-xs sm:text-[13px] leading-relaxed text-gray-800">
                 <p>
                   Please fill out completely all applicable portions of the Records Request and Consent to Release form.
                 </p>
@@ -716,7 +716,7 @@ export default function FosterCareApplicationPage() {
                 <p>
                   Mail the form and all applicable fees, using one of the forms of payment listed at the bottom of the form, to:
                 </p>
-                <div className="pl-8 space-y-0.5">
+                <div className="pl-4 sm:pl-8 space-y-0.5">
                   <p>Service Oklahoma</p>
                   <p>Records Management Division</p>
                   <p>P. O. Box 11415</p>
@@ -768,19 +768,19 @@ export default function FosterCareApplicationPage() {
                 Continue to Application Form →
               </button>
             </div>
-          </>
+          </div>
         )}
 
         {currentPage === 2 && (
-          <div className="bg-white">
+          <div className="bg-white w-full overflow-x-hidden">
             <form onSubmit={handleSubmit}>
               {/* Header matching Service Oklahoma form style */}
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4 mb-6">
                 <div>
-                  <h1 className="text-[13px] font-bold text-gray-900 uppercase mb-2">
+                  <h1 className="text-[12px] sm:text-[13px] font-bold text-gray-900 uppercase mb-2">
                     RECORDS REQUEST AND CONSENT TO RELEASE
                   </h1>
-                  <p className="text-[11px] text-gray-700">
+                  <p className="text-[10px] sm:text-[11px] text-gray-700">
                     (For birth certificates, contact Department of Health)
                   </p>
                 </div>
@@ -798,19 +798,19 @@ export default function FosterCareApplicationPage() {
                     </div>
                   </div>
                   <div className="text-[9px] text-gray-600 border border-gray-400">
-                    <div className="grid grid-cols-2 border-b border-gray-400">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 border-b border-gray-400">
                       <div className="border-r border-gray-400 px-2 py-1 font-semibold text-center">Per Record Fee</div>
                       <div className="px-2 py-1 font-semibold text-center">Per Certified<br/>Record Fee</div>
                     </div>
-                    <div className="grid grid-cols-2 border-b border-gray-400 text-[8px]">
-                      <div className="border-r border-gray-400 px-2 py-1 text-right">$25.00</div>
-                      <div className="px-2 py-1 text-right">$28.00</div>
+                    <div className="grid grid-cols-2 border-b border-gray-400 text-[7px] sm:text-[8px]">
+                      <div className="border-r border-gray-400 px-1 sm:px-2 py-1 text-right">$25.00</div>
+                      <div className="px-1 sm:px-2 py-1 text-right">$28.00</div>
                     </div>
-                    <div className="grid grid-cols-2 border-b border-gray-400 text-[8px]">
-                      <div className="border-r border-gray-400 px-2 py-1 text-right">$7.00</div>
-                      <div className="px-2 py-1 text-right">$10.00</div>
+                    <div className="grid grid-cols-2 border-b border-gray-400 text-[7px] sm:text-[8px]">
+                      <div className="border-r border-gray-400 px-1 sm:px-2 py-1 text-right">$7.00</div>
+                      <div className="px-1 sm:px-2 py-1 text-right">$10.00</div>
                     </div>
-                    <div className="grid grid-cols-2 text-[8px]">
+                    <div className="grid grid-cols-2 text-[7px] sm:text-[8px]">
                       <div className="border-r border-gray-400 px-2 py-1">
                         <div>Per Page</div>
                         <div className="text-right">$0.25</div>
@@ -895,15 +895,16 @@ export default function FosterCareApplicationPage() {
                   <span className="font-semibold">for:</span>
                 </div>
                 
-                <table className="w-full border border-gray-400 text-[11px] mb-6">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold">Driver's Name</th>
-                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-24">Sex</th>
-                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-40">Driver License Number</th>
-                      <th className="border border-gray-400 px-2 py-1.5 text-left font-semibold w-32">Date of Birth</th>
-                    </tr>
-                  </thead>
+                <div className="overflow-x-auto -mx-2 sm:mx-0">
+                  <table className="w-full min-w-[500px] border border-gray-400 text-[10px] sm:text-[11px] mb-6">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-400 px-1 sm:px-2 py-1.5 text-left font-semibold">Driver's Name</th>
+                        <th className="border border-gray-400 px-1 sm:px-2 py-1.5 text-left font-semibold w-16 sm:w-24">Sex</th>
+                        <th className="border border-gray-400 px-1 sm:px-2 py-1.5 text-left font-semibold w-28 sm:w-40">Driver License #</th>
+                        <th className="border border-gray-400 px-1 sm:px-2 py-1.5 text-left font-semibold w-24 sm:w-32">DOB</th>
+                      </tr>
+                    </thead>
                   <tbody>
                     <tr>
                       <td className="border border-gray-400 px-2 py-2">
@@ -949,6 +950,7 @@ export default function FosterCareApplicationPage() {
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Check applicable statement section */}
@@ -956,7 +958,7 @@ export default function FosterCareApplicationPage() {
                 <p className="text-[11px] font-bold text-gray-900 mb-2">
                   Check the following applicable statement:
                 </p>
-                <div className="flex gap-8 text-[11px] mb-4">
+                <div className="flex flex-wrap gap-4 sm:gap-8 text-[11px] mb-4">
                   <label className="flex items-center">
                     <input 
                       type="checkbox" 
@@ -1233,18 +1235,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(1)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back to Instructions
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(3)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue to Background Check →
                 </button>
@@ -1254,12 +1256,11 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 3 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Header with Oklahoma Human Services logo */}
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4 mb-6">
                 <div className="flex items-center">
-                  <div className="w-16 h-16 mr-3">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mr-3">
                     <svg viewBox="0 0 100 100" className="w-full h-full">
                       <circle cx="50" cy="50" r="45" fill="#4A90E2"/>
                       <path d="M50 20 L60 40 L40 40 Z" fill="#E94B3C"/>
@@ -1269,12 +1270,12 @@ export default function FosterCareApplicationPage() {
                     </svg>
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-800">OKLAHOMA</h1>
-                    <h2 className="text-2xl font-normal text-blue-600">Human Services</h2>
+                    <h1 className="text-lg sm:text-2xl font-bold text-gray-800">OKLAHOMA</h1>
+                    <h2 className="text-lg sm:text-2xl font-normal text-blue-600">Human Services</h2>
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800">Request for Background Check</h3>
+                  <h3 className="text-base sm:text-xl font-semibold text-gray-800">Request for Background Check</h3>
                 </div>
               </div>
 
@@ -1285,7 +1286,7 @@ export default function FosterCareApplicationPage() {
                 </div>
 
                 {/* Name Fields */}
-                <div className="grid grid-cols-12 gap-3 mb-4 text-[11px]">
+                <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 sm:gap-3 mb-4 text-[10px] sm:text-[11px]">
                   <div className="col-span-4">
                     <label className="block mb-1 font-semibold text-gray-800">First name</label>
                     <input
@@ -1452,7 +1453,7 @@ export default function FosterCareApplicationPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-3 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 text-[11px]">
                   <div>
                     <label className="block mb-1 font-semibold text-gray-800">City and state of birth</label>
                     <input
@@ -1562,7 +1563,7 @@ export default function FosterCareApplicationPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mb-4 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 mb-4 text-[11px]">
                   <div>
                     <label className="block mb-1 font-semibold text-gray-800">Phone number</label>
                     <input
@@ -1657,18 +1658,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(2)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(4)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -1678,8 +1679,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 4 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* International Residency Section */}
               <div className="mb-6">
                 <div className="text-[11px] mb-2 text-gray-800">
@@ -1868,18 +1868,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(3)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(5)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -1889,8 +1889,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 5 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Privacy Policy Section */}
               <div className="mb-6">
                 <label className="flex items-start text-[11px]">
@@ -2218,18 +2217,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(4)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(6)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -2239,8 +2238,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 6 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Continuing from page 5 checkboxes */}
               <div className="mb-6">
                 <div className="space-y-2 text-[11px] text-gray-800">
@@ -2605,18 +2603,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(5)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(7)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -2626,8 +2624,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 7 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Private Child Welfare Section */}
               <div className="mb-6">
                 <div className="text-[11px] font-bold mb-3 text-gray-800">
@@ -2739,7 +2736,7 @@ export default function FosterCareApplicationPage() {
                 </div>
 
                 <div className="space-y-4 text-[11px]">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800">Name</label>
                       <input
@@ -2805,7 +2802,7 @@ export default function FosterCareApplicationPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800">Phone number</label>
                       <input
@@ -2890,18 +2887,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(6)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(8)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -2911,8 +2908,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 8 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Header with logos */}
               <div className="flex justify-between items-center mb-6">
                 <div className="w-20 h-20 border-2 border-gray-400 rounded-full flex items-center justify-center">
@@ -2945,7 +2941,7 @@ export default function FosterCareApplicationPage() {
 
                 <div className="space-y-4">
                   {/* First applicant */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">First name</label>
                       <input
@@ -2969,7 +2965,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Second applicant */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">First name</label>
                       <input
@@ -3000,7 +2996,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Individual/Agency info */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Individual or agency name</label>
                       <input
@@ -3024,7 +3020,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Rights statement */}
-                  <div className="text-[11px] text-gray-800 leading-relaxed">
+                  <div className="text-[10px] sm:text-[11px] text-gray-800 leading-relaxed">
                     <p>
                       I have the right to choose the information that I am willing to share with the above designated entity to assist in becoming a Department of Human Services (DHS) resource parent. I understand that the designated entity is not authorized to advocate for my approval as a resource parent. The designated entity's role is limited to providing support in completing application requirements.
                     </p>
@@ -3042,12 +3038,12 @@ export default function FosterCareApplicationPage() {
                   <p>No information will be shared with entity if you do not check a box.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-2 text-[11px]">
                   {/* Left column */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">First and last name</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3075,7 +3071,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Phone number</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3103,7 +3099,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Identified church home</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3131,7 +3127,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Application provided</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3159,7 +3155,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Application completed</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3187,7 +3183,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Identified agency</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3218,7 +3214,7 @@ export default function FosterCareApplicationPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Initial paperwork completed</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3246,7 +3242,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Training started</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3274,7 +3270,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Training completed</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3302,7 +3298,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Home study started</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3330,7 +3326,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800">Home study completed</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3367,18 +3363,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(7)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(9)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -3388,8 +3384,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 9 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Consent Information Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
@@ -3495,18 +3490,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(8)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(10)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -3516,8 +3511,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 10 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
                 <div className="w-32 h-20 border-2 border-gray-400 flex items-center justify-center">
@@ -3648,7 +3642,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Home type and details */}
-                  <div className="grid grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
                     <div>
                       <label className="block mb-2 font-semibold text-gray-800 text-[11px]">Home:</label>
                       <div className="flex gap-4">
@@ -3718,7 +3712,7 @@ export default function FosterCareApplicationPage() {
 
                 <div className="space-y-4">
                   {/* Name fields */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">First name</label>
                       <input
@@ -3779,7 +3773,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Personal details row 1 */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Date of birth</label>
                       <input
@@ -3839,7 +3833,7 @@ export default function FosterCareApplicationPage() {
                     </div>
                     <div className="col-span-3">
                       <label className="block mb-1 text-gray-800 text-[11px]">Hispanic or Latino origin?</label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -3868,7 +3862,7 @@ export default function FosterCareApplicationPage() {
                       <div className="flex items-end justify-end gap-4">
                         <div className="text-right">
                           <label className="block mb-1 text-gray-800 text-[11px]">Are you a U.S. citizen?</label>
-                          <div className="flex gap-3">
+                          <div className="flex flex-wrap gap-2 sm:gap-3">
                             <label className="flex items-center">
                               <input
                                 type="radio"
@@ -3910,7 +3904,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Phone numbers */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Work phone</label>
                       <input
@@ -3965,18 +3959,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(9)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(11)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -3986,8 +3980,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 11 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Continuation of Applicant 1 Information */}
               <div className="mb-6">
                 <div className="space-y-4">
@@ -4051,7 +4044,7 @@ export default function FosterCareApplicationPage() {
                   </div>
 
                   {/* Education and military */}
-                  <div className="grid grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                     <div>
                       <label className="block mb-1 text-gray-800 text-[11px]">Highest grade completed:</label>
                       <input
@@ -4064,7 +4057,7 @@ export default function FosterCareApplicationPage() {
                     </div>
                     <div>
                       <label className="block mb-1 text-gray-800 text-[11px]">Advanced degree?</label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4096,7 +4089,7 @@ export default function FosterCareApplicationPage() {
                     <label className="block mb-1 text-gray-800 text-[11px]">
                       Have you served or are you currently serving in the armed forces?
                     </label>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       <label className="flex items-center">
                         <input
                           type="radio"
@@ -4132,10 +4125,10 @@ export default function FosterCareApplicationPage() {
 
                 <div className="space-y-4">
                   {/* Employment status */}
-                  <div className="grid grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                     <div>
                       <label className="block mb-1 text-gray-800 text-[11px]">Are you employed?</label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4162,7 +4155,7 @@ export default function FosterCareApplicationPage() {
                     </div>
                     <div>
                       <label className="block mb-1 text-gray-800 text-[11px]">Are you self-employed?</label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4240,7 +4233,7 @@ export default function FosterCareApplicationPage() {
                           className="w-full border-b border-gray-400 px-2 py-1 outline-none bg-white text-[11px]"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 text-gray-800 text-[11px]">Employer name</label>
                           <input
@@ -4262,7 +4255,7 @@ export default function FosterCareApplicationPage() {
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 text-gray-800 text-[11px]">Supervisor's name</label>
                           <input
@@ -4336,7 +4329,7 @@ export default function FosterCareApplicationPage() {
                     <span className="text-[11px] text-gray-800">
                       Have you ever applied to foster, adopt, or provide in home daycare in any state?
                     </span>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       <label className="flex items-center">
                         <input
                           type="radio"
@@ -4367,7 +4360,7 @@ export default function FosterCareApplicationPage() {
                   <div className="ml-6 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-gray-800">• been arrested or had criminal charges filed?</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4395,7 +4388,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-gray-800">• entered a plea of guilty or nolo contendere to a crime?</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4423,7 +4416,7 @@ export default function FosterCareApplicationPage() {
 
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-gray-800">• been investigated for child physical abuse, sexual abuse, or neglect?</span>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <label className="flex items-center">
                           <input
                             type="radio"
@@ -4460,18 +4453,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(10)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(12)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -4481,13 +4474,12 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 12 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Protective Order Question */}
               <div className="mb-6">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-gray-800">• filed or been party to a protective order?</span>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
                     <label className="flex items-center">
                       <input
                         type="radio"
@@ -4598,7 +4590,7 @@ export default function FosterCareApplicationPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Gender</label>
                           <input
@@ -4804,7 +4796,7 @@ export default function FosterCareApplicationPage() {
 
                 {formData.references.map((reference, index) => (
                   <div key={index} className="mb-4 space-y-2">
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                       <div>
                         <label className="block mb-1 font-semibold text-gray-800 text-[11px]">First name</label>
                         <input
@@ -4870,18 +4862,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(11)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(13)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -4891,8 +4883,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 13 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Continuation of References (reference entries 2-4 already on page 12) */}
 
               {/* Counseling or Inpatient Treatment Section */}
@@ -4924,7 +4915,7 @@ export default function FosterCareApplicationPage() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Name</label>
                           <input
@@ -5022,7 +5013,7 @@ export default function FosterCareApplicationPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Phone number</label>
                           <input
@@ -5121,7 +5112,7 @@ export default function FosterCareApplicationPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <label className="block mb-1 font-semibold text-gray-800 text-[11px]">Phone number</label>
                           <input
@@ -5217,18 +5208,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(12)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(14)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -5238,13 +5229,12 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 14 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Adult Child Contact Question */}
               <div className="mb-6">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-gray-800">Do you have contact with this adult child?</span>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
                     <label className="flex items-center">
                       <input
                         type="radio"
@@ -5277,7 +5267,7 @@ export default function FosterCareApplicationPage() {
                   Signature and Agreement
                 </div>
 
-                <div className="text-[11px] text-gray-800 leading-relaxed mb-6">
+                <div className="text-[10px] sm:text-[11px] text-gray-800 leading-relaxed mb-6">
                   <p>
                     I, the undersigned, have provided accurate information and authorize OKDHS to use this information, including the national criminal background investigation, all applicable out-of-state child abuse and neglect registry checks, an Oklahoma Child Abuse and Neglect Information System check, a Community Services Worker Registry check, and all accompanying records, in completing an assessment of the applicants. I further authorize OKDHS to conduct a Juvenile Justice Information System review for children 13 years of age and older, contact references, and contact me by email. I understand that failure of <strong>all household members 18 years of age and older to sign this form will result in denial or withdrawal of the application.</strong>
                   </p>
@@ -5300,14 +5290,14 @@ export default function FosterCareApplicationPage() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex items-center gap-2 text-[11px] text-gray-800 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-800 mb-3">
                     <span>Subscribed on this</span>
                     <input
                       type="text"
                       name="signatureDay"
                       value={formData.signatureDay}
                       onChange={handleInputChange}
-                      className="w-16 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
+                      className="w-12 sm:w-16 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
                       placeholder="day"
                     />
                     <span>day of</span>
@@ -5316,7 +5306,7 @@ export default function FosterCareApplicationPage() {
                       name="signatureMonth"
                       value={formData.signatureMonth}
                       onChange={handleInputChange}
-                      className="w-32 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
+                      className="w-24 sm:w-32 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
                       placeholder="month"
                     />
                     <span>, 20</span>
@@ -5325,7 +5315,7 @@ export default function FosterCareApplicationPage() {
                       name="signatureYear"
                       value={formData.signatureYear}
                       onChange={handleInputChange}
-                      className="w-12 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
+                      className="w-10 sm:w-12 border-b border-gray-400 px-2 py-1 outline-none bg-transparent text-center"
                       placeholder="YY"
                     />
                     <span>at (city)</span>
@@ -5334,7 +5324,7 @@ export default function FosterCareApplicationPage() {
                       name="signatureCity"
                       value={formData.signatureCity}
                       onChange={handleInputChange}
-                      className="flex-1 border-b border-gray-400 px-2 py-1 outline-none bg-transparent"
+                      className="flex-1 min-w-[100px] border-b border-gray-400 px-2 py-1 outline-none bg-transparent"
                     />
                     <span>,</span>
                   </div>
@@ -5345,7 +5335,7 @@ export default function FosterCareApplicationPage() {
                       name="signatureState"
                       value={formData.signatureState}
                       onChange={handleInputChange}
-                      className="w-48 border-b border-gray-400 px-2 py-1 outline-none bg-transparent"
+                      className="w-32 sm:w-48 border-b border-gray-400 px-2 py-1 outline-none bg-transparent"
                     />
                     <span>.</span>
                   </div>
@@ -5439,7 +5429,7 @@ export default function FosterCareApplicationPage() {
                   Notice
                 </div>
 
-                <div className="text-[11px] text-gray-800 leading-relaxed">
+                <div className="text-[10px] sm:text-[11px] text-gray-800 leading-relaxed">
                   <p>
                     OKDHS has assured compliance with United States Department of Health and Human Services (DHHS) Regulations, Title 45, Code of Federal Regulations, Part 80, that implements Public Law 88-352, Civil Rights Act of 1964, Section 601, Part 84, that implements Public Law 93-112, Rehabilitation Act of 1973, Section 504, and Part 90, that implements Public Law 94-135, Age Discrimination Act of 1975, Section 301. These laws and regulations prohibit excluding participation in, denying the benefits of, or subjecting to discrimination under any program or activity receiving federal financial assistance, any person on the grounds of race, color, national origin or any qualified person on the basis of handicap or, unless program-enabling legislation permits, on the basis of age. Under these requirements, payment cannot be made to vendors providing care, services, or both in federally-assisted programs conducted by OKDHS unless such care, service, or both is provided without discrimination on the grounds of race, color, national origin, or handicap or without distinction on the basis of age, except as legislatively permitted or required. Written complaints about non-compliance with any of these laws should be made to the OKDHS Director, PO Box 25352, Oklahoma City, Oklahoma 73125, Secretary of Health and Human Services, Washington D.C., or both.
                   </p>
@@ -5454,18 +5444,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(13)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(15)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -5475,8 +5465,7 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 15 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Agency Use Only Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
@@ -5489,7 +5478,7 @@ export default function FosterCareApplicationPage() {
                     <div className="text-[11px] font-semibold text-gray-800 mb-2">
                       Check each type of resource assessment requested:
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <label className="flex items-center">
                         <input
                           type="checkbox"
@@ -5538,7 +5527,7 @@ export default function FosterCareApplicationPage() {
                     <div className="text-[11px] font-semibold text-gray-800 mb-2">
                       Check which type of resource home for which the applicant is applying.
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <label className="flex items-center">
                         <input
                           type="checkbox"
@@ -5618,18 +5607,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(14)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
                   onClick={() => setCurrentPage(16)}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue →
                 </button>
@@ -5639,15 +5628,14 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 16 && (
-          <div className="bg-white">
-            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
               {/* Required Forms and Verification Documents Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
                   Required Forms and Verification Documents
                 </div>
 
-                <div className="text-[11px] text-gray-800 leading-relaxed mb-6">
+                <div className="text-[10px] sm:text-[11px] text-gray-800 leading-relaxed mb-6">
                   <p>
                     Below is a list of forms and verification documents that applicants are required to provide to the agency within 20 calendar days.
                   </p>
@@ -5912,18 +5900,18 @@ export default function FosterCareApplicationPage() {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t-2 border-gray-300">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-8 pt-6 border-t-2 border-gray-300">
                 <button
                   type="button"
                   onClick={() => setCurrentPage(15)}
-                  className="px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-400 transition-colors order-2 sm:order-1"
                 >
                   ← Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors disabled:bg-gray-400 uppercase tracking-wide"
+                  className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors disabled:bg-gray-400 uppercase tracking-wide order-1 sm:order-2"
                 >
                   {loading ? 'Submitting...' : 'Submit Complete Application'}
                 </button>

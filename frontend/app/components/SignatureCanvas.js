@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { useRef, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import SignaturePad from 'react-signature-canvas';
 
 /**
@@ -11,12 +11,29 @@ import SignaturePad from 'react-signature-canvas';
  * 
  * Props:
  * - onSave: Callback function that receives the signature data URL
- * - width: Canvas width (default: 500)
+ * - width: Canvas width (default: 500) - will be responsive on mobile
  * - height: Canvas height (default: 200)
  * - penColor: Signature pen color (default: 'black')
  */
 const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColor = 'black' }, ref) => {
   const sigPadRef = useRef(null);
+  const containerRef = useRef(null);
+  const [canvasWidth, setCanvasWidth] = useState(width);
+
+  // Make canvas responsive
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        // Use container width minus padding, but don't exceed original width
+        setCanvasWidth(Math.min(containerWidth - 4, width));
+      }
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, [width]);
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
@@ -61,39 +78,39 @@ const SignatureCanvas = forwardRef(({ onSave, width = 500, height = 200, penColo
   };
 
   return (
-    <div className="signature-canvas-wrapper">
+    <div className="signature-canvas-wrapper w-full" ref={containerRef}>
       <div className="border-2 border-gray-400 rounded-lg overflow-hidden bg-white">
         <SignaturePad
           ref={sigPadRef}
           canvasProps={{
-            width: width,
-            height: height,
-            className: 'signature-canvas'
+            width: canvasWidth,
+            height: Math.min(height, 150),
+            className: 'signature-canvas w-full touch-none'
           }}
           penColor={penColor}
           backgroundColor="rgba(255, 255, 255, 1)"
         />
       </div>
       
-      <div className="flex gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mt-2">
         <button
           type="button"
           onClick={handleClear}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-sm"
+          className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-xs sm:text-sm"
         >
           Clear
         </button>
         <button
           type="button"
           onClick={handleSave}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+          className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs sm:text-sm"
         >
           Save Signature
         </button>
       </div>
       
       <p className="text-xs text-gray-600 mt-2">
-        Draw your signature above using your mouse or touch screen
+        Draw your signature above using your finger or stylus
       </p>
     </div>
   );
