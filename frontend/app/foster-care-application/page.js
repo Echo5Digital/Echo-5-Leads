@@ -1,15 +1,22 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import SignatureCanvas from '../components/SignatureCanvas';
 
 export default function FosterCareApplicationPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const leadId = searchParams.get('leadId'); // Get leadId from URL
+  const [leadId, setLeadId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // Get leadId from URL on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setLeadId(params.get('leadId'));
+    }
+  }, []);
   
   // Signature refs for all signature fields
   const signatureRef = useRef(null);
