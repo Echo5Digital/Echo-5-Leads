@@ -698,20 +698,12 @@ export default function FosterCareApplicationPage() {
             {/* Service Oklahoma Header */}
             <div className="text-center mb-6 sm:mb-8">
               <div className="flex items-center justify-center mb-4">
-                <div className="mr-2 sm:mr-4">
-                  <svg viewBox="0 0 100 100" className="w-14 h-14 sm:w-20 sm:h-20">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#004B87" strokeWidth="2"/>
-                    <polygon points="50,20 55,40 75,40 60,52 65,70 50,58 35,70 40,52 25,40 45,40" fill="#004B87"/>
-                    <text x="50" y="85" textAnchor="middle" fontSize="12" fill="#004B87" fontWeight="bold">SERVICE</text>
-                  </svg>
-                </div>
+                <img 
+                  src="/formlogo/service-oklahoma-logo.png" 
+                  alt="Service Oklahoma Logo" 
+                  className="h-16 sm:h-20 w-auto"
+                />
               </div>
-              <h1 className="text-xl sm:text-3xl font-light text-gray-700 tracking-[0.2em] sm:tracking-[0.3em] mb-1">
-                SERVICE
-              </h1>
-              <h2 className="text-2xl sm:text-4xl font-light text-[#004B87] tracking-[0.15em] sm:tracking-[0.2em] mb-2 sm:mb-4">
-                OKLAHOMA
-              </h2>
               <div className="text-xs sm:text-sm text-gray-700 mb-1">Driver License Services - Records Management Division</div>
               <div className="text-sm sm:text-base font-bold text-gray-900 uppercase px-2">
                 RECORDS REQUEST AND CONSENT TO RELEASE
@@ -799,16 +791,11 @@ export default function FosterCareApplicationPage() {
                 </div>
                 <div className="text-right">
                   <div className="flex items-center justify-end mb-2">
-                    <div className="mr-2">
-                      <svg viewBox="0 0 100 100" className="w-16 h-16">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="#004B87" strokeWidth="2"/>
-                        <polygon points="50,20 55,40 75,40 60,52 65,70 50,58 35,70 40,52 25,40 45,40" fill="#004B87"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-sm font-light text-gray-700 tracking-widest">SERVICE</div>
-                      <div className="text-xl font-light text-[#004B87] tracking-widest">OKLAHOMA</div>
-                    </div>
+                    <img 
+                      src="/formlogo/service-oklahoma-logo.png" 
+                      alt="Service Oklahoma Logo" 
+                      className="h-16 w-auto"
+                    />
                   </div>
                   <div className="text-[9px] text-gray-600 border border-gray-400">
                     <div className="grid grid-cols-1 sm:grid-cols-2 border-b border-gray-400">
@@ -1269,23 +1256,16 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 3 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Header with Oklahoma Human Services logo */}
               <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-4 mb-6">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 mr-3">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <circle cx="50" cy="50" r="45" fill="#4A90E2"/>
-                      <path d="M50 20 L60 40 L40 40 Z" fill="#E94B3C"/>
-                      <path d="M70 50 L80 70 L60 70 Z" fill="#F39C12"/>
-                      <path d="M50 80 L60 60 L40 60 Z" fill="#2ECC71"/>
-                      <path d="M30 50 L20 70 L40 70 Z" fill="#9B59B6"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h1 className="text-lg sm:text-2xl font-bold text-gray-800">OKLAHOMA</h1>
-                    <h2 className="text-lg sm:text-2xl font-normal text-blue-600">Human Services</h2>
-                  </div>
+                  <img 
+                    src="/formlogo/oklahoma-human-services-logo.png" 
+                    alt="Oklahoma Human Services Logo" 
+                    className="h-16 sm:h-20 w-auto"
+                  />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-xl font-semibold text-gray-800">Request for Background Check</h3>
@@ -1692,7 +1672,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 4 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* International Residency Section */}
               <div className="mb-6">
                 <div className="text-[11px] mb-2 text-gray-800">
@@ -1902,7 +1883,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 5 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Privacy Policy Section */}
               <div className="mb-6">
                 <label className="flex items-start text-[11px]">
@@ -2251,7 +2233,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 6 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Continuing from page 5 checkboxes */}
               <div className="mb-6">
                 <div className="space-y-2 text-[11px] text-gray-800">
@@ -2637,7 +2620,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 7 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Private Child Welfare Section */}
               <div className="mb-6">
                 <div className="text-[11px] font-bold mb-3 text-gray-800">
@@ -2921,20 +2905,25 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 8 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Header with logos */}
               <div className="flex justify-between items-center mb-6">
-                <div className="w-20 h-20 border-2 border-gray-400 rounded-full flex items-center justify-center">
-                  <span className="text-xs text-gray-500">Logo</span>
-                </div>
+                <img 
+                  src="/formlogo/oklahoma-state-seal.png" 
+                  alt="State of Oklahoma Seal" 
+                  className="h-20 w-20"
+                />
                 <div className="flex-1 text-center">
                   <h1 className="text-base font-bold text-gray-900">
                     Consent for Release of Information to Community Partners
                   </h1>
                 </div>
-                <div className="w-20 h-20 border-2 border-gray-400 rounded-full flex items-center justify-center">
-                  <span className="text-xs text-gray-500">Logo</span>
-                </div>
+                <img 
+                  src="/formlogo/oklahoma-dhs-logo.png" 
+                  alt="Oklahoma Department of Human Services Logo" 
+                  className="h-20 w-20"
+                />
               </div>
 
               {/* Notice */}
@@ -3397,7 +3386,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 9 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Consent Information Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
@@ -3524,12 +3514,15 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 10 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <div className="w-32 h-20 border-2 border-gray-400 flex items-center justify-center">
-                  <span className="text-xs text-gray-500">OK Human Services Logo</span>
-                </div>
+                <img 
+                  src="/formlogo/oklahoma-human-services-logo.png" 
+                  alt="Oklahoma Human Services Logo" 
+                  className="h-20 w-auto"
+                />
                 <div className="flex-1 text-right">
                   <h1 className="text-base font-bold text-gray-900">Resource Family Application</h1>
                 </div>
@@ -3993,7 +3986,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 11 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Continuation of Applicant 1 Information */}
               <div className="mb-6">
                 <div className="space-y-4">
@@ -4487,7 +4481,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 12 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Protective Order Question */}
               <div className="mb-6">
                 <div className="flex items-center justify-between">
@@ -4896,7 +4891,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 13 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Continuation of References (reference entries 2-4 already on page 12) */}
 
               {/* Counseling or Inpatient Treatment Section */}
@@ -5242,7 +5238,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 14 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Adult Child Contact Question */}
               <div className="mb-6">
                 <div className="flex items-center justify-between">
@@ -5478,7 +5475,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 15 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Agency Use Only Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
@@ -5641,7 +5639,8 @@ export default function FosterCareApplicationPage() {
         )}
 
         {currentPage === 16 && (
-          <div className="bg-white w-full overflow-x-hidden">`n            <form onSubmit={handleSubmit}>
+          <div className="bg-white w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit}>
               {/* Required Forms and Verification Documents Section */}
               <div className="mb-6">
                 <div className="bg-blue-600 text-white px-3 py-2 font-bold text-sm mb-4">
