@@ -660,6 +660,29 @@ export default function FosterCareApplicationPage() {
     alert('✅ Test data filled! Signatures left blank for you to draw.');
   };
 
+  // Validation function - only for Driver's Name and Driver License # on page 2
+  const validatePage = (pageNumber) => {
+    const errors = [];
+    
+    if (pageNumber === 2) {
+      if (!formData.firstName.trim()) errors.push('Driver\'s Name');
+      if (!formData.driversLicense.trim()) errors.push('Driver License #');
+    }
+    
+    if (errors.length > 0) {
+      alert(`⚠️ Please fill in the following required fields:\n\n${errors.join('\n')}`);
+      return false;
+    }
+    return true;
+  };
+
+  const handleNextPage = (nextPage) => {
+    if (validatePage(currentPage)) {
+      setCurrentPage(nextPage);
+      window.scrollTo(0, 0);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -1245,7 +1268,7 @@ export default function FosterCareApplicationPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setCurrentPage(3)}
+                  onClick={() => handleNextPage(3)}
                   className="w-full sm:w-auto px-4 sm:px-8 py-2.5 bg-gray-800 text-white text-sm font-semibold hover:bg-gray-700 transition-colors uppercase tracking-wide order-1 sm:order-2"
                 >
                   Continue to Background Check →
