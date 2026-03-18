@@ -71,9 +71,6 @@ async function getLeads(req, res) {
     }
     // SuperAdmin with no tenantId = no tenant filter = see all leads
     
-    // Members can see all leads in their tenant (same as ClientAdmin)
-    // No additional filtering needed - tenant filter is sufficient
-    
     if (stage) filter.stage = stage;
     if (source) filter.source = source;
     if (spamFlagParam === 'true') filter.spamFlag = true;
@@ -88,6 +85,11 @@ async function getLeads(req, res) {
         // Show leads assigned to specific user
         filter.assignedUserId = assignedToParam;
       }
+    }
+
+    // Member and Staff can only see leads assigned to them — enforced server-side
+    if (req.user && (req.user.role === ROLES.MEMBER || req.user.role === ROLES.STAFF)) {
+      filter.assignedUserId = req.user.userId;
     }
 
     if (q) {

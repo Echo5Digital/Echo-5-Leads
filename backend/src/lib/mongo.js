@@ -19,7 +19,7 @@ export async function getDb() {
 
 async function ensureIndexes(db) {
   await db.collection('leads').createIndexes([
-    { key: { tenantId: 1, email: 1 }, name: 'u_tenant_email', partialFilterExpression: { email: { $type: 'string' } } },
+    { key: { tenantId: 1, email: 1 }, name: 'u_tenant_email', unique: true, partialFilterExpression: { email: { $type: 'string' } } },
     { key: { tenantId: 1, phoneE164: 1 }, name: 'u_tenant_phone', unique: true, partialFilterExpression: { phoneE164: { $type: 'string' } } },
     { key: { tenantId: 1, createdAt: -1 }, name: 'idx_tenant_createdAt' },
     { key: { tenantId: 1, stage: 1, latestActivityAt: -1 }, name: 'idx_tenant_stage_latest' },

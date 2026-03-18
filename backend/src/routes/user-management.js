@@ -65,44 +65,49 @@ async function listUsers(req, res) {
   }
 }
 
-// Create user - SuperAdmin can create any role, ClientAdmin can create Members in their tenant
+// Which roles each role is allowed to assign
+const ASSIGNABLE_ROLES = {
+  [ROLES.SUPER_ADMIN]:  [ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER, ROLES.STAFF, ROLES.MEMBER],
+  [ROLES.CLIENT_ADMIN]: [ROLES.MEMBER],
+  [ROLES.CEO]:          [ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER, ROLES.STAFF, ROLES.MEMBER],
+  [ROLES.CFO]:          [ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER, ROLES.STAFF, ROLES.MEMBER],
+  [ROLES.MANAGER]:      [ROLES.MANAGER, ROLES.STAFF],
+  [ROLES.STAFF]:        [],
+  [ROLES.MEMBER]:       [],
+};
+
+// Create user
 async function createUserRoute(req, res) {
   try {
     const { email, password, firstName, lastName, role, tenantId } = req.body;
 
     if (!email || !password || !firstName || !lastName || !role) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: email, password, firstName, lastName, role' 
+      return res.status(400).json({
+        error: 'Missing required fields: email, password, firstName, lastName, role'
       });
     }
 
     // Validate role permissions
-    if (req.user.role === ROLES.CLIENT_ADMIN) {
-      // ClientAdmin can only create Members in their own tenant
-      if (role !== ROLES.MEMBER) {
-        return res.status(403).json({ 
-          error: 'ClientAdmin can only create Member users' 
-        });
-      }
-      
-      if (tenantId && tenantId !== req.user.tenantId.toString()) {
-        return res.status(403).json({ 
-          error: 'Can only create users in your own tenant' 
-        });
-      }
+    const allowed = ASSIGNABLE_ROLES[req.user.role] || [];
+    if (!allowed.includes(role)) {
+      return res.status(403).json({
+        error: `Your role (${req.user.role}) cannot assign the role: ${role}`
+      });
     }
 
-    // Set tenant ID based on user role and permissions
+    // Non-super-admins can only create users in their own tenant
+    if (req.user.role !== ROLES.SUPER_ADMIN && tenantId && tenantId !== req.user.tenantId?.toString()) {
+      return res.status(403).json({ error: 'Can only create users in your own tenant' });
+    }
+
+    // Set tenant ID
     let finalTenantId = null;
     if (role === ROLES.SUPER_ADMIN) {
-      // SuperAdmin has no tenant
       finalTenantId = null;
-    } else if (req.user.role === ROLES.CLIENT_ADMIN) {
-      // ClientAdmin creating member - use their tenant
-      finalTenantId = req.user.tenantId;
     } else if (req.user.role === ROLES.SUPER_ADMIN) {
-      // SuperAdmin creating user - use provided tenantId
       finalTenantId = tenantId;
+    } else {
+      finalTenantId = req.user.tenantId;
     }
 
     const db = await getDb();
@@ -251,25 +256,25 @@ async function deleteUserRoute(req, res) {
 
 // Export protected routes
 export const protectedListUsers = [
-  authenticateToken, 
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN), 
+  authenticateToken,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER),
   listUsers
 ];
 
 export const protectedCreateUser = [
-  authenticateToken, 
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN), 
+  authenticateToken,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER),
   createUserRoute
 ];
 
 export const protectedUpdateUser = [
-  authenticateToken, 
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN), 
+  authenticateToken,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER),
   updateUserRoute
 ];
 
 export const protectedDeleteUser = [
-  authenticateToken, 
-  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN), 
+  authenticateToken,
+  requireRole(ROLES.SUPER_ADMIN, ROLES.CLIENT_ADMIN, ROLES.CEO, ROLES.CFO, ROLES.MANAGER),
   deleteUserRoute
 ];

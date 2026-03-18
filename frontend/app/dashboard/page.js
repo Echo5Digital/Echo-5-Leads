@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { leadsApi, tenantsApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PageContainer from '../components/PageContainer';
 import { Card, CardHeader, StatCard, LoadingSpinner, ErrorMessage, Button } from '../components/UIComponents';
@@ -12,8 +13,16 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
+  const { user, isExecutive } = useAuth();
   const { getStages, selectedTenant } = useTenant();
+  const router = useRouter();
+
+  // Redirect CEO/CFO to the executive dashboard
+  useEffect(() => {
+    if (user && isExecutive()) {
+      router.replace('/executive-dashboard');
+    }
+  }, [user]);
 
   // Get dynamic stages from tenant config
   const stages = getStages();

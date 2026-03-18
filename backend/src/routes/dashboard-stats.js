@@ -184,13 +184,56 @@ async function getDashboardStats(req, res) {
       .map(([source, count]) => ({ source, count }))
       .sort((a, b) => b.count - a.count);
 
+    // Team performance: assigned leads + activity breakdown per user
+    const usersCollection = db.collection('users');
+    const tenantUsers = tenantId
+      ? await usersCollection.find({ tenantId, active: true }, { projection: { firstName: 1, lastName: 1, role: 1 } }).toArray()
+      : [];
+
+    const [assignedLeadsCursor, userActivityCursor] = await Promise.all([
+      leads.aggregate([
+        { $match: { ...queryFilter, assignedUserId: { $exists: true, $ne: null } } },
+        { $group: { _id: '$assignedUserId', count: { $sum: 1 } } }
+      ]).toArray(),
+      activities.aggregate([
+        { $match: { ...(tenantId ? { tenantId } : {}), userId: { $exists: true, $ne: null } } },
+        { $group: {
+          _id: '$userId',
+          total: { $sum: 1 },
+          calls:  { $sum: { $cond: [{ $eq: ['$type', 'call'] },   1, 0] } },
+          emails: { $sum: { $cond: [{ $eq: ['$type', 'email'] },  1, 0] } },
+          notes:  { $sum: { $cond: [{ $eq: ['$type', 'note'] },   1, 0] } },
+          sms:    { $sum: { $cond: [{ $eq: ['$type', 'sms'] },    1, 0] } },
+        }}
+      ]).toArray()
+    ]);
+
+    const assignedMap = Object.fromEntries(assignedLeadsCursor.map(r => [r._id?.toString(), r.count]));
+    const activityMap = Object.fromEntries(userActivityCursor.map(r => [r._id?.toString(), r]));
+
+    const teamPerformance = tenantUsers.map(u => {
+      const uid = u._id.toString();
+      const act = activityMap[uid] || { total: 0, calls: 0, emails: 0, notes: 0, sms: 0 };
+      return {
+        name: `${u.firstName} ${u.lastName}`,
+        role: u.role,
+        assignedLeads: assignedMap[uid] || 0,
+        activitiesTotal: act.total,
+        calls: act.calls,
+        emails: act.emails,
+        notes: act.notes,
+        sms: act.sms,
+      };
+    }).sort((a, b) => b.assignedLeads - a.assignedLeads);
+
     return res.status(200).json({
       totalLeads,
       leadsThisWeek,
       avgTimeToContact,
       pctWithinSLA,
       stageDistribution: stageData,
-      sourceDistribution
+      sourceDistribution,
+      teamPerformance
     });
   } catch (err) {
     console.error('Dashboard stats error:', err);

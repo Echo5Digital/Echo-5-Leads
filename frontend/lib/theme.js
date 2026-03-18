@@ -55,6 +55,10 @@ export const colors = {
     superAdmin: 'bg-purple-100 text-purple-800',
     clientAdmin: 'bg-blue-100 text-blue-800',
     member: 'bg-green-100 text-green-800',
+    ceo: 'bg-red-100 text-red-800',
+    cfo: 'bg-orange-100 text-orange-800',
+    manager: 'bg-yellow-100 text-yellow-800',
+    staff: 'bg-teal-100 text-teal-800',
   },
 };
 
@@ -125,6 +129,10 @@ export const getRoleBadgeClass = (role) => {
     'super_admin': colors.role.superAdmin,
     'client_admin': colors.role.clientAdmin,
     'member': colors.role.member,
+    'ceo': colors.role.ceo,
+    'cfo': colors.role.cfo,
+    'manager': colors.role.manager,
+    'staff': colors.role.staff,
   };
   return `px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${roleMap[role] || colors.gray}`;
 };

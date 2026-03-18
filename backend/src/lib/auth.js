@@ -10,8 +10,12 @@ const REFRESH_TOKEN_EXPIRES_IN = '30d';
 // User roles
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
-  CLIENT_ADMIN: 'client_admin', 
-  MEMBER: 'member'
+  CLIENT_ADMIN: 'client_admin',
+  MEMBER: 'member',
+  CEO: 'ceo',
+  CFO: 'cfo',
+  MANAGER: 'manager',
+  STAFF: 'staff'
 };
 
 // Permission levels for easier role checking
@@ -36,6 +40,37 @@ export const PERMISSIONS = {
     canViewAllLeads: false, // Only assigned leads
     canManageUsers: false,
     canAssignLeads: true    // Only reassign within same tenant
+  },
+  [ROLES.CEO]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: true,
+    canManageUsers: false,
+    canAssignLeads: true,
+    canEditLeads: true
+  },
+  [ROLES.CFO]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: true,
+    canManageUsers: false,
+    canAssignLeads: true,
+    canEditLeads: false
+  },
+  [ROLES.MANAGER]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: false,
+    canManageUsers: true,
+    canAssignLeads: true,
+    canEditLeads: true
+  },
+  [ROLES.STAFF]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: false,
+    canManageUsers: false,
+    canAssignLeads: true
   }
 };
 
@@ -149,8 +184,9 @@ export async function canViewLead(db, user, leadId) {
     return { canView: false, lead: null };
   }
 
-  // ClientAdmin and Members can view all leads in their tenant
-  if (user.role === ROLES.CLIENT_ADMIN || user.role === ROLES.MEMBER) {
+  // All tenant-scoped roles can view leads in their tenant
+  const tenantRoles = [ROLES.CLIENT_ADMIN, ROLES.MEMBER, ROLES.STAFF, ROLES.MANAGER, ROLES.CEO, ROLES.CFO];
+  if (tenantRoles.includes(user.role)) {
     return { canView: true, lead };
   }
 

@@ -9,7 +9,7 @@ import { useTenant } from '@/lib/TenantContext';
 export default function LeadDetail() {
   const params = useParams();
   const router = useRouter();
-  const { user, isSuperAdmin, isClientAdmin } = useAuth();
+  const { user, isSuperAdmin, isClientAdmin, hasPermission } = useAuth();
   const { getStages } = useTenant();
   const [lead, setLead] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -196,24 +196,30 @@ export default function LeadDetail() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Stage
             </label>
-            <select
-              value={lead.stage || 'New'}
-              onChange={(e) => handleStageChange(e.target.value)}
-              className="w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              {stages.map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage.replace(/_/g, ' ').toUpperCase()}
-                </option>
-              ))}
-            </select>
+            {hasPermission('canEditLeads') ? (
+              <select
+                value={lead.stage || 'New'}
+                onChange={(e) => handleStageChange(e.target.value)}
+                className="w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                {stages.map((stage) => (
+                  <option key={stage} value={stage}>
+                    {stage.replace(/_/g, ' ').toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="inline-block px-3 py-2 bg-gray-100 rounded-md text-sm text-gray-700">
+                {(lead.stage || 'New').replace(/_/g, ' ').toUpperCase()}
+              </span>
+            )}
             <p className="mt-1 text-xs text-gray-500">
               Update the lead's current stage in the pipeline
             </p>
           </div>
 
           {/* Assigned To Section - Only for SuperAdmin and ClientAdmin */}
-          {(isSuperAdmin() || isClientAdmin()) && (
+          {(isSuperAdmin() || isClientAdmin() || user?.role === 'manager') && (
             <div className="mb-6 pb-6 border-b border-gray-200">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Assigned To
@@ -336,12 +342,14 @@ export default function LeadDetail() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Activity Timeline</h2>
-            <button
-              onClick={() => setShowActivityForm(!showActivityForm)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-            >
-              {showActivityForm ? 'Cancel' : '+ Add Activity'}
-            </button>
+            {hasPermission('canEditLeads') && (
+              <button
+                onClick={() => setShowActivityForm(!showActivityForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              >
+                {showActivityForm ? 'Cancel' : '+ Add Activity'}
+              </button>
+            )}
           </div>
 
           {/* Activity Form */}

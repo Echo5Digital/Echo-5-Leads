@@ -15,9 +15,10 @@ export default function LeadsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
-  const { user } = useAuth();
+  const { user, hasPermission, isExecutive } = useAuth();
   const { getStages, selectedTenant } = useTenant();
   const [teamMembers, setTeamMembers] = useState([]);
+  const assignableMembers = teamMembers.filter(m => m.role === 'staff' || m.role === 'manager');
   const [filters, setFilters] = useState({
     stage: '',
     source: '',
@@ -491,7 +492,7 @@ export default function LeadsListPage() {
               Dashboard
             </Link>
             {/* Import CSV Button */}
-            {(user?.role === 'client_admin' || user?.role === 'super_admin') && (
+            {(user?.role === 'client_admin' || user?.role === 'super_admin' || user?.role === 'manager') && (
               <button
                 onClick={handleImportClick}
                 className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-200"
@@ -499,12 +500,14 @@ export default function LeadsListPage() {
                 📥 Import Facebook Leads
               </button>
             )}
-            <Link
-              href="/leads/new"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              + Add New Lead
-            </Link>
+            {hasPermission('canEditLeads') && (
+              <Link
+                href="/leads/new"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                + Add New Lead
+              </Link>
+            )}
           </div>
         </div>
 
@@ -643,7 +646,7 @@ export default function LeadsListPage() {
               >
                 <option value="">All Members</option>
                 <option value="unassigned">Unassigned</option>
-                {teamMembers.map((member) => (
+                {assignableMembers.map((member) => (
                   <option key={member._id} value={member._id}>
                     {member.firstName} {member.lastName}
                   </option>
@@ -686,7 +689,7 @@ export default function LeadsListPage() {
               </span>
             )}
           </div>
-          {selectedLeads.length > 0 && (
+          {selectedLeads.length > 0 && hasPermission('canEditLeads') && (
             <button
               onClick={handleBulkDelete}
               className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200"
@@ -731,12 +734,14 @@ export default function LeadsListPage() {
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-3 py-3 text-left w-10">
-                      <input
-                        type="checkbox"
-                        checked={selectedLeads.length === leads.length && leads.length > 0}
-                        onChange={toggleSelectAll}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
+                      {hasPermission('canEditLeads') && (
+                        <input
+                          type="checkbox"
+                          checked={selectedLeads.length === leads.length && leads.length > 0}
+                          onChange={toggleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      )}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
                       Email
@@ -762,29 +767,35 @@ export default function LeadsListPage() {
                   {leads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
                       <td className="px-3 py-4 w-10">
-                        <input
-                          type="checkbox"
-                          checked={selectedLeads.includes(lead._id)}
-                          onChange={() => toggleSelectLead(lead._id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                        {hasPermission('canEditLeads') && (
+                          <input
+                            type="checkbox"
+                            checked={selectedLeads.includes(lead._id)}
+                            onChange={() => toggleSelectLead(lead._id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        )}
                       </td>
                       <td className="px-4 py-4 w-40 md:w-48">
-                        <Link
-                          href={`/leads/${lead._id}`}
-                          className="text-blue-600 hover:text-blue-900 font-medium block truncate"
-                          title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
-                          onClick={() => {
-                            sessionStorage.setItem('leadsFilters', JSON.stringify(filters));
-                            sessionStorage.setItem('leadsScrollPosition', window.scrollY.toString());
-                            sessionStorage.setItem('leadsActiveTab', activeTab);
-                          }}
-                        >
-                          {/* Old: Display email */}
-                          {/* {lead.email || 'Unknown'} */}
-                          {/* New: Display name (fullName or firstName+lastName), fallback to email */}
-                          {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
-                        </Link>
+                        {isExecutive() ? (
+                          <span className="text-gray-900 font-medium block truncate"
+                            title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}>
+                            {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/leads/${lead._id}`}
+                            className="text-blue-600 hover:text-blue-900 font-medium block truncate"
+                            title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
+                            onClick={() => {
+                              sessionStorage.setItem('leadsFilters', JSON.stringify(filters));
+                              sessionStorage.setItem('leadsScrollPosition', window.scrollY.toString());
+                              sessionStorage.setItem('leadsActiveTab', activeTab);
+                            }}
+                          >
+                            {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
+                          </Link>
+                        )}
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
                             SPAM
@@ -801,27 +812,41 @@ export default function LeadsListPage() {
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || '-'}</div>
                       </td>
                       <td className="px-4 py-4 w-36">
-                        <select
-                          value={lead.stage}
-                          onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                        >
-                          {stages.map((stage) => (
-                            <option key={stage} value={stage}>
-                              {stage.replace(/_/g, ' ').toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
+                        {hasPermission('canEditLeads') ? (
+                          <select
+                            value={lead.stage}
+                            onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
+                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                          >
+                            {stages.map((stage) => (
+                              <option key={stage} value={stage}>
+                                {stage.replace(/_/g, ' ').toUpperCase()}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-700">
+                            {lead.stage?.replace(/_/g, ' ').toUpperCase()}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 w-40 text-sm text-gray-600 hidden lg:table-cell">
-                        {(user?.role === 'super_admin' || user?.role === 'client_admin') ? (
+                        {isExecutive() ? (
+                          <span className="text-xs text-gray-600">
+                            {lead.assignedUserId
+                              ? teamMembers.find(m => m._id === lead.assignedUserId)
+                                ? `${teamMembers.find(m => m._id === lead.assignedUserId).firstName} ${teamMembers.find(m => m._id === lead.assignedUserId).lastName}`
+                                : 'Assigned'
+                              : 'Unassigned'}
+                          </span>
+                        ) : (user?.role === 'super_admin' || user?.role === 'client_admin' || user?.role === 'manager') ? (
                           <select
                             value={lead.assignedUserId || ''}
                             onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value)}
                             className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full"
                           >
                             <option value="">Unassigned</option>
-                            {teamMembers.map((member) => (
+                            {assignableMembers.map((member) => (
                               <option key={member._id} value={member._id}>
                                 {member.firstName} {member.lastName}
                               </option>
@@ -854,13 +879,15 @@ export default function LeadsListPage() {
                       </td>
                       <td className="px-4 py-4 w-24 text-sm">
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSendForm(lead)}
-                            className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
-                            title="Send application form"
-                          >
-                            Send Form
-                          </button>
+                          {hasPermission('canEditLeads') && (
+                            <button
+                              onClick={() => handleSendForm(lead)}
+                              className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+                              title="Send application form"
+                            >
+                              Send Form
+                            </button>
+                          )}
                           {lead.customFields?.applicationId && (
                             <button
                               onClick={() => handleDownloadForm(lead)}
@@ -870,13 +897,15 @@ export default function LeadsListPage() {
                               Download
                             </button>
                           )}
-                          <button
-                            onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
-                            className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
-                            title="Delete lead"
-                          >
-                            Delete
-                          </button>
+                          {hasPermission('canEditLeads') && (
+                            <button
+                              onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
+                              className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                              title="Delete lead"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -943,12 +972,14 @@ export default function LeadsListPage() {
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-3 py-3 text-left w-10">
-                      <input
-                        type="checkbox"
-                        checked={selectedLeads.length === metaLeads.length && metaLeads.length > 0}
-                        onChange={toggleSelectAll}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
+                      {hasPermission('canEditLeads') && (
+                        <input
+                          type="checkbox"
+                          checked={selectedLeads.length === metaLeads.length && metaLeads.length > 0}
+                          onChange={toggleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      )}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 md:w-48">
                       Email
@@ -974,21 +1005,30 @@ export default function LeadsListPage() {
                   {metaLeads.map((lead) => (
                     <tr key={lead._id} className="hover:bg-gray-50">
                       <td className="px-3 py-4 w-10">
-                        <input
-                          type="checkbox"
-                          checked={selectedLeads.includes(lead._id)}
-                          onChange={() => toggleSelectLead(lead._id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                        {hasPermission('canEditLeads') && (
+                          <input
+                            type="checkbox"
+                            checked={selectedLeads.includes(lead._id)}
+                            onChange={() => toggleSelectLead(lead._id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        )}
                       </td>
                       <td className="px-4 py-4 w-40 md:w-48">
-                        <button
-                          onClick={() => handleViewDetails(lead)}
-                          className="text-blue-600 hover:text-blue-900 font-medium block truncate hover:underline"
-                          title={lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
-                        >
-                          {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
-                        </button>
+                        {isExecutive() ? (
+                          <span className="text-gray-900 font-medium block truncate"
+                            title={lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}>
+                            {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleViewDetails(lead)}
+                            className="text-blue-600 hover:text-blue-900 font-medium block truncate hover:underline"
+                            title={lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
+                          >
+                            {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
+                          </button>
+                        )}
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
                             SPAM
@@ -1004,27 +1044,41 @@ export default function LeadsListPage() {
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || 'facebook_import'}</div>
                       </td>
                       <td className="px-4 py-4 w-36">
-                        <select
-                          value={lead.stage}
-                          onChange={(e) => handleQuickStageChange(lead._id, e.target.value, true)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                        >
-                          {stages.map((stage) => (
-                            <option key={stage} value={stage}>
-                              {stage.replace(/_/g, ' ').toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
+                        {hasPermission('canEditLeads') ? (
+                          <select
+                            value={lead.stage}
+                            onChange={(e) => handleQuickStageChange(lead._id, e.target.value, true)}
+                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                          >
+                            {stages.map((stage) => (
+                              <option key={stage} value={stage}>
+                                {stage.replace(/_/g, ' ').toUpperCase()}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-700">
+                            {lead.stage?.replace(/_/g, ' ').toUpperCase()}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 w-40 text-sm text-gray-600 hidden lg:table-cell">
-                        {(user?.role === 'super_admin' || user?.role === 'client_admin') ? (
+                        {isExecutive() ? (
+                          <span className="text-xs text-gray-600">
+                            {lead.assignedUserId
+                              ? teamMembers.find(m => m._id === lead.assignedUserId)
+                                ? `${teamMembers.find(m => m._id === lead.assignedUserId).firstName} ${teamMembers.find(m => m._id === lead.assignedUserId).lastName}`
+                                : 'Assigned'
+                              : 'Unassigned'}
+                          </span>
+                        ) : (user?.role === 'super_admin' || user?.role === 'client_admin' || user?.role === 'manager') ? (
                           <select
                             value={lead.assignedUserId || ''}
                             onChange={(e) => handleQuickAssignmentChange(lead._id, e.target.value, true)}
                             className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-full"
                           >
                             <option value="">Unassigned</option>
-                            {teamMembers.map((member) => (
+                            {assignableMembers.map((member) => (
                               <option key={member._id} value={member._id}>
                                 {member.firstName} {member.lastName}
                               </option>
@@ -1057,13 +1111,15 @@ export default function LeadsListPage() {
                       </td>
                       <td className="px-4 py-4 w-24 text-sm">
                         <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSendForm(lead)}
-                            className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
-                            title="Send application form"
-                          >
-                            Send Form
-                          </button>
+                          {hasPermission('canEditLeads') && (
+                            <button
+                              onClick={() => handleSendForm(lead)}
+                              className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                              title="Send application form"
+                            >
+                              Send Form
+                            </button>
+                          )}
                           {lead.customFields?.applicationId && (
                             <button
                               onClick={() => handleDownloadForm(lead)}
@@ -1080,13 +1136,15 @@ export default function LeadsListPage() {
                           >
                             View
                           </button>
-                          <button
-                            onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`, true)}
-                            className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
-                            title="Delete lead"
-                          >
-                            Delete
-                          </button>
+                          {hasPermission('canEditLeads') && (
+                            <button
+                              onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`, true)}
+                              className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                              title="Delete lead"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

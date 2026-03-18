@@ -8,8 +8,12 @@ const AuthContext = createContext();
 // User roles
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
-  CLIENT_ADMIN: 'client_admin', 
-  MEMBER: 'member'
+  CLIENT_ADMIN: 'client_admin',
+  MEMBER: 'member',
+  CEO: 'ceo',
+  CFO: 'cfo',
+  MANAGER: 'manager',
+  STAFF: 'staff'
 };
 
 // Permission levels for easier role checking
@@ -19,21 +23,56 @@ export const PERMISSIONS = {
     canManageTenants: true,
     canViewAllLeads: true,
     canManageUsers: true,
-    canAssignLeads: true
+    canAssignLeads: true,
+    canEditLeads: true
   },
   [ROLES.CLIENT_ADMIN]: {
     canViewAllTenants: false,
     canManageTenants: false,
-    canViewAllLeads: false, // Only their tenant's leads
-    canManageUsers: true,   // Only their tenant's users
-    canAssignLeads: true    // Only within their tenant
+    canViewAllLeads: false,
+    canManageUsers: true,
+    canAssignLeads: true,
+    canEditLeads: true
   },
   [ROLES.MEMBER]: {
     canViewAllTenants: false,
     canManageTenants: false,
-    canViewAllLeads: false, // Only assigned leads
+    canViewAllLeads: false,
     canManageUsers: false,
-    canAssignLeads: true    // Only reassign within same tenant
+    canAssignLeads: true,
+    canEditLeads: true
+  },
+  [ROLES.CEO]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: true,
+    canManageUsers: false,
+    canAssignLeads: false,
+    canEditLeads: true
+  },
+  [ROLES.CFO]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: true,
+    canManageUsers: false,
+    canAssignLeads: false,
+    canEditLeads: false
+  },
+  [ROLES.MANAGER]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: false,
+    canManageUsers: true,
+    canAssignLeads: true,
+    canEditLeads: true
+  },
+  [ROLES.STAFF]: {
+    canViewAllTenants: false,
+    canManageTenants: false,
+    canViewAllLeads: false,
+    canManageUsers: false,
+    canAssignLeads: true,
+    canEditLeads: true
   }
 };
 
@@ -278,6 +317,9 @@ export function AuthProvider({ children }) {
     isSuperAdmin: () => user?.role === ROLES.SUPER_ADMIN,
     isClientAdmin: () => user?.role === ROLES.CLIENT_ADMIN,
     isMember: () => user?.role === ROLES.MEMBER,
+    isCEO: () => user?.role === ROLES.CEO,
+    isCFO: () => user?.role === ROLES.CFO,
+    isExecutive: () => user?.role === ROLES.CEO || user?.role === ROLES.CFO,
   };
 
   return (
