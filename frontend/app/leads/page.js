@@ -689,7 +689,7 @@ export default function LeadsListPage() {
               </span>
             )}
           </div>
-          {selectedLeads.length > 0 && hasPermission('canEditLeads') && (
+          {selectedLeads.length > 0 && hasPermission('canEditLeads') && !isExecutive() && (
             <button
               onClick={handleBulkDelete}
               className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all duration-200"
@@ -777,13 +777,7 @@ export default function LeadsListPage() {
                         )}
                       </td>
                       <td className="px-4 py-4 w-40 md:w-48">
-                        {isExecutive() ? (
-                          <span className="text-gray-900 font-medium block truncate"
-                            title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}>
-                            {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
-                          </span>
-                        ) : (
-                          <Link
+                        <Link
                             href={`/leads/${lead._id}`}
                             className="text-blue-600 hover:text-blue-900 font-medium block truncate"
                             title={lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
@@ -795,7 +789,6 @@ export default function LeadsListPage() {
                           >
                             {lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : null) || lead.email || 'Unknown'}
                           </Link>
-                        )}
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
                             SPAM
@@ -897,7 +890,7 @@ export default function LeadsListPage() {
                               Download
                             </button>
                           )}
-                          {hasPermission('canEditLeads') && (
+                          {hasPermission('canEditLeads') && !isExecutive() && (
                             <button
                               onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
                               className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
@@ -1015,20 +1008,13 @@ export default function LeadsListPage() {
                         )}
                       </td>
                       <td className="px-4 py-4 w-40 md:w-48">
-                        {isExecutive() ? (
-                          <span className="text-gray-900 font-medium block truncate"
-                            title={lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}>
-                            {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
-                          </span>
-                        ) : (
-                          <button
+                        <button
                             onClick={() => handleViewDetails(lead)}
                             className="text-blue-600 hover:text-blue-900 font-medium block truncate hover:underline"
                             title={lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
                           >
                             {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}` : lead.email || 'Unknown'}
                           </button>
-                        )}
                         {lead.spamFlag && (
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
                             SPAM
@@ -1136,7 +1122,7 @@ export default function LeadsListPage() {
                           >
                             View
                           </button>
-                          {hasPermission('canEditLeads') && (
+                          {hasPermission('canEditLeads') && !isExecutive() && (
                             <button
                               onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`, true)}
                               className="text-red-600 hover:text-red-700 font-medium transition-colors duration-200"

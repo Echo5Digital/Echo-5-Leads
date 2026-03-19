@@ -226,6 +226,29 @@ async function getDashboardStats(req, res) {
       };
     }).sort((a, b) => b.assignedLeads - a.assignedLeads);
 
+    // Lead velocity: last 12 weeks (total + qualified per week)
+    const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement'];
+    const leadVelocity = [];
+    for (let i = 11; i >= 0; i--) {
+      const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+      const weekEnd   = new Date(now.getTime() - i       * 7 * 24 * 60 * 60 * 1000);
+      const label = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const dateFilter = { createdAt: { $gte: weekStart, $lt: weekEnd } };
+
+      const [wTotal, wQualified] = await Promise.all([
+        Promise.all([
+          leads.countDocuments({ ...queryFilter, ...dateFilter }),
+          metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
+        ]).then(([a, b]) => a + b),
+        Promise.all([
+          leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+          metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+        ]).then(([a, b]) => a + b),
+      ]);
+
+      leadVelocity.push({ label, total: wTotal, qualified: wQualified });
+    }
+
     return res.status(200).json({
       totalLeads,
       leadsThisWeek,
@@ -233,7 +256,8 @@ async function getDashboardStats(req, res) {
       pctWithinSLA,
       stageDistribution: stageData,
       sourceDistribution,
-      teamPerformance
+      teamPerformance,
+      leadVelocity,
     });
   } catch (err) {
     console.error('Dashboard stats error:', err);

@@ -39,7 +39,7 @@ async function getLeadDetail(req, res) {
 
     const activities = db.collection('activities');
     const acts = await activities.find({ tenantId: lead.tenantId, leadId: id }).sort({ createdAt: -1 }).toArray();
-    
+
     return res.status(200).json({ lead, activities: acts });
   } catch (err) {
     console.error('Lead detail error:', err);

@@ -9,7 +9,7 @@ import { useTenant } from '@/lib/TenantContext';
 export default function LeadDetail() {
   const params = useParams();
   const router = useRouter();
-  const { user, isSuperAdmin, isClientAdmin, hasPermission } = useAuth();
+  const { user, isSuperAdmin, isClientAdmin, hasPermission, isExecutive } = useAuth();
   const { getStages } = useTenant();
   const [lead, setLead] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -196,7 +196,7 @@ export default function LeadDetail() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Stage
             </label>
-            {hasPermission('canEditLeads') ? (
+            {hasPermission('canEditLeads') && !isExecutive() ? (
               <select
                 value={lead.stage || 'New'}
                 onChange={(e) => handleStageChange(e.target.value)}
@@ -342,7 +342,7 @@ export default function LeadDetail() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Activity Timeline</h2>
-            {hasPermission('canEditLeads') && (
+            {hasPermission('canEditLeads') && !isExecutive() && (
               <button
                 onClick={() => setShowActivityForm(!showActivityForm)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
@@ -467,6 +467,7 @@ export default function LeadDetail() {
                             ))}
                           </div>
                         )}
+
                       </div>
                       <span className="text-xs text-gray-500 whitespace-nowrap ml-4">
                         {formatDate(activity.createdAt)}
