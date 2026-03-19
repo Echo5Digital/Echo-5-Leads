@@ -805,7 +805,7 @@ export default function LeadsListPage() {
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || '-'}</div>
                       </td>
                       <td className="px-4 py-4 w-36">
-                        {hasPermission('canEditLeads') ? (
+                        {hasPermission('canEditLeads') && !isExecutive() ? (
                           <select
                             value={lead.stage}
                             onChange={(e) => handleQuickStageChange(lead._id, e.target.value)}
@@ -1030,7 +1030,7 @@ export default function LeadsListPage() {
                         <div className="text-xs text-gray-500 truncate" title={lead.source}>{lead.source || 'facebook_import'}</div>
                       </td>
                       <td className="px-4 py-4 w-36">
-                        {hasPermission('canEditLeads') ? (
+                        {hasPermission('canEditLeads') && !isExecutive() ? (
                           <select
                             value={lead.stage}
                             onChange={(e) => handleQuickStageChange(lead._id, e.target.value, true)}

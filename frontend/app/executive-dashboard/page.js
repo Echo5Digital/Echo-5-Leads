@@ -230,7 +230,7 @@ export default function ExecutiveDashboard() {
           />
           <KpiCard
             label="Top Source"
-            value={topSource?.source ? capFirst(topSource.source.replace(/_import$/i, '').replace(/_/g, ' ')) : 'N/A'}
+            value={topSource?.source ? fmtSource(topSource.source) : 'N/A'}
             sub={topSource ? `${topSource.count} leads` : ''}
             accent="violet"
             icon={<StarIcon />}
@@ -424,7 +424,7 @@ export default function ExecutiveDashboard() {
                     const pct = totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0;
                     return (
                       <div key={source} className="flex items-center gap-2">
-                        <span className="text-xs text-slate-600 w-20 truncate capitalize">{source || 'Unknown'}</span>
+                        <span className="text-xs text-slate-600 w-20 truncate">{fmtSource(source)}</span>
                         <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                           <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
                         </div>
@@ -488,6 +488,27 @@ export default function ExecutiveDashboard() {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function fmt(str) { return str?.replace(/_/g, ' ') || ''; }
 function capFirst(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+
+const SOURCE_LABELS = {
+  facebook_import: 'Facebook',
+  facebook:        'Facebook',
+  pro_elements:    'Website Leads',
+  pro_element:     'Website Leads',
+  manual:          'Manual',
+  meta:            'Meta',
+  google:          'Google Ads',
+  google_ads:      'Google Ads',
+  website:         'Website',
+};
+function fmtSource(src) {
+  if (!src) return 'Unknown';
+  const key = src.toLowerCase().replace(/\s+/g, '_');
+  if (SOURCE_LABELS[key]) return SOURCE_LABELS[key];
+  if (key.startsWith('pro_element') || key.startsWith('elementor')) return 'Website Leads';
+  if (key.startsWith('facebook') || key.startsWith('fb_')) return 'Facebook';
+  if (key.startsWith('google')) return 'Google Ads';
+  return capFirst(src.replace(/_import$/i, '').replace(/_/g, ' '));
+}
 
 function buildTrendData(leadVelocity) {
   if (!Array.isArray(leadVelocity) || leadVelocity.length === 0) return [];
