@@ -55,9 +55,15 @@ export default function ExecutiveDashboard() {
       if (isSuperAdmin() && selectedTenant) params.set('tenantId', selectedTenant._id);
       const query = params.toString() ? `?${params.toString()}` : '';
 
+      // Pass tenantId to sla/overdue so it only fetches for the user's own tenant
+      const slaParams = new URLSearchParams();
+      if (isSuperAdmin() && selectedTenant) slaParams.set('tenantId', selectedTenant._id);
+      else if (user?.tenantId) slaParams.set('tenantId', user.tenantId);
+      const slaQuery = slaParams.toString() ? `?${slaParams.toString()}` : '';
+
       const [statsData, slaResult] = await Promise.all([
         apiFetch(`/api/dashboard/stats${query}`, token),
-        apiFetch('/api/sla/overdue', token),
+        apiFetch(`/api/sla/overdue${slaQuery}`, token),
       ]);
 
       setStats(statsData);
