@@ -23,10 +23,13 @@ async function ensureIndexes(db) {
     { key: { tenantId: 1, phoneE164: 1 }, name: 'u_tenant_phone', unique: true, partialFilterExpression: { phoneE164: { $type: 'string' } } },
     { key: { tenantId: 1, createdAt: -1 }, name: 'idx_tenant_createdAt' },
     { key: { tenantId: 1, stage: 1, latestActivityAt: -1 }, name: 'idx_tenant_stage_latest' },
-    { key: { assignedTo: 1 }, name: 'idx_assignedTo' }
+    { key: { assignedTo: 1 }, name: 'idx_assignedTo' },
+    { key: { tenantId: 1, createdAt: 1, stage: 1 }, name: 'idx_tenant_createdAt_stage' },
+    { key: { tenantId: 1, latestActivityAt: 1, createdAt: 1 }, name: 'idx_tenant_sla' },
   ]);
   await db.collection('activities').createIndexes([
-    { key: { tenantId: 1, leadId: 1, createdAt: -1 }, name: 'idx_tenant_lead_createdAt' }
+    { key: { tenantId: 1, leadId: 1, createdAt: -1 }, name: 'idx_tenant_lead_createdAt' },
+    { key: { tenantId: 1, leadId: 1, type: 1, createdAt: 1 }, name: 'idx_tenant_lead_type_createdAt' },
   ]);
   await db.collection('api_keys').createIndexes([
     { key: { keyHash: 1 }, name: 'idx_keyHash' },

@@ -105,56 +105,76 @@ async function getDashboardStats(req, res) {
       stageData[item._id] = (stageData[item._id] || 0) + item.count;
     }
 
-    // Calculate avg time to first contact
-    const leadsWithContact = await leads.find({
-      ...queryFilter,
-      stage: { $ne: 'new' }
-    }).toArray();
+    // Calculate avg time to first contact (single aggregation instead of N+1 queries)
+    const contactTimeResult = await leads.aggregate([
+      { $match: { ...queryFilter, stage: { $ne: 'new' } } },
+      {
+        $lookup: {
+          from: 'activities',
+          let: { leadId: { $toString: '$_id' }, tid: '$tenantId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$leadId', '$$leadId'] },
+                    { $eq: ['$tenantId', '$$tid'] },
+                    { $ne: ['$type', 'utm_snapshot'] },
+                  ],
+                },
+              },
+            },
+            { $sort: { createdAt: 1 } },
+            { $limit: 1 },
+          ],
+          as: 'firstActivity',
+        },
+      },
+      { $unwind: '$firstActivity' },
+      {
+        $group: {
+          _id: null,
+          totalMs: { $sum: { $subtract: ['$firstActivity.createdAt', '$createdAt'] } },
+          count: { $sum: 1 },
+        },
+      },
+    ]).toArray();
 
-    let totalContactTime = 0;
-    let contactedCount = 0;
+    const avgTimeToContact =
+      contactTimeResult[0]?.count > 0
+        ? Math.round(contactTimeResult[0].totalMs / contactTimeResult[0].count / (1000 * 60 * 60))
+        : null;
 
-    for (const lead of leadsWithContact) {
-      // Find first non-utm_snapshot activity
-      const firstActivity = await activities.findOne({
-        tenantId,
-        leadId: lead._id.toString(),
-        type: { $ne: 'utm_snapshot' }
-      }, { sort: { createdAt: 1 } });
+    // Calculate % within SLA (aggregation instead of loading all leads into memory)
+    const slaResult = await leads.aggregate([
+      {
+        $match: {
+          ...queryFilter,
+          createdAt: { $exists: true },
+          latestActivityAt: { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          withinSLA: {
+            $sum: {
+              $cond: [
+                { $lte: [{ $subtract: ['$latestActivityAt', '$createdAt'] }, slaMs] },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]).toArray();
 
-      if (firstActivity && lead.createdAt) {
-        const timeDiff = firstActivity.createdAt.getTime() - lead.createdAt.getTime();
-        totalContactTime += timeDiff;
-        contactedCount++;
-      }
-    }
-
-    const avgTimeToContact = contactedCount > 0
-      ? Math.round(totalContactTime / contactedCount / (1000 * 60 * 60)) // Convert to hours
-      : null;
-
-    // Calculate % within SLA
-    const allLeadsWithActivity = await leads.find({
-      tenantId,
-      latestActivityAt: { $exists: true }
-    }).toArray();
-
-    let withinSLA = 0;
-    let totalWithActivity = 0;
-
-    for (const lead of allLeadsWithActivity) {
-      if (lead.createdAt && lead.latestActivityAt) {
-        const timeDiff = lead.latestActivityAt.getTime() - lead.createdAt.getTime();
-        totalWithActivity++;
-        if (timeDiff <= slaMs) {
-          withinSLA++;
-        }
-      }
-    }
-
-    const pctWithinSLA = totalWithActivity > 0
-      ? Math.round((withinSLA / totalWithActivity) * 100 * 10) / 10
-      : 0;
+    const pctWithinSLA =
+      slaResult[0]?.total > 0
+        ? Math.round((slaResult[0].withinSLA / slaResult[0].total) * 100 * 10) / 10
+        : 0;
 
     // Source distribution (website leads + meta leads)
     const [websiteSourceDistribution, metaSourceDistribution] = await Promise.all([
@@ -226,28 +246,33 @@ async function getDashboardStats(req, res) {
       };
     }).sort((a, b) => b.assignedLeads - a.assignedLeads);
 
-    // Lead velocity: last 12 weeks (total + qualified per week)
+    // Lead velocity: last 12 weeks (total + qualified per week) — all weeks run in parallel
     const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement'];
-    const leadVelocity = [];
-    for (let i = 11; i >= 0; i--) {
-      const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
-      const weekEnd   = new Date(now.getTime() - i       * 7 * 24 * 60 * 60 * 1000);
-      const label = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const dateFilter = { createdAt: { $gte: weekStart, $lt: weekEnd } };
-
-      const [wTotal, wQualified] = await Promise.all([
-        Promise.all([
-          leads.countDocuments({ ...queryFilter, ...dateFilter }),
-          metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
-        ]).then(([a, b]) => a + b),
-        Promise.all([
-          leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-          metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-        ]).then(([a, b]) => a + b),
-      ]);
-
-      leadVelocity.push({ label, total: wTotal, qualified: wQualified });
-    }
+    const weekRanges = Array.from({ length: 12 }, (_, i) => {
+      const idx = 11 - i;
+      return {
+        label: new Date(now.getTime() - (idx + 1) * 7 * 24 * 60 * 60 * 1000)
+          .toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        weekStart: new Date(now.getTime() - (idx + 1) * 7 * 24 * 60 * 60 * 1000),
+        weekEnd:   new Date(now.getTime() - idx       * 7 * 24 * 60 * 60 * 1000),
+      };
+    });
+    const leadVelocity = await Promise.all(
+      weekRanges.map(async ({ label, weekStart, weekEnd }) => {
+        const dateFilter = { createdAt: { $gte: weekStart, $lt: weekEnd } };
+        const [wTotal, wQualified] = await Promise.all([
+          Promise.all([
+            leads.countDocuments({ ...queryFilter, ...dateFilter }),
+            metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
+          ]).then(([a, b]) => a + b),
+          Promise.all([
+            leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+            metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+          ]).then(([a, b]) => a + b),
+        ]);
+        return { label, total: wTotal, qualified: wQualified };
+      })
+    );
 
     return res.status(200).json({
       totalLeads,
