@@ -35,6 +35,11 @@ async function ensureIndexes(db) {
     { key: { keyHash: 1 }, name: 'idx_keyHash' },
     { key: { tenantId: 1, active: 1 }, name: 'idx_tenant_active' }
   ]);
+  // Dashboard stats cache — TTL index auto-deletes expired entries
+  await db.collection('dashboard_cache').createIndexes([
+    { key: { expiresAt: 1 }, name: 'idx_cache_ttl', expireAfterSeconds: 0 },
+    { key: { cacheKey: 1 }, name: 'idx_cache_key', unique: true },
+  ]);
   // Create users indexes (handle existing index conflict)
   try {
     await db.collection('users').createIndexes([

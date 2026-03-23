@@ -2,6 +2,11 @@ import { getDb, resolveTenantId } from '../lib/mongo.js';
 import { authenticateToken, ROLES } from '../lib/auth.js';
 import { ObjectId } from 'mongodb';
 
+// Level-1 cache: in-memory (instant — works for warm Vercel instances)
+const statsCache = new Map();
+// Level-2 cache: MongoDB dashboard_cache collection (survives cold starts)
+const CACHE_TTL_MS = 60_000; // 60 seconds
+
 async function getDashboardStats(req, res) {
   try {
     const db = await getDb();
@@ -17,16 +22,8 @@ async function getDashboardStats(req, res) {
              tenantId = queryTenantId.length === 24 ? new ObjectId(queryTenantId) : queryTenantId;
           }
         }
-        // If no tenantId, SuperAdmin sees aggregate stats (or we could enforce tenant selection)
-        // For now, let's assume if no tenantId, we calculate across ALL tenants (or return empty)
-        // But the current logic below relies on `tenantId` being set for the queries.
-        // Let's default to returning empty or requiring tenantId for stats.
         if (!tenantId) {
-           // Optional: return global stats if needed, but for now let's require tenant context or handle it
-           // If we want global stats, we'd need to remove { tenantId } from queries below.
-           // Let's assume for dashboard stats, we want to see data for a specific tenant context.
-           // If SuperAdmin hasn't selected one, maybe we pick the first one or return 0s?
-           // Let's proceed with tenantId = null and handle it in queries.
+           // proceed with tenantId = null
         }
       } else {
         tenantId = req.user.tenantId;
@@ -37,272 +34,214 @@ async function getDashboardStats(req, res) {
       if (!tenantId) return res.status(401).json({ error: 'Invalid API key' });
     }
 
-    // If we still don't have a tenantId (e.g. SuperAdmin without selection), 
-    // we might want to return an error or global stats. 
-    // Existing logic heavily relies on `tenantId`.
     if (!tenantId && (!req.user || req.user.role !== ROLES.SUPER_ADMIN)) {
        return res.status(401).json({ error: 'Tenant context required' });
+    }
+
+    // ── Cache check (L1: memory, L2: MongoDB) ─────────────────────────────────
+    const cacheKey = String(tenantId || 'global');
+    const memCached = statsCache.get(cacheKey);
+    if (memCached && Date.now() - memCached.ts < CACHE_TTL_MS) {
+      return res.status(200).json(memCached.data);
+    }
+    const dashboardCache = db.collection('dashboard_cache');
+    const dbCached = await dashboardCache.findOne({ cacheKey });
+    if (dbCached) {
+      // Warm the in-memory cache too
+      statsCache.set(cacheKey, { data: dbCached.data, ts: Date.now() });
+      return res.status(200).json(dbCached.data);
     }
 
     const leads = db.collection('leads');
     const metaLeads = db.collection('meta_leads');
     const activities = db.collection('activities');
     const tenants = db.collection('tenants');
+    const usersCollection = db.collection('users');
 
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    let slaHours = 24;
-    if (tenantId) {
-      const tenant = await tenants.findOne({ _id: tenantId });
-      slaHours = tenant?.config?.slaHours || 24;
-    }
-    const slaMs = slaHours * 60 * 60 * 1000;
-
-    // Build query filter
     const queryFilter = tenantId ? { tenantId } : {};
 
-    // Total leads (website leads + meta leads)
-    const [websiteLeadsCount, metaLeadsCount] = await Promise.all([
-      leads.countDocuments(queryFilter),
-      metaLeads.countDocuments(queryFilter)
-    ]);
-    const totalLeads = websiteLeadsCount + metaLeadsCount;
-
-    // Leads this week (website leads + meta leads)
-    const [websiteLeadsThisWeek, metaLeadsThisWeek] = await Promise.all([
-      leads.countDocuments({
-        ...queryFilter,
-        createdAt: { $gte: oneWeekAgo }
-      }),
-      metaLeads.countDocuments({
-        ...queryFilter,
-        createdAt: { $gte: oneWeekAgo }
-      })
-    ]);
-    const leadsThisWeek = websiteLeadsThisWeek + metaLeadsThisWeek;
-
-    // Lead distribution by stage (website leads + meta leads)
-    const [websiteStageDistribution, metaStageDistribution] = await Promise.all([
-      leads.aggregate([
-        { $match: queryFilter },
-        { $group: { _id: '$stage', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
-      ]).toArray(),
-      metaLeads.aggregate([
-        { $match: queryFilter },
-        { $group: { _id: '$stage', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
-      ]).toArray()
-    ]);
-
-    // Combine stage distributions from both collections
-    const stageData = {};
-    for (const item of websiteStageDistribution) {
-      stageData[item._id] = (stageData[item._id] || 0) + item.count;
-    }
-    for (const item of metaStageDistribution) {
-      stageData[item._id] = (stageData[item._id] || 0) + item.count;
-    }
-
-    // Calculate avg time to first contact (single aggregation instead of N+1 queries)
-    const contactTimeResult = await leads.aggregate([
-      { $match: { ...queryFilter, stage: { $ne: 'new' } } },
-      {
-        $lookup: {
-          from: 'activities',
-          let: { leadId: { $toString: '$_id' }, tid: '$tenantId' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$leadId', '$$leadId'] },
-                    { $eq: ['$tenantId', '$$tid'] },
-                    { $ne: ['$type', 'utm_snapshot'] },
-                  ],
-                },
-              },
-            },
-            { $sort: { createdAt: 1 } },
-            { $limit: 1 },
-          ],
-          as: 'firstActivity',
-        },
-      },
-      { $unwind: '$firstActivity' },
-      {
-        $group: {
-          _id: null,
-          totalMs: { $sum: { $subtract: ['$firstActivity.createdAt', '$createdAt'] } },
-          count: { $sum: 1 },
-        },
-      },
-    ]).toArray();
-
-    const avgTimeToContact =
-      contactTimeResult[0]?.count > 0
-        ? Math.round(contactTimeResult[0].totalMs / contactTimeResult[0].count / (1000 * 60 * 60))
-        : null;
-
-    // Calculate % within SLA (aggregation instead of loading all leads into memory)
-    const slaResult = await leads.aggregate([
-      {
-        $match: {
-          ...queryFilter,
-          createdAt: { $exists: true },
-          latestActivityAt: { $exists: true },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: 1 },
-          withinSLA: {
-            $sum: {
-              $cond: [
-                { $lte: [{ $subtract: ['$latestActivityAt', '$createdAt'] }, slaMs] },
-                1,
-                0,
-              ],
-            },
-          },
-        },
-      },
-    ]).toArray();
-
-    const pctWithinSLA =
-      slaResult[0]?.total > 0
-        ? Math.round((slaResult[0].withinSLA / slaResult[0].total) * 100 * 10) / 10
-        : 0;
-
-    // Source distribution (website leads + meta leads)
-    const [websiteSourceDistribution, metaSourceDistribution] = await Promise.all([
-      leads.aggregate([
-        { $match: queryFilter },
-        { $group: { _id: '$source', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
-      ]).toArray(),
-      metaLeads.aggregate([
-        { $match: queryFilter },
-        { $group: { _id: '$source', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
-      ]).toArray()
-    ]);
-
-    // Combine source distributions from both collections
-    const sourceData = {};
-    for (const item of websiteSourceDistribution) {
-      sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
-    }
-    for (const item of metaSourceDistribution) {
-      sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
-    }
-
-    // Convert to array format and sort by count
-    const sourceDistribution = Object.entries(sourceData)
-      .map(([source, count]) => ({ source, count }))
-      .sort((a, b) => b.count - a.count);
-
-    // Team performance: assigned leads + activity breakdown per user
-    const usersCollection = db.collection('users');
-    const tenantUsers = tenantId
-      ? await usersCollection.find({ tenantId, active: true }, { projection: { firstName: 1, lastName: 1, role: 1 } }).toArray()
-      : [];
-
-    const [assignedLeadsCursor, userActivityCursor] = await Promise.all([
-      leads.aggregate([
-        { $match: { ...queryFilter, assignedUserId: { $exists: true, $ne: null } } },
-        { $group: { _id: '$assignedUserId', count: { $sum: 1 } } }
-      ]).toArray(),
-      activities.aggregate([
-        { $match: { ...(tenantId ? { tenantId } : {}), userId: { $exists: true, $ne: null } } },
-        { $group: {
-          _id: '$userId',
-          total: { $sum: 1 },
-          calls:  { $sum: { $cond: [{ $eq: ['$type', 'call'] },   1, 0] } },
-          emails: { $sum: { $cond: [{ $eq: ['$type', 'email'] },  1, 0] } },
-          notes:  { $sum: { $cond: [{ $eq: ['$type', 'note'] },   1, 0] } },
-          sms:    { $sum: { $cond: [{ $eq: ['$type', 'sms'] },    1, 0] } },
-        }}
-      ]).toArray()
-    ]);
-
-    const assignedMap = Object.fromEntries(assignedLeadsCursor.map(r => [r._id?.toString(), r.count]));
-    const activityMap = Object.fromEntries(userActivityCursor.map(r => [r._id?.toString(), r]));
-
-    const teamPerformance = tenantUsers.map(u => {
-      const uid = u._id.toString();
-      const act = activityMap[uid] || { total: 0, calls: 0, emails: 0, notes: 0, sms: 0 };
-      return {
-        name: `${u.firstName} ${u.lastName}`,
-        role: u.role,
-        assignedLeads: assignedMap[uid] || 0,
-        activitiesTotal: act.total,
-        calls: act.calls,
-        emails: act.emails,
-        notes: act.notes,
-        sms: act.sms,
-      };
-    }).sort((a, b) => b.assignedLeads - a.assignedLeads);
-
-    // Lead velocity: 12 weeks (11 past + current/upcoming week) — labeled by week END so
-    // today's date always appears on the chart and tomorrow's leads are captured too.
     const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement'];
+
+    // ── Build week/month ranges ────────────────────────────────────────────────
+    // 12 weeks: 11 past + current/upcoming, labeled by week END
     const weekRanges = Array.from({ length: 12 }, (_, i) => {
       const idx = 11 - i;
       const weekEnd   = new Date(now.getTime() + (1 - idx) * 7 * 24 * 60 * 60 * 1000);
-      const weekStart = new Date(weekEnd.getTime()          - 7 * 24 * 60 * 60 * 1000);
-      return {
-        label: weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        weekStart,
-        weekEnd,
-      };
+      const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return { label: weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), weekStart, weekEnd };
     });
-    const leadVelocity = await Promise.all(
-      weekRanges.map(async ({ label, weekStart, weekEnd }) => {
-        const dateFilter = { createdAt: { $gte: weekStart, $lt: weekEnd } };
-        const [wTotal, wQualified] = await Promise.all([
-          Promise.all([
-            leads.countDocuments({ ...queryFilter, ...dateFilter }),
-            metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
-          ]).then(([a, b]) => a + b),
-          Promise.all([
-            leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-            metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-          ]).then(([a, b]) => a + b),
-        ]);
-        return { label, total: wTotal, qualified: wQualified };
-      })
-    );
+    const weekBoundaries = [...weekRanges.map(r => r.weekStart), weekRanges[11].weekEnd];
 
-    // Monthly buckets: 12 months (11 past + current month), one data point per calendar month
+    // 12 calendar months: 11 past + current
     const monthRanges = Array.from({ length: 12 }, (_, i) => {
       const monthsAgo = 11 - i;
       const d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
       const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
       const monthEnd   = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-      const label = monthStart.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-      return { label, monthStart, monthEnd };
+      return { label: monthStart.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }), monthStart, monthEnd };
     });
-    const leadVelocityMonthly = await Promise.all(
-      monthRanges.map(async ({ label, monthStart, monthEnd }) => {
-        const dateFilter = { createdAt: { $gte: monthStart, $lt: monthEnd } };
-        const [mTotal, mQualified] = await Promise.all([
-          Promise.all([
-            leads.countDocuments({ ...queryFilter, ...dateFilter }),
-            metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
-          ]).then(([a, b]) => a + b),
-          Promise.all([
-            leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-            metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
-          ]).then(([a, b]) => a + b),
-        ]);
-        return { label, total: mTotal, qualified: mQualified };
-      })
-    );
+    const monthBoundaries = [...monthRanges.map(r => r.monthStart), monthRanges[11].monthEnd];
 
-    return res.status(200).json({
+    // ── Run ALL queries in parallel ────────────────────────────────────────────
+    const tenant = tenantId ? await tenants.findOne({ _id: tenantId }) : null;
+    const slaHours = tenant?.config?.slaHours || 24;
+    const slaMs = slaHours * 60 * 60 * 1000;
+
+    const [
+      [websiteLeadsCount, metaLeadsCount],
+      [websiteLeadsThisWeek, metaLeadsThisWeek],
+      websiteStageDistribution,
+      metaStageDistribution,
+      contactTimeResult,
+      slaResult,
+      websiteSourceDistribution,
+      metaSourceDistribution,
+      tenantUsers,
+      assignedLeadsCursor,
+      userActivityCursor,
+      // velocity: 2 $bucket aggregations replace 48 countDocuments for weekly
+      leadsWeekBuckets,
+      metaLeadsWeekBuckets,
+      // velocity: 2 $bucket aggregations replace 48 countDocuments for monthly
+      leadsMonthBuckets,
+      metaLeadsMonthBuckets,
+    ] = await Promise.all([
+      // counts
+      Promise.all([leads.countDocuments(queryFilter), metaLeads.countDocuments(queryFilter)]),
+      Promise.all([
+        leads.countDocuments({ ...queryFilter, createdAt: { $gte: oneWeekAgo } }),
+        metaLeads.countDocuments({ ...queryFilter, createdAt: { $gte: oneWeekAgo } }),
+      ]),
+      // stage distribution
+      leads.aggregate([{ $match: queryFilter }, { $group: { _id: '$stage', count: { $sum: 1 } } }]).toArray(),
+      metaLeads.aggregate([{ $match: queryFilter }, { $group: { _id: '$stage', count: { $sum: 1 } } }]).toArray(),
+      // avg contact time
+      leads.aggregate([
+        { $match: { ...queryFilter, stage: { $ne: 'new' } } },
+        { $lookup: {
+          from: 'activities',
+          let: { leadId: { $toString: '$_id' }, tid: '$tenantId' },
+          pipeline: [
+            { $match: { $expr: { $and: [
+              { $eq: ['$leadId', '$$leadId'] },
+              { $eq: ['$tenantId', '$$tid'] },
+              { $ne: ['$type', 'utm_snapshot'] },
+            ]}}},
+            { $sort: { createdAt: 1 } },
+            { $limit: 1 },
+          ],
+          as: 'firstActivity',
+        }},
+        { $unwind: '$firstActivity' },
+        { $group: { _id: null, totalMs: { $sum: { $subtract: ['$firstActivity.createdAt', '$createdAt'] } }, count: { $sum: 1 } } },
+      ]).toArray(),
+      // SLA
+      leads.aggregate([
+        { $match: { ...queryFilter, createdAt: { $exists: true }, latestActivityAt: { $exists: true } } },
+        { $group: { _id: null, total: { $sum: 1 }, withinSLA: { $sum: { $cond: [{ $lte: [{ $subtract: ['$latestActivityAt', '$createdAt'] }, slaMs] }, 1, 0] } } } },
+      ]).toArray(),
+      // source distribution
+      leads.aggregate([{ $match: queryFilter }, { $group: { _id: '$source', count: { $sum: 1 } } }]).toArray(),
+      metaLeads.aggregate([{ $match: queryFilter }, { $group: { _id: '$source', count: { $sum: 1 } } }]).toArray(),
+      // team
+      tenantId ? usersCollection.find({ tenantId, active: true }, { projection: { firstName: 1, lastName: 1, role: 1 } }).toArray() : Promise.resolve([]),
+      leads.aggregate([
+        { $match: { ...queryFilter, assignedUserId: { $exists: true, $ne: null } } },
+        { $group: { _id: '$assignedUserId', count: { $sum: 1 } } },
+      ]).toArray(),
+      activities.aggregate([
+        { $match: { ...(tenantId ? { tenantId } : {}), userId: { $exists: true, $ne: null } } },
+        { $group: { _id: '$userId', total: { $sum: 1 },
+          calls:  { $sum: { $cond: [{ $eq: ['$type', 'call'] },   1, 0] } },
+          emails: { $sum: { $cond: [{ $eq: ['$type', 'email'] },  1, 0] } },
+          notes:  { $sum: { $cond: [{ $eq: ['$type', 'note'] },   1, 0] } },
+          sms:    { $sum: { $cond: [{ $eq: ['$type', 'sms'] },    1, 0] } },
+        }},
+      ]).toArray(),
+      // weekly velocity — 1 $bucket per collection instead of 24 countDocuments
+      leads.aggregate([
+        { $match: { ...queryFilter, createdAt: { $gte: weekBoundaries[0], $lt: weekBoundaries[12] } } },
+        { $bucket: { groupBy: '$createdAt', boundaries: weekBoundaries, default: '__other__',
+          output: { total: { $sum: 1 }, qualified: { $sum: { $cond: [{ $in: ['$stage', QUALIFIED_STAGES] }, 1, 0] } } } } },
+      ]).toArray(),
+      metaLeads.aggregate([
+        { $match: { ...queryFilter, createdAt: { $gte: weekBoundaries[0], $lt: weekBoundaries[12] } } },
+        { $bucket: { groupBy: '$createdAt', boundaries: weekBoundaries, default: '__other__',
+          output: { total: { $sum: 1 }, qualified: { $sum: { $cond: [{ $in: ['$stage', QUALIFIED_STAGES] }, 1, 0] } } } } },
+      ]).toArray(),
+      // monthly velocity — 1 $bucket per collection instead of 24 countDocuments
+      leads.aggregate([
+        { $match: { ...queryFilter, createdAt: { $gte: monthBoundaries[0], $lt: monthBoundaries[12] } } },
+        { $bucket: { groupBy: '$createdAt', boundaries: monthBoundaries, default: '__other__',
+          output: { total: { $sum: 1 }, qualified: { $sum: { $cond: [{ $in: ['$stage', QUALIFIED_STAGES] }, 1, 0] } } } } },
+      ]).toArray(),
+      metaLeads.aggregate([
+        { $match: { ...queryFilter, createdAt: { $gte: monthBoundaries[0], $lt: monthBoundaries[12] } } },
+        { $bucket: { groupBy: '$createdAt', boundaries: monthBoundaries, default: '__other__',
+          output: { total: { $sum: 1 }, qualified: { $sum: { $cond: [{ $in: ['$stage', QUALIFIED_STAGES] }, 1, 0] } } } } },
+      ]).toArray(),
+    ]);
+
+    // ── Assemble results ───────────────────────────────────────────────────────
+    const totalLeads = websiteLeadsCount + metaLeadsCount;
+    const leadsThisWeek = websiteLeadsThisWeek + metaLeadsThisWeek;
+
+    const stageData = {};
+    for (const item of websiteStageDistribution) stageData[item._id] = (stageData[item._id] || 0) + item.count;
+    for (const item of metaStageDistribution)     stageData[item._id] = (stageData[item._id] || 0) + item.count;
+
+    const avgTimeToContact = contactTimeResult[0]?.count > 0
+      ? Math.round(contactTimeResult[0].totalMs / contactTimeResult[0].count / (1000 * 60 * 60))
+      : null;
+
+    const pctWithinSLA = slaResult[0]?.total > 0
+      ? Math.round((slaResult[0].withinSLA / slaResult[0].total) * 100 * 10) / 10
+      : 0;
+
+    const sourceData = {};
+    for (const item of websiteSourceDistribution) sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
+    for (const item of metaSourceDistribution)    sourceData[item._id] = (sourceData[item._id] || 0) + item.count;
+    const sourceDistribution = Object.entries(sourceData)
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const assignedMap = Object.fromEntries(assignedLeadsCursor.map(r => [r._id?.toString(), r.count]));
+    const activityMap = Object.fromEntries(userActivityCursor.map(r => [r._id?.toString(), r]));
+    const teamPerformance = tenantUsers.map(u => {
+      const uid = u._id.toString();
+      const act = activityMap[uid] || { total: 0, calls: 0, emails: 0, notes: 0, sms: 0 };
+      return { name: `${u.firstName} ${u.lastName}`, role: u.role,
+        assignedLeads: assignedMap[uid] || 0, activitiesTotal: act.total,
+        calls: act.calls, emails: act.emails, notes: act.notes, sms: act.sms };
+    }).sort((a, b) => b.assignedLeads - a.assignedLeads);
+
+    // Merge $bucket results for weekly velocity
+    const weekBucketMap = new Map();
+    for (const b of [...leadsWeekBuckets, ...metaLeadsWeekBuckets]) {
+      const key = b._id instanceof Date ? b._id.getTime() : new Date(b._id).getTime();
+      const existing = weekBucketMap.get(key) || { total: 0, qualified: 0 };
+      weekBucketMap.set(key, { total: existing.total + b.total, qualified: existing.qualified + b.qualified });
+    }
+    const leadVelocity = weekRanges.map(r => {
+      const b = weekBucketMap.get(r.weekStart.getTime()) || { total: 0, qualified: 0 };
+      return { label: r.label, total: b.total, qualified: b.qualified };
+    });
+
+    // Merge $bucket results for monthly velocity
+    const monthBucketMap = new Map();
+    for (const b of [...leadsMonthBuckets, ...metaLeadsMonthBuckets]) {
+      const key = b._id instanceof Date ? b._id.getTime() : new Date(b._id).getTime();
+      const existing = monthBucketMap.get(key) || { total: 0, qualified: 0 };
+      monthBucketMap.set(key, { total: existing.total + b.total, qualified: existing.qualified + b.qualified });
+    }
+    const leadVelocityMonthly = monthRanges.map(r => {
+      const b = monthBucketMap.get(r.monthStart.getTime()) || { total: 0, qualified: 0 };
+      return { label: r.label, total: b.total, qualified: b.qualified };
+    });
+
+    const responseData = {
       totalLeads,
       leadsThisWeek,
       avgTimeToContact,
@@ -312,7 +251,19 @@ async function getDashboardStats(req, res) {
       teamPerformance,
       leadVelocity,
       leadVelocityMonthly,
-    });
+    };
+
+    // ── Store in both cache levels ─────────────────────────────────────────────
+    statsCache.set(cacheKey, { data: responseData, ts: Date.now() });
+    const expiresAt = new Date(Date.now() + CACHE_TTL_MS);
+    // Fire-and-forget — don't await, so the response isn't delayed
+    dashboardCache.updateOne(
+      { cacheKey },
+      { $set: { cacheKey, data: responseData, expiresAt } },
+      { upsert: true }
+    ).catch(() => {}); // swallow cache write errors
+
+    return res.status(200).json(responseData);
   } catch (err) {
     console.error('Dashboard stats error:', err);
     return res.status(500).json({ error: 'internal_error', details: String(err?.message || err) });
