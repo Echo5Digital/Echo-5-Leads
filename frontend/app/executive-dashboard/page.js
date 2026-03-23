@@ -35,6 +35,7 @@ export default function ExecutiveDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeLines, setActiveLines] = useState({ total: true, qualified: true });
+  const [trendView, setTrendView] = useState('week'); // 'week' | 'month'
 
   useEffect(() => {
     if (!authLoading && user && !isExecutive() && !isSuperAdmin()) {
@@ -152,8 +153,8 @@ export default function ExecutiveDashboard() {
   if (topCloser) alerts.push({ color: 'green', text: `Top closer: ${topCloser.name} — ${topCloser.assignedLeads} leads` });
   if (alerts.length === 0) alerts.push({ color: 'green', text: 'All systems healthy — no critical alerts' });
 
-  // Lead Volume Trend chart data from analytics leadVelocity
-  const trendData = buildTrendData(stats.leadVelocity);
+  // Lead Volume Trend chart data — weekly or monthly
+  const trendData = buildTrendData(trendView === 'month' ? stats.leadVelocityMonthly : stats.leadVelocity);
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const roleLabel = user?.role?.toUpperCase() || 'EXECUTIVE';
@@ -246,7 +247,24 @@ export default function ExecutiveDashboard() {
         {/* ── Lead Volume Trend ──────────────────────────────────────────────── */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-semibold text-slate-800">Lead Volume Trend</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-base font-semibold text-slate-800">Lead Volume Trend</h2>
+              {/* Weekly / Monthly toggle */}
+              <div className="flex items-center bg-slate-100 rounded-lg p-0.5 text-xs font-medium">
+                <button
+                  onClick={() => setTrendView('week')}
+                  className={`px-3 py-1 rounded-md transition-all ${trendView === 'week' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Weekly
+                </button>
+                <button
+                  onClick={() => setTrendView('month')}
+                  className={`px-3 py-1 rounded-md transition-all ${trendView === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Monthly
+                </button>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <ToggleChip
                 active={activeLines.total}

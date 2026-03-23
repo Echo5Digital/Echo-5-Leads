@@ -246,15 +246,17 @@ async function getDashboardStats(req, res) {
       };
     }).sort((a, b) => b.assignedLeads - a.assignedLeads);
 
-    // Lead velocity: last 12 weeks (total + qualified per week) — all weeks run in parallel
+    // Lead velocity: 12 weeks (11 past + current/upcoming week) — labeled by week END so
+    // today's date always appears on the chart and tomorrow's leads are captured too.
     const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement'];
     const weekRanges = Array.from({ length: 12 }, (_, i) => {
       const idx = 11 - i;
+      const weekEnd   = new Date(now.getTime() + (1 - idx) * 7 * 24 * 60 * 60 * 1000);
+      const weekStart = new Date(weekEnd.getTime()          - 7 * 24 * 60 * 60 * 1000);
       return {
-        label: new Date(now.getTime() - (idx + 1) * 7 * 24 * 60 * 60 * 1000)
-          .toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        weekStart: new Date(now.getTime() - (idx + 1) * 7 * 24 * 60 * 60 * 1000),
-        weekEnd:   new Date(now.getTime() - idx       * 7 * 24 * 60 * 60 * 1000),
+        label: weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        weekStart,
+        weekEnd,
       };
     });
     const leadVelocity = await Promise.all(
@@ -274,6 +276,32 @@ async function getDashboardStats(req, res) {
       })
     );
 
+    // Monthly buckets: 12 months (11 past + current month), one data point per calendar month
+    const monthRanges = Array.from({ length: 12 }, (_, i) => {
+      const monthsAgo = 11 - i;
+      const d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+      const monthEnd   = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      const label = monthStart.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      return { label, monthStart, monthEnd };
+    });
+    const leadVelocityMonthly = await Promise.all(
+      monthRanges.map(async ({ label, monthStart, monthEnd }) => {
+        const dateFilter = { createdAt: { $gte: monthStart, $lt: monthEnd } };
+        const [mTotal, mQualified] = await Promise.all([
+          Promise.all([
+            leads.countDocuments({ ...queryFilter, ...dateFilter }),
+            metaLeads.countDocuments({ ...queryFilter, ...dateFilter }),
+          ]).then(([a, b]) => a + b),
+          Promise.all([
+            leads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+            metaLeads.countDocuments({ ...queryFilter, ...dateFilter, stage: { $in: QUALIFIED_STAGES } }),
+          ]).then(([a, b]) => a + b),
+        ]);
+        return { label, total: mTotal, qualified: mQualified };
+      })
+    );
+
     return res.status(200).json({
       totalLeads,
       leadsThisWeek,
@@ -283,6 +311,7 @@ async function getDashboardStats(req, res) {
       sourceDistribution,
       teamPerformance,
       leadVelocity,
+      leadVelocityMonthly,
     });
   } catch (err) {
     console.error('Dashboard stats error:', err);
