@@ -81,7 +81,7 @@ export default function ExecutiveDashboard() {
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-slate-500 text-sm">Loading CEO Dashboard...</p>
+          <p className="text-slate-500 text-sm">Loading Executive Dashboard...</p>
         </div>
       </div>
     );
@@ -172,14 +172,11 @@ export default function ExecutiveDashboard() {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">CEO Dashboard</h1>
+              <h1 className="text-xl font-bold text-slate-800">Executive Dashboard</h1>
               <p className="text-xs text-slate-400">{today}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 text-xs font-bold rounded-full text-white ${user?.role === 'ceo' ? 'bg-purple-600' : 'bg-blue-600'}`}>
-              {roleLabel}
-            </span>
             <div className="text-right">
               <p className="text-sm font-semibold text-slate-700">{user?.firstName} {user?.lastName}</p>
               <p className="text-xs text-slate-400">{user?.email}</p>
