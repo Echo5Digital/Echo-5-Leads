@@ -26,7 +26,7 @@ const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study
 const ACTIVE_STAGES = ['new', 'contacted', 'qualified', 'orientation', 'application', 'home_study'];
 
 export default function ExecutiveDashboard() {
-  const { user, isExecutive, isSuperAdmin, loading: authLoading } = useAuth();
+  const { user, isExecutive, isStaff, isSuperAdmin, loading: authLoading } = useAuth();
   const { selectedTenant, getStages } = useTenant();
   const router = useRouter();
 
@@ -38,7 +38,7 @@ export default function ExecutiveDashboard() {
   const [trendView, setTrendView] = useState('week'); // 'week' | 'month'
 
   useEffect(() => {
-    if (!authLoading && user && !isExecutive() && !isSuperAdmin()) {
+    if (!authLoading && user && !isExecutive() && !isStaff() && !isSuperAdmin()) {
       router.replace('/dashboard');
     }
   }, [user, authLoading]);

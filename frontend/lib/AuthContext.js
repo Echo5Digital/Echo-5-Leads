@@ -69,7 +69,7 @@ export const PERMISSIONS = {
   [ROLES.STAFF]: {
     canViewAllTenants: false,
     canManageTenants: false,
-    canViewAllLeads: false,
+    canViewAllLeads: true,
     canManageUsers: false,
     canAssignLeads: true,
     canEditLeads: true
@@ -319,6 +319,7 @@ export function AuthProvider({ children }) {
     isMember: () => user?.role === ROLES.MEMBER,
     isCEO: () => user?.role === ROLES.CEO,
     isCFO: () => user?.role === ROLES.CFO,
+    isStaff: () => user?.role === ROLES.STAFF,
     isExecutive: () => user?.role === ROLES.CEO || user?.role === ROLES.CFO,
   };
 

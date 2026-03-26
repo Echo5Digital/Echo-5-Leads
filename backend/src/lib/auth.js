@@ -68,7 +68,7 @@ export const PERMISSIONS = {
   [ROLES.STAFF]: {
     canViewAllTenants: false,
     canManageTenants: false,
-    canViewAllLeads: false,
+    canViewAllLeads: true,
     canManageUsers: false,
     canAssignLeads: true
   }

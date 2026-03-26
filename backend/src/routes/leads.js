@@ -87,8 +87,8 @@ async function getLeads(req, res) {
       }
     }
 
-    // Member and Staff can only see leads assigned to them — enforced server-side
-    if (req.user && (req.user.role === ROLES.MEMBER || req.user.role === ROLES.STAFF)) {
+    // Member can only see leads assigned to them — enforced server-side
+    if (req.user && req.user.role === ROLES.MEMBER) {
       filter.assignedUserId = req.user.userId;
     }
 
