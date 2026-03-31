@@ -29,12 +29,26 @@ async function updateMetaLead(req, res) {
     // Only allow updating certain fields
     const allowedFields = ['stage', 'assignedUserId', 'office', 'notes'];
     const updateData = {};
-    
+
     allowedFields.forEach(field => {
       if (req.body.hasOwnProperty(field)) {
         updateData[field] = req.body[field];
       }
     });
+
+    // Archive / unarchive
+    if (typeof req.body.archived === 'boolean' && req.body.archived !== lead.archived) {
+      updateData.archived = req.body.archived;
+      const now = new Date();
+      updateData.latestActivityAt = now;
+      await db.collection('activities').insertOne({
+        tenantId: lead.tenantId,
+        leadId: id,
+        type: req.body.archived ? 'archived' : 'unarchived',
+        content: { note: req.body.archived ? 'Lead archived' : 'Lead unarchived' },
+        createdAt: now,
+      });
+    }
 
     updateData.updatedAt = new Date();
 

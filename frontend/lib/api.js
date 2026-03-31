@@ -77,6 +77,22 @@ export const leadsApi = {
     });
   },
 
+  // Archive lead (moves out of main pipeline)
+  async archiveLead(id) {
+    return apiRequest(`/api/leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ archived: true }),
+    });
+  },
+
+  // Unarchive lead (returns to main pipeline)
+  async unarchiveLead(id) {
+    return apiRequest(`/api/leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ archived: false }),
+    });
+  },
+
   // Add activity to lead
   async addActivity(leadId, data) {
     return apiRequest(`/api/leads/${leadId}/activity`, {
@@ -192,6 +208,22 @@ export const metaLeadsApi = {
   async deleteMetaLead(id) {
     return apiRequest(`/api/meta-leads/${id}`, {
       method: 'DELETE',
+    });
+  },
+
+  // Archive meta lead
+  async archiveLead(id) {
+    return apiRequest(`/api/meta-leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ archived: true }),
+    });
+  },
+
+  // Unarchive meta lead
+  async unarchiveLead(id) {
+    return apiRequest(`/api/meta-leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ archived: false }),
     });
   },
 

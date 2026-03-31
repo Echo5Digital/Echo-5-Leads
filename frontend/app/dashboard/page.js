@@ -144,11 +144,19 @@ export default function Dashboard() {
           icon="⏱️"
         />
 
-        <StatCard 
-          label="New Leads" 
+        <StatCard
+          label="New Leads"
           value={stats.stageDistribution?.new || 0}
           icon="🆕"
         />
+
+        <Link href="/leads?tab=archived" className="block">
+          <StatCard
+            label="Archived Leads"
+            value={stats.archivedCount || 0}
+            icon="📁"
+          />
+        </Link>
       </div>
 
       {/* Lead Funnel */}

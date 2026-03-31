@@ -85,6 +85,20 @@ export default function LeadDetail() {
     }
   }
 
+  async function handleToggleArchive() {
+    const isArchived = lead.archived === true;
+    const msg = isArchived
+      ? 'Return this lead to the main pipeline?'
+      : 'Archive this lead? They will be moved out of the main pipeline and into the Archived folder.';
+    if (!confirm(msg)) return;
+    try {
+      await leadsApi.updateLead(params.id, { archived: !isArchived });
+      loadLead();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
   async function handleAddActivity(e) {
     e.preventDefault();
     try {
@@ -215,6 +229,34 @@ export default function LeadDetail() {
             )}
             <p className="mt-1 text-xs text-gray-500">
               Update the lead's current stage in the pipeline
+            </p>
+          </div>
+
+          {/* Archive / Unarchive */}
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Archive
+            </label>
+            {lead.archived ? (
+              <div className="flex items-center gap-3">
+                <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium">📁 Archived</span>
+                <button
+                  onClick={handleToggleArchive}
+                  className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors duration-200"
+                >
+                  Unarchive — Return to Pipeline
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleToggleArchive}
+                className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 transition-colors duration-200"
+              >
+                Archive Lead
+              </button>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              {lead.archived ? 'This lead is archived and hidden from the main pipeline.' : 'Move this lead out of the main pipeline into the Archived folder.'}
             </p>
           </div>
 

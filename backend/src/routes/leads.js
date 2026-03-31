@@ -71,6 +71,13 @@ async function getLeads(req, res) {
     }
     // SuperAdmin with no tenantId = no tenant filter = see all leads
     
+    // Archived filter: default to active leads only; pass ?archived=true to see archived
+    if (req.query.archived === 'true') {
+      filter.archived = true;
+    } else {
+      filter.archived = { $ne: true };
+    }
+
     if (stage) filter.stage = stage;
     if (source) filter.source = source;
     if (spamFlagParam === 'true') filter.spamFlag = true;

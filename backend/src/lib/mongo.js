@@ -26,6 +26,7 @@ async function ensureIndexes(db) {
     { key: { assignedTo: 1 }, name: 'idx_assignedTo' },
     { key: { tenantId: 1, createdAt: 1, stage: 1 }, name: 'idx_tenant_createdAt_stage' },
     { key: { tenantId: 1, latestActivityAt: 1, createdAt: 1 }, name: 'idx_tenant_sla' },
+    { key: { tenantId: 1, archived: 1, createdAt: -1 }, name: 'idx_tenant_archived_createdAt' },
   ]);
   await db.collection('activities').createIndexes([
     { key: { tenantId: 1, leadId: 1, createdAt: -1 }, name: 'idx_tenant_lead_createdAt' },

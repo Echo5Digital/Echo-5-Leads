@@ -60,7 +60,8 @@ async function getDashboardStats(req, res) {
 
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const queryFilter = tenantId ? { tenantId } : {};
+    const queryFilter = tenantId ? { tenantId, archived: { $ne: true } } : { archived: { $ne: true } };
+    const archivedFilter = tenantId ? { tenantId, archived: true } : { archived: true };
 
     const QUALIFIED_STAGES = ['qualified', 'orientation', 'application', 'home_study', 'licensed', 'placement'];
 
@@ -92,6 +93,7 @@ async function getDashboardStats(req, res) {
     const [
       [websiteLeadsCount, metaLeadsCount],
       [websiteLeadsThisWeek, metaLeadsThisWeek],
+      [websiteArchivedCount, metaArchivedCount],
       websiteStageDistribution,
       metaStageDistribution,
       contactTimeResult,
@@ -114,6 +116,7 @@ async function getDashboardStats(req, res) {
         leads.countDocuments({ ...queryFilter, createdAt: { $gte: oneWeekAgo } }),
         metaLeads.countDocuments({ ...queryFilter, createdAt: { $gte: oneWeekAgo } }),
       ]),
+      Promise.all([leads.countDocuments(archivedFilter), metaLeads.countDocuments(archivedFilter)]),
       // stage distribution
       leads.aggregate([{ $match: queryFilter }, { $group: { _id: '$stage', count: { $sum: 1 } } }]).toArray(),
       metaLeads.aggregate([{ $match: queryFilter }, { $group: { _id: '$stage', count: { $sum: 1 } } }]).toArray(),
@@ -187,6 +190,7 @@ async function getDashboardStats(req, res) {
     // ── Assemble results ───────────────────────────────────────────────────────
     const totalLeads = websiteLeadsCount + metaLeadsCount;
     const leadsThisWeek = websiteLeadsThisWeek + metaLeadsThisWeek;
+    const archivedCount = websiteArchivedCount + metaArchivedCount;
 
     const stageData = {};
     for (const item of websiteStageDistribution) stageData[item._id] = (stageData[item._id] || 0) + item.count;
@@ -244,6 +248,7 @@ async function getDashboardStats(req, res) {
     const responseData = {
       totalLeads,
       leadsThisWeek,
+      archivedCount,
       avgTimeToContact,
       pctWithinSLA,
       stageDistribution: stageData,

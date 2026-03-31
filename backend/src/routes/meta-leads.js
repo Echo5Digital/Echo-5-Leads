@@ -58,6 +58,13 @@ async function getMetaLeads(req, res) {
       return res.status(403).json({ error: 'Access denied: No tenant assigned' });
     }
     
+    // Archived filter: default to active leads only; pass ?archived=true to see archived
+    if (req.query.archived === 'true') {
+      filter.archived = true;
+    } else {
+      filter.archived = { $ne: true };
+    }
+
     if (stage) filter.stage = stage;
     if (source) filter.source = source;
     if (spamFlagParam === 'true') filter.spamFlag = true;

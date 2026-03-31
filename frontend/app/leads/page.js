@@ -7,11 +7,19 @@ import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
 
 export default function LeadsListPage() {
-  // Tab state
-  const [activeTab, setActiveTab] = useState('website'); // 'website' or 'meta'
+  const searchParams = useSearchParams();
+  // Tab state — support ?tab=archived from dashboard link
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlTab = new URLSearchParams(window.location.search).get('tab');
+      if (urlTab === 'archived') return 'archived';
+    }
+    return 'website';
+  });
   
   const [leads, setLeads] = useState([]);
   const [metaLeads, setMetaLeads] = useState([]);
+  const [archivedLeads, setArchivedLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
@@ -96,15 +104,19 @@ export default function LeadsListPage() {
       if (selectedTenant) {
         if (activeTab === 'website') {
           loadLeads();
-        } else {
+        } else if (activeTab === 'meta') {
           loadMetaLeads();
+        } else if (activeTab === 'archived') {
+          loadArchivedLeads();
         }
       }
     } else {
       if (activeTab === 'website') {
         loadLeads();
-      } else {
+      } else if (activeTab === 'meta') {
         loadMetaLeads();
+      } else if (activeTab === 'archived') {
+        loadArchivedLeads();
       }
     }
   }, [filters, selectedTenant, user, activeTab]);
@@ -193,6 +205,34 @@ export default function LeadsListPage() {
     }
   }
 
+  async function loadArchivedLeads() {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = { archived: true, limit: 100 };
+      if (filters.q) params.q = filters.q;
+      if (filters.stage) params.stage = filters.stage;
+      if (filters.assignedTo) params.assignedTo = filters.assignedTo;
+      if (user?.role === 'super_admin' && selectedTenant) params.tenantId = selectedTenant._id;
+
+      const [websiteData, metaData] = await Promise.all([
+        leadsApi.getLeads(params),
+        metaLeadsApi.getMetaLeads(params),
+      ]);
+      const combined = [
+        ...websiteData.items.map(l => ({ ...l, _source: 'website' })),
+        ...metaData.items.map(l => ({ ...l, _source: 'meta' })),
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setArchivedLeads(combined);
+      setTotal(combined.length);
+      setTotalPages(1);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function handleFilterChange(key, value) {
     setFilters({ ...filters, [key]: value, page: 1 });
   }
@@ -256,6 +296,34 @@ export default function LeadsListPage() {
       }
     } catch (err) {
       alert('Error deleting lead: ' + err.message);
+    }
+  }
+
+  async function handleArchiveLead(leadId, leadName, isMeta = false) {
+    if (!confirm(`Archive ${leadName || 'this lead'}? They will be moved out of the main pipeline and into the Archived folder.`)) return;
+    try {
+      if (isMeta) {
+        await metaLeadsApi.archiveLead(leadId);
+        loadMetaLeads();
+      } else {
+        await leadsApi.archiveLead(leadId);
+        loadLeads();
+      }
+    } catch (err) {
+      alert('Error archiving lead: ' + err.message);
+    }
+  }
+
+  async function handleUnarchiveLead(leadId, isMeta = false) {
+    try {
+      if (isMeta) {
+        await metaLeadsApi.unarchiveLead(leadId);
+      } else {
+        await leadsApi.unarchiveLead(leadId);
+      }
+      loadArchivedLeads();
+    } catch (err) {
+      alert('Error unarchiving lead: ' + err.message);
     }
   }
 
@@ -571,6 +639,16 @@ export default function LeadsListPage() {
           >
             📱 Meta (Facebook) Leads
           </button>
+          <button
+            onClick={() => {setActiveTab('archived'); setFilters({...filters, page: 1});}}
+            className={`px-6 py-3 font-medium text-sm transition-all duration-200 ${
+              activeTab === 'archived'
+                ? 'text-amber-600 border-b-2 border-amber-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📁 Archived
+          </button>
         </div>
 
         {/* Filters */}
@@ -871,7 +949,7 @@ export default function LeadsListPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4 w-24 text-sm">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
                             <button
                               onClick={() => handleSendForm(lead)}
@@ -890,6 +968,13 @@ export default function LeadsListPage() {
                               Download
                             </button>
                           )}
+                          <button
+                            onClick={() => handleArchiveLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`.trim())}
+                            className="text-amber-600 hover:text-amber-700 font-medium transition-colors duration-200"
+                            title="Archive lead"
+                          >
+                            Archive
+                          </button>
                           {hasPermission('canEditLeads') && !isExecutive() && (
                             <button
                               onClick={() => handleDeleteLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`)}
@@ -1096,7 +1181,7 @@ export default function LeadsListPage() {
                         </div>
                       </td>
                       <td className="px-4 py-4 w-24 text-sm">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
                             <button
                               onClick={() => handleSendForm(lead)}
@@ -1121,6 +1206,13 @@ export default function LeadsListPage() {
                             title="View details"
                           >
                             View
+                          </button>
+                          <button
+                            onClick={() => handleArchiveLead(lead._id, `${lead.firstName || ''} ${lead.lastName || ''}`.trim(), true)}
+                            className="text-amber-600 hover:text-amber-700 font-medium transition-colors duration-200"
+                            title="Archive lead"
+                          >
+                            Archive
                           </button>
                           {hasPermission('canEditLeads') && !isExecutive() && (
                             <button
@@ -1186,6 +1278,88 @@ export default function LeadsListPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Archived Leads Empty State */}
+        {!loading && activeTab === 'archived' && archivedLeads.length === 0 && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center border border-white/20">
+            <div className="text-4xl mb-3">📁</div>
+            <p className="text-gray-600 font-medium">No archived leads</p>
+            <p className="text-gray-500 text-sm mt-1">Leads you archive will appear here and stay out of the main pipeline.</p>
+          </div>
+        )}
+
+        {/* Archived Leads Table */}
+        {!loading && activeTab === 'archived' && archivedLeads.length > 0 && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-amber-100">
+            <div className="px-6 py-4 bg-amber-50 border-b border-amber-100">
+              <h2 className="text-sm font-semibold text-amber-800">📁 Archived Leads — {archivedLeads.length} total</h2>
+              <p className="text-xs text-amber-700 mt-0.5">These leads are hidden from the main pipeline. Unarchive to return them.</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email / Phone</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stage</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Source</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Archived</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {archivedLeads.map((lead) => (
+                    <tr key={lead._id} className="hover:bg-amber-50/40">
+                      <td className="px-4 py-4">
+                        {lead._source === 'website' ? (
+                          <Link
+                            href={`/leads/${lead._id}`}
+                            className="text-blue-600 hover:text-blue-900 font-medium block truncate"
+                            onClick={() => {
+                              sessionStorage.setItem('leadsFilters', JSON.stringify(filters));
+                              sessionStorage.setItem('leadsScrollPosition', window.scrollY.toString());
+                              sessionStorage.setItem('leadsActiveTab', activeTab);
+                            }}
+                          >
+                            {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : lead.email || 'Unknown'}
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => handleViewDetails(lead)}
+                            className="text-blue-600 hover:text-blue-900 font-medium block truncate hover:underline"
+                          >
+                            {lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : lead.email || 'Unknown'}
+                          </button>
+                        )}
+                        <span className="text-xs text-gray-400">{lead._source === 'website' ? 'Website' : 'Meta/Facebook'}</span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        <div className="truncate">{lead.email || '—'}</div>
+                        <div className="text-xs text-gray-400">{lead.phoneE164 || ''}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-700">
+                          {lead.stage?.replace(/_/g, ' ').toUpperCase() || '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 hidden md:table-cell">{lead.source || '—'}</td>
+                      <td className="px-4 py-4 text-sm text-gray-500 hidden lg:table-cell">{formatDate(lead.createdAt)}</td>
+                      <td className="px-4 py-4 text-sm">
+                        <button
+                          onClick={() => handleUnarchiveLead(lead._id, lead._source === 'meta')}
+                          className="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-200"
+                          title="Return to main pipeline"
+                        >
+                          Unarchive
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

@@ -97,6 +97,19 @@ async function updateLead(req, res) {
     // Update spam flag if provided
     if (body.spamFlag !== undefined) update.$set.spamFlag = Boolean(body.spamFlag);
 
+    // Archive / unarchive
+    if (typeof body.archived === 'boolean' && body.archived !== existingLead.archived) {
+      update.$set.archived = body.archived;
+      update.$set.latestActivityAt = now;
+      await activities.insertOne({
+        tenantId,
+        leadId: id,
+        type: body.archived ? 'archived' : 'unarchived',
+        content: { note: body.archived ? 'Lead archived' : 'Lead unarchived' },
+        createdAt: now,
+      });
+    }
+
     // Only update if there are changes
     if (Object.keys(update.$set).length === 0) {
       return res.status(200).json({ ok: true, message: 'No changes' });
