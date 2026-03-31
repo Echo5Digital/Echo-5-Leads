@@ -170,25 +170,25 @@ Please review and follow up with the applicant within 5 business days.
 Application ID: ${applicationId}
     `.trim();
 
-    // Send notification email to admin/case workers
-    for (const email of notificationEmails) {
-      try {
-        await sendEmail({
-          to: email,
-          subject: adminEmailSubject,
-          text: adminEmailBody,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBuffer,
-              contentType: 'application/pdf'
-            }
-          ]
-        });
-      } catch (emailError) {
-        console.error(`Failed to send notification to ${email}:`, emailError);
-      }
-    }
+    // Send notification email to admin/case workers — PAUSED for testing
+    // for (const email of notificationEmails) {
+    //   try {
+    //     await sendEmail({
+    //       to: email,
+    //       subject: adminEmailSubject,
+    //       text: adminEmailBody,
+    //       attachments: [
+    //         {
+    //           filename: fileName,
+    //           content: pdfBuffer,
+    //           contentType: 'application/pdf'
+    //         }
+    //       ]
+    //     });
+    //   } catch (emailError) {
+    //     console.error(`Failed to send notification to ${email}:`, emailError);
+    //   }
+    // }
 
     // Return success response
     res.status(200).json({
