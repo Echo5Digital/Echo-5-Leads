@@ -350,6 +350,9 @@ export default function LeadsListPage() {
 
     try {
       await leadsApi.sendFormToLead(email, name, '', lead._id);
+      const sentAt = new Date().toISOString();
+      setLeads(prev => prev.map(l => l._id === lead._id ? { ...l, formSentAt: sentAt } : l));
+      setMetaLeads(prev => prev.map(l => l._id === lead._id ? { ...l, formSentAt: sentAt } : l));
       alert(`✓ Form sent successfully!\n\nThe application form has been sent to ${email}. The recipient will receive an email with a link to complete the form.`);
     } catch (err) {
       alert('Error sending form: ' + err.message);
@@ -965,7 +968,7 @@ export default function LeadsListPage() {
                           {hasPermission('canEditLeads') && (
                             <button
                               onClick={() => handleSendForm(lead)}
-                              className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+                              className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
                               title="Send application form"
                             >
                               {lead.formSentAt ? 'Resend Form' : 'Send Form'}
@@ -1197,7 +1200,7 @@ export default function LeadsListPage() {
                           {hasPermission('canEditLeads') && (
                             <button
                               onClick={() => handleSendForm(lead)}
-                              className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                              className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
                               title="Send application form"
                             >
                               {lead.formSentAt ? 'Resend Form' : 'Send Form'}
