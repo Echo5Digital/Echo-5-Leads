@@ -24,6 +24,10 @@ export default function LeadDetail() {
   });
   const [teamMembers, setTeamMembers] = useState([]);
   const [assignedTo, setAssignedTo] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Get stages from tenant config or fallback to default
   const stages = getStages();
@@ -47,6 +51,14 @@ export default function LeadDetail() {
       setLead(data.lead);
       setActivities(data.activities);
       setAssignedTo(data.lead.assignedUserId || '');
+      setEditForm({
+        firstName: data.lead.firstName || '',
+        lastName: data.lead.lastName || '',
+        email: data.lead.email || '',
+        phone: data.lead.phoneE164 || '',
+        city: data.lead.city || '',
+        notes: data.lead.notes || '',
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -83,6 +95,40 @@ export default function LeadDetail() {
     } catch (err) {
       alert('Error updating stage: ' + err.message);
     }
+  }
+
+  async function handleEditSave() {
+    try {
+      setSaving(true);
+      await leadsApi.updateLead(params.id, {
+        firstName: editForm.firstName,
+        lastName: editForm.lastName,
+        email: editForm.email,
+        phone: editForm.phone,
+        city: editForm.city,
+        notes: editForm.notes,
+      });
+      await loadLead();
+      setEditMode(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      alert('Error saving changes: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleEditCancel() {
+    setEditForm({
+      firstName: lead.firstName || '',
+      lastName: lead.lastName || '',
+      email: lead.email || '',
+      phone: lead.phoneE164 || '',
+      city: lead.city || '',
+      notes: lead.notes || '',
+    });
+    setEditMode(false);
   }
 
   async function handleToggleArchive() {
@@ -203,8 +249,25 @@ export default function LeadDetail() {
 
         {/* Lead Details */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-          
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Contact Information</h2>
+            {hasPermission('canEditLeads') && !editMode && (
+              <button
+                onClick={() => setEditMode(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+              >
+                ✏️ Edit Info
+              </button>
+            )}
+          </div>
+
+          {/* Save success banner */}
+          {saveSuccess && (
+            <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm font-medium">
+              ✅ Changes saved successfully
+            </div>
+          )}
+
           {/* Stage Change Section */}
           <div className="mb-6 pb-6 border-b border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -284,32 +347,135 @@ export default function LeadDetail() {
             </div>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {editMode ? (
+            /* ── Edit Mode ── */
             <div>
-              <label className="block text-sm font-medium text-gray-500">Email</label>
-              <p className="mt-1 text-gray-900">{lead.email || '-'}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input
+                    type="text"
+                    value={editForm.firstName}
+                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    value={editForm.lastName}
+                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Last name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="+1 (555) 000-0000"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    value={editForm.city}
+                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="City"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">Source <span className="text-xs">(read-only)</span></label>
+                  <p className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 text-sm">{lead.source || '—'}</p>
+                </div>
+              </div>
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Internal notes about this lead..."
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleEditSave}
+                  disabled={saving}
+                  className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={handleEditCancel}
+                  disabled={saving}
+                  className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500">Phone</label>
-              <p className="mt-1 text-gray-900">{lead.phoneE164 || '-'}</p>
+          ) : (
+            /* ── View Mode ── */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-500">First Name</label>
+                <p className="mt-1 text-gray-900">{lead.firstName || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Last Name</label>
+                <p className="mt-1 text-gray-900">{lead.lastName || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Email</label>
+                <p className="mt-1 text-gray-900">{lead.email || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Phone</label>
+                <p className="mt-1 text-gray-900">{lead.phoneE164 || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">City</label>
+                <p className="mt-1 text-gray-900">{lead.city || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Source</label>
+                <p className="mt-1 text-gray-900">{lead.source || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Campaign</label>
+                <p className="mt-1 text-gray-900">{lead.campaignName || '—'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Created</label>
+                <p className="mt-1 text-gray-900">{formatDate(lead.createdAt)}</p>
+              </div>
+              {lead.notes && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-500">Notes</label>
+                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{lead.notes}</p>
+                </div>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500">City</label>
-              <p className="mt-1 text-gray-900">{lead.city || '-'}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500">Source</label>
-              <p className="mt-1 text-gray-900">{lead.source || '-'}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500">Campaign</label>
-              <p className="mt-1 text-gray-900">{lead.campaignName || '-'}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500">Created</label>
-              <p className="mt-1 text-gray-900">{formatDate(lead.createdAt)}</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* All Form Fields */}
