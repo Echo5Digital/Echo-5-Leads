@@ -1,4 +1,6 @@
 import { sendEmail } from '../lib/email.js';
+import { getDb } from '../lib/mongo.js';
+import { ObjectId } from 'mongodb';
 
 /**
  * POST /api/share-foster-application
@@ -134,6 +136,27 @@ Open Arms Foster Care Team
 
     // Log the share action
     console.log(`📧 Form link ${emailResult.testMode ? '(TEST MODE)' : 'shared'} with ${recipientEmail} (${recipientName})`);
+
+    // Mark lead as form-sent so the button shows "Resend Form"
+    try {
+      const leadIdParam = formUrl ? new URL(formUrl).searchParams.get('leadId') : null;
+      if (leadIdParam) {
+        const db = await getDb();
+        const leadObjectId = new ObjectId(leadIdParam);
+        const leadsResult = await db.collection('leads').updateOne(
+          { _id: leadObjectId },
+          { $set: { formSentAt: new Date() } }
+        );
+        if (leadsResult.matchedCount === 0) {
+          await db.collection('meta_leads').updateOne(
+            { _id: leadObjectId },
+            { $set: { formSentAt: new Date() } }
+          );
+        }
+      }
+    } catch (dbErr) {
+      console.warn('[Share Form] Could not update formSentAt:', dbErr.message);
+    }
 
     // Return success response
     res.status(200).json({

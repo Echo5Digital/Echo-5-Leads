@@ -848,7 +848,7 @@ export default function LeadsListPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden xl:table-cell">
                       Created
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-52">
                       Actions
                     </th>
                   </tr>
@@ -960,7 +960,7 @@ export default function LeadsListPage() {
                           {formatDate(lead.createdAt)}
                         </div>
                       </td>
-                      <td className="px-4 py-4 w-24 text-sm">
+                      <td className="px-4 py-4 w-52 text-sm">
                         <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
                             <button
@@ -968,7 +968,7 @@ export default function LeadsListPage() {
                               className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
                               title="Send application form"
                             >
-                              Send Form
+                              {lead.formSentAt ? 'Resend Form' : 'Send Form'}
                             </button>
                           )}
                           {lead.customFields?.applicationId && (
@@ -1086,7 +1086,7 @@ export default function LeadsListPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden xl:table-cell">
                       Created
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-52">
                       Actions
                     </th>
                   </tr>
@@ -1192,7 +1192,7 @@ export default function LeadsListPage() {
                           {formatDate(lead.createdAt)}
                         </div>
                       </td>
-                      <td className="px-4 py-4 w-24 text-sm">
+                      <td className="px-4 py-4 w-52 text-sm">
                         <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
                             <button
@@ -1200,7 +1200,7 @@ export default function LeadsListPage() {
                               className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
                               title="Send application form"
                             >
-                              Send Form
+                              {lead.formSentAt ? 'Resend Form' : 'Send Form'}
                             </button>
                           )}
                           {lead.customFields?.applicationId && (
