@@ -7,15 +7,8 @@ import { useTenant } from '@/lib/TenantContext';
 import Link from 'next/link';
 
 export default function LeadsListPage() {
-  const searchParams = useSearchParams();
-  // Tab state — support ?tab=archived from dashboard link
-  const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const urlTab = new URLSearchParams(window.location.search).get('tab');
-      if (urlTab === 'archived') return 'archived';
-    }
-    return 'website';
-  });
+  // Tab state — 'website' | 'meta' | 'archived'
+  const [activeTab, setActiveTab] = useState('website');
   
   const [leads, setLeads] = useState([]);
   const [metaLeads, setMetaLeads] = useState([]);
