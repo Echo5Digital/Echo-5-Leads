@@ -51,10 +51,10 @@ async function addLeadActivity(req, res) {
     const activity = { tenantId, leadId: id, type, content, createdAt: now };
     await activities.insertOne(activity);
 
-    // Send notification email if note was added
-    if (type === 'note' && tenant) {
-      await sendNoteNotification(lead, activity, addedByName, tenant);
-    }
+    // Send notification email if note was added — PAUSED
+    // if (type === 'note' && tenant) {
+    //   await sendNoteNotification(lead, activity, addedByName, tenant);
+    // }
 
     if (type !== 'utm_snapshot') {
       const update = { latestActivityAt: now };
