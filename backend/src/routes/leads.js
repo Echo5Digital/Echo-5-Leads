@@ -94,10 +94,7 @@ async function getLeads(req, res) {
       }
     }
 
-    // Member can only see leads assigned to them — enforced server-side
-    if (req.user && req.user.role === ROLES.MEMBER) {
-      filter.assignedUserId = req.user.userId;
-    }
+    // All roles can see all leads for their tenant
 
     if (q) {
       const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
