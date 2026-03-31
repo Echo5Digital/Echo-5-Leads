@@ -109,4 +109,4 @@ export function normPhone(raw) {
   return '+' + digits; // fallback
 }
 
-export const STAGES = ['new','contacted','qualified','orientation','application','home_study','licensed','placement','not_fit'];
+export const STAGES = ['new','pending_contact','contacted','application','orientation','home_study','licensed','placement','not_fit'];

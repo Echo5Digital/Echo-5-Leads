@@ -41,10 +41,10 @@ async function handler(req, res) {
     // Default stages if not configured
     const defaultStages = [
       'new',
+      'pending_contact',
       'contacted',
-      'qualified',
-      'orientation',
       'application',
+      'orientation',
       'home_study',
       'licensed',
       'placement',

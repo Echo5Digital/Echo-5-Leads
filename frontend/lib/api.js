@@ -321,10 +321,10 @@ export const tenantsApi = {
 // Default stages (fallback if tenant config not loaded)
 export const STAGES = [
   'new',
+  'pending_contact',
   'contacted',
-  'qualified',
-  'orientation',
   'application',
+  'orientation',
   'home_study',
   'licensed',
   'placement',

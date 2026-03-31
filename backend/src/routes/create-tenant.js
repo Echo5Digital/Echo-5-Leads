@@ -25,8 +25,8 @@ async function createTenant(req, res) {
 
     // Default configuration
     const defaultStages = [
-      'new', 'contacted', 'qualified', 'orientation',
-      'application', 'home_study', 'licensed', 'placement', 'not_fit'
+      'new', 'pending_contact', 'contacted', 'application',
+      'orientation', 'home_study', 'licensed', 'placement', 'not_fit'
     ];
 
     const tenant = {
