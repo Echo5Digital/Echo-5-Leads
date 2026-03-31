@@ -687,16 +687,36 @@ export default function FosterCareApplicationPage() {
     e.preventDefault();
     setLoading(true);
 
+    // Auto-capture any signatures drawn but not explicitly saved via "Save Signature" button
+    const autoCapture = {};
+    const sigMap = [
+      ['applicantSignature', signatureRef],
+      ['applicant1ConsentSignature', consent1SignatureRef],
+      ['applicant2ConsentSignature', consent2SignatureRef],
+      ['personNamedSignature', personNamedSignatureRef],
+      ['personMakingSignature', personMakingSignatureRef],
+      ['applicant1Signature', applicant1SignatureRef],
+      ['applicant2Signature', applicant2SignatureRef],
+      ['adultMember1Signature', adultMember1SignatureRef],
+      ['adultMember2Signature', adultMember2SignatureRef],
+      ['adultMember3Signature', adultMember3SignatureRef],
+      ['adultMember4Signature', adultMember4SignatureRef],
+    ];
+    sigMap.forEach(([field, ref]) => {
+      const dataURL = ref.current?.getDataURL();
+      if (dataURL) autoCapture[field] = dataURL;
+    });
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const url = leadId 
+      const url = leadId
         ? `${apiUrl}/api/foster-care-application?leadId=${leadId}`
         : `${apiUrl}/api/foster-care-application`;
-      
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, ...autoCapture })
       });
 
       if (!response.ok) {
