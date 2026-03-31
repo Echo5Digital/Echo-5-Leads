@@ -13,6 +13,7 @@ export default function LeadsListPage() {
   const [leads, setLeads] = useState([]);
   const [metaLeads, setMetaLeads] = useState([]);
   const [archivedLeads, setArchivedLeads] = useState([]);
+  const [archivedCount, setArchivedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
@@ -115,12 +116,21 @@ export default function LeadsListPage() {
   }, [filters, selectedTenant, user, activeTab]);
 
   useEffect(() => {
-    // Load team members when tenant is selected or user changes
+    // Load team members and archived count when tenant/user changes
     if (selectedTenant || user?.tenantId) {
       const tenantId = user?.role === 'super_admin' && selectedTenant ? selectedTenant._id : user?.tenantId;
       if (tenantId) {
         loadTeamMembers(tenantId);
       }
+    }
+    // Fetch archived count for tab badge
+    if (user?.role !== 'super_admin' || selectedTenant) {
+      const params = { archived: true, limit: 1 };
+      if (user?.role === 'super_admin' && selectedTenant) params.tenantId = selectedTenant._id;
+      Promise.all([
+        leadsApi.getLeads(params).catch(() => ({ total: 0 })),
+        metaLeadsApi.getMetaLeads(params).catch(() => ({ total: 0 })),
+      ]).then(([w, m]) => setArchivedCount((w.total || 0) + (m.total || 0)));
     }
   }, [selectedTenant, user]);
 
@@ -217,6 +227,7 @@ export default function LeadsListPage() {
         ...metaData.items.map(l => ({ ...l, _source: 'meta' })),
       ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setArchivedLeads(combined);
+      setArchivedCount(combined.length);
       setTotal(combined.length);
       setTotalPages(1);
     } catch (err) {
@@ -634,13 +645,20 @@ export default function LeadsListPage() {
           </button>
           <button
             onClick={() => {setActiveTab('archived'); setFilters({...filters, page: 1});}}
-            className={`px-6 py-3 font-medium text-sm transition-all duration-200 ${
+            className={`px-6 py-3 font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
               activeTab === 'archived'
                 ? 'text-amber-600 border-b-2 border-amber-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             📁 Archived
+            {archivedCount > 0 && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                activeTab === 'archived' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-600'
+              }`}>
+                {archivedCount}
+              </span>
+            )}
           </button>
         </div>
 
