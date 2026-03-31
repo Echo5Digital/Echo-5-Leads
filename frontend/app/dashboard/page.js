@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { BarChart2, TrendingUp, Clock, UserPlus, Archive } from 'lucide-react';
 import { leadsApi, tenantsApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
@@ -126,35 +127,35 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          label="Total Leads" 
+        <StatCard
+          label="Total Leads"
           value={stats.totalLeads}
-          icon="📊"
+          icon={<BarChart2 size={24} className="text-blue-400" />}
         />
 
-        <StatCard 
-          label="Leads This Week" 
+        <StatCard
+          label="Leads This Week"
           value={stats.leadsThisWeek}
-          icon="📈"
+          icon={<TrendingUp size={24} className="text-indigo-400" />}
         />
 
-        <StatCard 
-          label="Avg. Time to First Contact" 
+        <StatCard
+          label="Avg. Time to First Contact"
           value={stats.avgTimeToContact !== null ? `${stats.avgTimeToContact}h` : 'N/A'}
-          icon="⏱️"
+          icon={<Clock size={24} className="text-purple-400" />}
         />
 
         <StatCard
           label="New Leads"
           value={stats.stageDistribution?.new || 0}
-          icon="🆕"
+          icon={<UserPlus size={24} className="text-emerald-400" />}
         />
 
         <Link href="/leads?tab=archived" className="block">
           <StatCard
             label="Archived Leads"
             value={stats.archivedCount || 0}
-            icon="📁"
+            icon={<Archive size={24} className="text-amber-400" />}
           />
         </Link>
       </div>

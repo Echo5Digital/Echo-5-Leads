@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trophy, Zap, AlertTriangle, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
 import Cookies from 'js-cookie';
@@ -386,7 +387,7 @@ export default function ExecutiveDashboard() {
               <div className="space-y-3">
                 {topCloser && (
                   <TeamRow
-                    icon="🏆"
+                    icon={<Trophy size={14} className="text-yellow-500" />}
                     label="Top Closer"
                     value={topCloser.name}
                     sub={`${topCloser.assignedLeads} Leads`}
@@ -394,14 +395,14 @@ export default function ExecutiveDashboard() {
                   />
                 )}
                 <TeamRow
-                  icon="⚡"
+                  icon={<Zap size={14} className="text-blue-500" />}
                   label="Avg Response"
                   value={avgContactMins !== null ? `${avgContactMins} mins` : 'N/A'}
                   sub="avg. time to contact"
                   ok={avgContactMins !== null && avgContactMins < 30}
                 />
                 <TeamRow
-                  icon="⚠️"
+                  icon={<AlertTriangle size={14} className="text-red-500" />}
                   label="Overdue Leads"
                   value={overdueCount.toString()}
                   sub="Past Due"
@@ -409,7 +410,7 @@ export default function ExecutiveDashboard() {
                 />
                 {teamPerformance.length > 1 && (
                   <TeamRow
-                    icon="📊"
+                    icon={<BarChart2 size={14} className="text-indigo-500" />}
                     label="Team Size"
                     value={teamPerformance.length.toString()}
                     sub="active members"

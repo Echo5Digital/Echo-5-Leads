@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { leadsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
+import { Pencil, CheckCircle, Archive, Phone, Mail, MessageSquare, RefreshCw, Link, FileText, Activity } from 'lucide-react';
 
 export default function LeadDetail() {
   const params = useParams();
@@ -190,14 +191,16 @@ export default function LeadDetail() {
 
   function getActivityIcon(type) {
     const icons = {
-      note: '📝',
-      call: '📞',
-      email: '✉️',
-      sms: '💬',
-      status_change: '🔄',
-      utm_snapshot: '🔗',
+      note: <FileText size={18} className="text-blue-500" />,
+      call: <Phone size={18} className="text-green-500" />,
+      email: <Mail size={18} className="text-purple-500" />,
+      sms: <MessageSquare size={18} className="text-cyan-500" />,
+      status_change: <RefreshCw size={18} className="text-orange-500" />,
+      utm_snapshot: <Link size={18} className="text-gray-400" />,
+      archived: <Archive size={18} className="text-amber-500" />,
+      unarchived: <Archive size={18} className="text-emerald-500" />,
     };
-    return icons[type] || '•';
+    return icons[type] || <Activity size={18} className="text-gray-400" />;
   }
 
   if (loading) {
@@ -256,7 +259,7 @@ export default function LeadDetail() {
                 onClick={() => setEditMode(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
               >
-                ✏️ Edit Info
+                <Pencil size={14} /> Edit Info
               </button>
             )}
           </div>
@@ -264,7 +267,7 @@ export default function LeadDetail() {
           {/* Save success banner */}
           {saveSuccess && (
             <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm font-medium">
-              ✅ Changes saved successfully
+              <CheckCircle size={16} className="inline mr-1" /> Changes saved successfully
             </div>
           )}
 
@@ -302,7 +305,7 @@ export default function LeadDetail() {
             </label>
             {lead.archived ? (
               <div className="flex items-center gap-3">
-                <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium">📁 Archived</span>
+                <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded font-medium"><Archive size={12} /> Archived</span>
                 <button
                   onClick={handleToggleArchive}
                   className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors duration-200"
@@ -649,7 +652,7 @@ export default function LeadDetail() {
             {activities.map((activity) => (
               <div key={activity._id} className="border-l-4 border-blue-500 pl-4 py-2">
                 <div className="flex items-start">
-                  <span className="text-2xl mr-3">{getActivityIcon(activity.type)}</span>
+                  <span className="mr-3 mt-0.5 flex-shrink-0">{getActivityIcon(activity.type)}</span>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
                       <div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Globe, Smartphone, Archive, Download, AlertTriangle, Settings, Phone, FileText, Mail, MessageSquare, RefreshCw, CheckCircle, FolderOpen } from 'lucide-react';
 import { leadsApi, metaLeadsApi, tenantsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
@@ -569,7 +570,7 @@ export default function LeadsListPage() {
                 onClick={handleImportClick}
                 className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-200"
               >
-                📥 Import Facebook Leads
+                <Download size={15} className="inline mr-1" /> Import Facebook Leads
               </button>
             )}
             {hasPermission('canEditLeads') && (
@@ -625,23 +626,23 @@ export default function LeadsListPage() {
         <div className="mb-6 flex gap-2 border-b border-gray-200">
           <button
             onClick={() => {setActiveTab('website'); setFilters({...filters, page: 1});}}
-            className={`px-6 py-3 font-medium text-sm transition-all duration-200 ${
+            className={`px-6 py-3 font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
               activeTab === 'website'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            🌐 Website Leads
+            <Globe size={15} /> Website Leads
           </button>
           <button
             onClick={() => {setActiveTab('meta'); setFilters({...filters, page: 1});}}
-            className={`px-6 py-3 font-medium text-sm transition-all duration-200 ${
+            className={`px-6 py-3 font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
               activeTab === 'meta'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            📱 Meta (Facebook) Leads
+            <Smartphone size={15} /> Meta (Facebook) Leads
           </button>
           <button
             onClick={() => {setActiveTab('archived'); setFilters({...filters, page: 1});}}
@@ -651,7 +652,7 @@ export default function LeadsListPage() {
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            📁 Archived
+            <Archive size={15} /> Archived
             {archivedCount > 0 && (
               <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                 activeTab === 'archived' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-600'
@@ -1295,7 +1296,7 @@ export default function LeadsListPage() {
         {/* Archived Leads Empty State */}
         {!loading && activeTab === 'archived' && archivedLeads.length === 0 && (
           <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center border border-white/20">
-            <div className="text-4xl mb-3">📁</div>
+            <div className="mb-3 flex justify-center"><Archive size={40} className="text-amber-400" /></div>
             <p className="text-gray-600 font-medium">No archived leads</p>
             <p className="text-gray-500 text-sm mt-1">Leads you archive will appear here and stay out of the main pipeline.</p>
           </div>
@@ -1305,7 +1306,7 @@ export default function LeadsListPage() {
         {!loading && activeTab === 'archived' && archivedLeads.length > 0 && (
           <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-amber-100">
             <div className="px-6 py-4 bg-amber-50 border-b border-amber-100">
-              <h2 className="text-sm font-semibold text-amber-800">📁 Archived Leads — {archivedLeads.length} total</h2>
+              <h2 className="text-sm font-semibold text-amber-800 flex items-center gap-2"><Archive size={14} /> Archived Leads — {archivedLeads.length} total</h2>
               <p className="text-xs text-amber-700 mt-0.5">These leads are hidden from the main pipeline. Unarchive to return them.</p>
             </div>
             <div className="overflow-x-auto">
@@ -1389,7 +1390,7 @@ export default function LeadsListPage() {
                     {/* Client Alert for SuperAdmin */}
                     {user?.role === 'super_admin' && !selectedTenant && (
                       <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-900 font-medium">⚠️ Select a client first</p>
+                        <p className="text-sm text-red-900 font-medium flex items-center gap-1"><AlertTriangle size={14} /> Select a client first</p>
                         <p className="text-xs text-red-800 mt-1">Use the sidebar to select a client before importing</p>
                       </div>
                     )}
@@ -1441,7 +1442,7 @@ export default function LeadsListPage() {
                     <div className="text-center py-8">
                       <div className="inline-block">
                         <div className="animate-spin">
-                          <div className="text-4xl">⚙️</div>
+                          <div className="flex justify-center"><Settings size={32} className="text-gray-400" /></div>
                         </div>
                       </div>
                       <p className="mt-4 text-gray-900 font-medium">{importProgress}</p>
@@ -1482,7 +1483,7 @@ export default function LeadsListPage() {
               {/* Content */}
               {detailLoading ? (
                 <div className="p-8 text-center">
-                  <div className="inline-block animate-spin text-2xl mb-4">⚙️</div>
+                  <div className="inline-block animate-spin mb-4"><Settings size={24} className="text-gray-400" /></div>
                   <p className="text-gray-600">Loading details...</p>
                 </div>
               ) : leadDetails ? (
@@ -1490,7 +1491,7 @@ export default function LeadsListPage() {
                   {/* Contact Information */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <span>📞</span> Contact Information
+                      <Phone size={16} /> Contact Information
                     </h3>
                     <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
                       <div>
@@ -1558,7 +1559,7 @@ export default function LeadsListPage() {
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <span>📝</span> Activity Timeline ({leadDetails.activities?.length || 0})
+                        <FileText size={16} /> Activity Timeline ({leadDetails.activities?.length || 0})
                       </h3>
                       <button
                         onClick={() => setShowMetaActivityForm(!showMetaActivityForm)}
@@ -1636,7 +1637,9 @@ export default function LeadsListPage() {
                         <div key={idx} className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <p className="font-medium text-gray-900">{activity.type === 'note' ? '📌 Note' : activity.type === 'call' ? '📞 Call' : activity.type === 'email' ? '✉️ Email' : activity.type === 'sms' ? '💬 SMS' : '🔄 ' + activity.type}</p>
+                              <p className="font-medium text-gray-900 flex items-center gap-1">
+                                {activity.type === 'note' ? <><FileText size={14} /> Note</> : activity.type === 'call' ? <><Phone size={14} /> Call</> : activity.type === 'email' ? <><Mail size={14} /> Email</> : activity.type === 'sms' ? <><MessageSquare size={14} /> SMS</> : <><RefreshCw size={14} /> {activity.type}</>}
+                              </p>
                               {activity.content?.title && (
                                 <p className="text-sm font-medium text-gray-700 mt-1">{activity.content.title}</p>
                               )}
