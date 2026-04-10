@@ -31,6 +31,7 @@ import createApiKeyRoute from './src/routes/create-api-key.js';
 import revokeApiKeyRoute from './src/routes/revoke-api-key.js';
 import revealApiKeyRoute from './src/routes/reveal-api-key.js';
 import slaOverdueRoute from './src/routes/sla-overdue.js';
+import followupNotificationsRoute from './src/routes/followup-notifications.js';
 import { verifyWebhook as metaVerifyWebhook, handleWebhook as metaHandleWebhook } from './src/routes/ingest-meta-lead.js';
 import { handleGoogleLead } from './src/routes/ingest-google-lead.js';
 
@@ -142,6 +143,9 @@ app.delete('/api/tenants/:tenantId/api-keys/:keyId', revokeApiKeyRoute);
 
 // SLA Monitoring
 app.get('/api/sla/overdue', slaOverdueRoute);
+
+// Follow-up Notifications (Cron Job)
+app.get('/api/notifications/followups', followupNotificationsRoute);
 
 // Foster Care Application Routes
 app.post('/api/foster-care-application', fosterCareApplicationRoute);
