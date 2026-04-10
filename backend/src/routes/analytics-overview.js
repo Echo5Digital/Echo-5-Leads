@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     // 1. Conversion Rates by Stage
     const allLeads = await leadsCollection.find({ tenantId }).toArray();
     const stageConversion = {};
-    const stages = ['new', 'pending_contact', 'contacted', 'application', 'orientation', 'home_study', 'licensed'];
+    const stages = ['new', 'pending_contact', 'contacted', 'application', 'training', 'orientation', 'home_study', 'licensed'];
     
     for (let i = 0; i < stages.length - 1; i++) {
       const currentStage = stages[i];

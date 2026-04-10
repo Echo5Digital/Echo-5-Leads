@@ -324,6 +324,7 @@ export const STAGES = [
   'pending_contact',
   'contacted',
   'application',
+  'training',
   'orientation',
   'home_study',
   'licensed',
