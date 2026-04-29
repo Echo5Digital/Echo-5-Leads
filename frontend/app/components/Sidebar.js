@@ -171,10 +171,7 @@ export default function Sidebar() {
     <div className="w-64 bg-gray-900 min-h-screen fixed left-0 top-0 text-white">
       {/* Logo/Brand */}
       <div className="p-6 border-b border-gray-800">
-        <h1 className="text-xl font-bold">
-          {isSuperAdmin() ? 'Echo5 Leads' : (selectedTenant?.name || user?.tenant?.name || 'Echo5 Leads')}
-        </h1>
-        <p className="text-xs text-gray-400 mt-1">Lead Management</p>
+        <h1 className="text-xl font-bold">Lead Management System</h1>
       </div>
 
       {/* User Info */}
