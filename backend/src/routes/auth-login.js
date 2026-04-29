@@ -18,24 +18,31 @@ export default async function login(req, res) {
     }
 
     const db = await getDb();
-    
-    // Find user by email
-    const user = await db.collection('users').findOne({ 
-      email: email.toLowerCase(),
-      active: true
-    });
 
-    if (!user) {
-      return res.status(401).json({ 
-        error: 'Invalid email or password' 
+    // Find all active users with this email (same email may exist in multiple tenants)
+    const candidates = await db.collection('users')
+      .find({ email: email.toLowerCase(), active: true })
+      .toArray();
+
+    if (candidates.length === 0) {
+      return res.status(401).json({
+        error: 'Invalid email or password'
       });
     }
 
-    // Check password
-    const isValidPassword = await comparePassword(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ 
-        error: 'Invalid email or password' 
+    // Find the one whose password matches (handles same email across different tenants)
+    let user = null;
+    for (const candidate of candidates) {
+      const isValidPassword = await comparePassword(password, candidate.password);
+      if (isValidPassword) {
+        user = candidate;
+        break;
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        error: 'Invalid email or password'
       });
     }
 

@@ -205,8 +205,11 @@ export async function getUserById(db, userId) {
 export async function createUser(db, userData) {
   const { email, password, role, tenantId, firstName, lastName } = userData;
   
-  // Check if user already exists
-  const existingUser = await db.collection('users').findOne({ email });
+  // Check if user already exists within this tenant
+  const resolvedTenantId = tenantId
+    ? (typeof tenantId === 'string' && tenantId.length === 24 ? new ObjectId(tenantId) : tenantId)
+    : null;
+  const existingUser = await db.collection('users').findOne({ email, tenantId: resolvedTenantId });
   if (existingUser) {
     throw new Error('User with this email already exists');
   }
@@ -245,7 +248,7 @@ export async function createUser(db, userData) {
 // Update indexes for users collection
 export async function ensureUserIndexes(db) {
   await db.collection('users').createIndexes([
-    { key: { email: 1 }, unique: true, name: 'idx_email_unique' },
+    { key: { email: 1, tenantId: 1 }, unique: true, name: 'idx_users_email_tenant_unique' },
     { key: { tenantId: 1, role: 1 }, name: 'idx_tenant_role' },
     { key: { active: 1 }, name: 'idx_active' }
   ]);

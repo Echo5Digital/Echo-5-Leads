@@ -41,10 +41,14 @@ async function ensureIndexes(db) {
     { key: { expiresAt: 1 }, name: 'idx_cache_ttl', expireAfterSeconds: 0 },
     { key: { cacheKey: 1 }, name: 'idx_cache_key', unique: true },
   ]);
-  // Create users indexes (handle existing index conflict)
+  // Drop old global email unique index if it exists (replaced by per-tenant compound index)
+  for (const oldName of ['idx_users_email_unique', 'idx_email_unique']) {
+    try { await db.collection('users').dropIndex(oldName); } catch (_) { /* didn't exist */ }
+  }
+  // Create users indexes — email uniqueness is per-tenant, not global
   try {
     await db.collection('users').createIndexes([
-      { key: { email: 1 }, unique: true, name: 'idx_users_email_unique' },
+      { key: { email: 1, tenantId: 1 }, unique: true, name: 'idx_users_email_tenant_unique' },
       { key: { tenantId: 1, role: 1 }, name: 'idx_users_tenant_role' },
       { key: { active: 1 }, name: 'idx_users_active' }
     ]);

@@ -1,9 +1,22 @@
 // GET /api/sla/overdue - Get overdue leads across all tenants or specific tenant
+// Protected by CRON_SECRET (same as followup-notifications)
 import { getDb } from '../lib/mongo.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Require CRON_SECRET authorization
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret) {
+    const authHeader = req.headers.authorization;
+    const querySecret = req.query.secret;
+    const isVercel = req.headers['x-vercel-cron'] === '1';
+    const authorized = isVercel || authHeader === `Bearer ${cronSecret}` || querySecret === cronSecret;
+    if (!authorized) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
   }
 
   try {
