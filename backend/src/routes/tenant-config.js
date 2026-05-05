@@ -60,7 +60,8 @@ async function handler(req, res) {
       users: tenant.config?.users || [],
       spamKeywords: tenant.config?.spamKeywords || [],
       slaHours: tenant.config?.slaHours || 24,
-      allowedOrigins: tenant.config?.allowedOrigins || []
+      allowedOrigins: tenant.config?.allowedOrigins || [],
+      features: tenant.config?.features || {},
     };
 
     res.status(200).json(config);

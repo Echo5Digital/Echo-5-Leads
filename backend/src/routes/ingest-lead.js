@@ -79,6 +79,12 @@ export default async function ingestLead(req, res) {
 
     const tenant = await tenants.findOne({ _id: tenantId });
     const spamKeywords = (tenant?.config?.spamKeywords || []).map(s => String(s).toLowerCase());
+
+    // For Open Arms Initiative (and any tenant with this flag): require BOTH email and phone
+    if (tenant?.config?.features?.requireBothEmailAndPhone) {
+      if (!email) return res.status(400).json({ error: 'Email address is required.' });
+      if (!phoneE164) return res.status(400).json({ error: 'Phone number is required.' });
+    }
     const stageDefault = 'new';
 
     // Check if this is a migration request - skip duplicate check for:

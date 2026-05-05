@@ -41,6 +41,10 @@ import fosterCareApplicationPdfRoute from './src/routes/foster-care-application-
 import shareFosterApplicationRoute from './src/routes/share-foster-application.js';
 import downloadFosterApplicationRoute from './src/routes/download-foster-application.js';
 
+// Open Arms Initiative Routes
+import sendInitiativeFormRoute from './src/routes/send-initiative-form.js';
+import { protectedUploadDocument, protectedListDocuments, protectedDownloadDocument } from './src/routes/lead-documents.js';
+
 // Auth routes
 import loginRoute from './src/routes/auth-login.js';
 import refreshTokenRoute from './src/routes/auth-refresh.js';
@@ -152,6 +156,12 @@ app.post('/api/foster-care-application', fosterCareApplicationRoute);
 app.get('/api/foster-care-application/:id/pdf', fosterCareApplicationPdfRoute);
 app.post('/api/share-foster-application', shareFosterApplicationRoute);
 app.get('/api/download-foster-application/:applicationId', downloadFosterApplicationRoute);
+
+// Open Arms Initiative Routes
+app.post('/api/leads/:id/send-form', ...sendInitiativeFormRoute);
+app.post('/api/leads/:id/documents', ...protectedUploadDocument);
+app.get('/api/leads/:id/documents', ...protectedListDocuments);
+app.get('/api/leads/:id/documents/:docId/download', ...protectedDownloadDocument);
 
 // Error handling
 app.use((err, req, res, next) => {

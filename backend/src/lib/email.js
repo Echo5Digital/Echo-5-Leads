@@ -33,23 +33,25 @@ function getTransporter() {
  * @param {string} options.subject - Email subject
  * @param {string} options.text - Plain text body
  * @param {string} options.html - HTML body (optional)
+ * @param {Array}  options.attachments - Nodemailer attachment objects (optional)
  */
-export async function sendEmail({ to, subject, text, html }) {
+export async function sendEmail({ to, subject, text, html, attachments }) {
   // Check if in test mode
   const testMode = process.env.EMAIL_TEST_MODE === 'true';
-  
+
   if (testMode) {
     console.log('='.repeat(80));
     console.log('[Email] TEST MODE - Email not actually sent');
     console.log('To:', to);
     console.log('Subject:', subject);
     console.log('Body:', text.substring(0, 200) + '...');
+    if (attachments?.length) console.log('Attachments:', attachments.map(a => a.filename).join(', '));
     console.log('='.repeat(80));
     return { success: true, messageId: 'test-mode-' + Date.now(), testMode: true };
   }
 
   const transport = getTransporter();
-  
+
   if (!transport) {
     console.log('[Email] Skipping email - transporter not configured');
     return { success: false, error: 'Email not configured' };
@@ -61,7 +63,8 @@ export async function sendEmail({ to, subject, text, html }) {
       to: Array.isArray(to) ? to.join(', ') : to,
       subject,
       text,
-      html: html || text
+      html: html || text,
+      ...(attachments?.length && { attachments }),
     });
 
     console.log('[Email] Sent successfully:', info.messageId);

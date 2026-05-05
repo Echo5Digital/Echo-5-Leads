@@ -174,6 +174,49 @@ export const leadsApi = {
   downloadFosterApplicationUrl(applicationId) {
     return `${API_URL}/api/download-foster-application/${applicationId}`;
   },
+
+  // ── Open Arms Initiative ────────────────────────────────────────────────
+
+  // Send blank Demographics or Sliding Fee PDF to lead's email
+  async sendInitiativeForm(leadId, formType) {
+    return apiRequest(`/api/leads/${leadId}/send-form`, {
+      method: 'POST',
+      body: JSON.stringify({ formType }),
+    });
+  },
+
+  // Upload a completed form document to a lead's profile
+  async uploadDocument(leadId, file, type) {
+    const token = Cookies.get('accessToken');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const response = await fetch(`${API_URL}/api/leads/${leadId}/documents`, {
+      method: 'POST',
+      headers: {
+        // Do NOT set Content-Type — browser sets it with boundary for multipart
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Upload failed');
+    }
+    return response.json();
+  },
+
+  // List uploaded documents for a lead
+  async getDocuments(leadId) {
+    return apiRequest(`/api/leads/${leadId}/documents`);
+  },
+
+  // Returns a URL to download a specific document
+  downloadDocumentUrl(leadId, docId) {
+    return `${API_URL}/api/leads/${leadId}/documents/${docId}/download`;
+  },
 };
 
 // Meta Leads API (Facebook/Meta Lead Ads)

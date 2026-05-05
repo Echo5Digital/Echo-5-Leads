@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { leadsApi, usersApi, STAGES } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { useTenant } from '@/lib/TenantContext';
-import { Pencil, CheckCircle, Archive, Phone, Mail, MessageSquare, RefreshCw, Link, FileText, Activity } from 'lucide-react';
+import { Pencil, CheckCircle, Archive, Phone, Mail, MessageSquare, RefreshCw, Link, FileText, Activity, Send, Upload, Download, Paperclip } from 'lucide-react';
 
 export default function LeadDetail() {
   const params = useParams();
@@ -29,6 +29,16 @@ export default function LeadDetail() {
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Initiative-specific state
+  const [tenantFeatures, setTenantFeatures] = useState({});
+  const [formSending, setFormSending] = useState({ demographics: false, 'sliding-fee': false });
+  const [formSendStatus, setFormSendStatus] = useState({ demographics: null, 'sliding-fee': null });
+  const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [uploadType, setUploadType] = useState('demographics');
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(null);
 
   // Get stages from tenant config or fallback to default
   const stages = getStages();
@@ -74,6 +84,76 @@ export default function LeadDetail() {
       setTeamMembers(response.users || []);
     } catch (err) {
       console.error('Failed to load team members:', err);
+    }
+  }
+
+  // ── Initiative: load tenant features + documents once the lead is available ─
+  useEffect(() => {
+    if (!lead?._id) return;
+
+    async function loadFeatures() {
+      try {
+        // SuperAdmin must supply tenantId; all other roles use their JWT implicitly
+        const config = await leadsApi.getTenantConfig(isSuperAdmin() ? lead.tenantId : null);
+        const features = config.features || {};
+        setTenantFeatures(features);
+        if (features.initiativeForms) {
+          loadDocuments();
+        }
+      } catch (err) {
+        console.error('Failed to load tenant features:', err);
+      }
+    }
+    loadFeatures();
+  }, [lead?._id]);
+
+  async function loadDocuments() {
+    try {
+      setDocsLoading(true);
+      const data = await leadsApi.getDocuments(params.id);
+      setDocuments(data.documents || []);
+    } catch (err) {
+      console.error('Failed to load documents:', err);
+    } finally {
+      setDocsLoading(false);
+    }
+  }
+
+  async function handleSendForm(formType) {
+    if (!lead.email) {
+      alert('This lead has no email address on file. Please add one before sending a form.');
+      return;
+    }
+    setFormSending(prev => ({ ...prev, [formType]: true }));
+    setFormSendStatus(prev => ({ ...prev, [formType]: null }));
+    try {
+      await leadsApi.sendInitiativeForm(params.id, formType);
+      setFormSendStatus(prev => ({ ...prev, [formType]: 'success' }));
+      setTimeout(() => setFormSendStatus(prev => ({ ...prev, [formType]: null })), 4000);
+      loadLead(); // refresh activities
+    } catch (err) {
+      setFormSendStatus(prev => ({ ...prev, [formType]: 'error:' + err.message }));
+    } finally {
+      setFormSending(prev => ({ ...prev, [formType]: false }));
+    }
+  }
+
+  async function handleFileUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = ''; // reset input so same file can be re-uploaded
+    setUploading(true);
+    setUploadStatus(null);
+    try {
+      await leadsApi.uploadDocument(params.id, file, uploadType);
+      setUploadStatus('success');
+      setTimeout(() => setUploadStatus(null), 4000);
+      loadDocuments();
+      loadLead(); // refresh activities
+    } catch (err) {
+      setUploadStatus('error:' + err.message);
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -326,6 +406,58 @@ export default function LeadDetail() {
             </p>
           </div>
 
+          {/* ── Send Initiative Forms (Open Arms Initiative only) ── */}
+          {tenantFeatures.initiativeForms && (
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Send Forms
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {/* Demographics Form */}
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => handleSendForm('demographics')}
+                    disabled={formSending['demographics'] || !lead.email}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    <Send size={14} />
+                    {formSending['demographics'] ? 'Sending…' : 'Send Demographics Form'}
+                  </button>
+                  {formSendStatus['demographics'] === 'success' && (
+                    <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle size={12} /> Sent to {lead.email}</span>
+                  )}
+                  {formSendStatus['demographics']?.startsWith('error:') && (
+                    <span className="text-xs text-red-600">{formSendStatus['demographics'].replace('error:', '')}</span>
+                  )}
+                </div>
+
+                {/* Sliding Fee Form */}
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => handleSendForm('sliding-fee')}
+                    disabled={formSending['sliding-fee'] || !lead.email}
+                    className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    <Send size={14} />
+                    {formSending['sliding-fee'] ? 'Sending…' : 'Send Sliding Fee Form'}
+                  </button>
+                  {formSendStatus['sliding-fee'] === 'success' && (
+                    <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle size={12} /> Sent to {lead.email}</span>
+                  )}
+                  {formSendStatus['sliding-fee']?.startsWith('error:') && (
+                    <span className="text-xs text-red-600">{formSendStatus['sliding-fee'].replace('error:', '')}</span>
+                  )}
+                </div>
+              </div>
+              {!lead.email && (
+                <p className="mt-2 text-xs text-amber-600">Add an email address to this lead before sending forms.</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Emails the blank PDF form directly to {lead.email || 'the client'} as an attachment.
+              </p>
+            </div>
+          )}
+
           {/* Assigned To Section - Only for SuperAdmin and ClientAdmin */}
           {(isSuperAdmin() || isClientAdmin() || user?.role === 'manager') && (
             <div className="mb-6 pb-6 border-b border-gray-200">
@@ -546,6 +678,89 @@ export default function LeadDetail() {
                   );
                 })}
             </div>
+          </div>
+        )}
+
+        {/* ── Documents (Open Arms Initiative only) ── */}
+        {tenantFeatures.initiativeForms && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <Paperclip size={20} className="text-gray-500" /> Documents
+              </h2>
+
+              {/* Upload controls */}
+              {hasPermission('canEditLeads') && !isExecutive() && (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={uploadType}
+                    onChange={(e) => setUploadType(e.target.value)}
+                    className="text-sm px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="demographics">Demographics Form</option>
+                    <option value="sliding_fee">Sliding Fee Application</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <label className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg cursor-pointer transition-colors duration-200 ${uploading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+                    <Upload size={14} />
+                    {uploading ? 'Uploading…' : 'Upload'}
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Upload status feedback */}
+            {uploadStatus === 'success' && (
+              <div className="mb-3 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center gap-2">
+                <CheckCircle size={14} /> File uploaded successfully.
+              </div>
+            )}
+            {uploadStatus?.startsWith('error:') && (
+              <div className="mb-3 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+                {uploadStatus.replace('error:', '')}
+              </div>
+            )}
+
+            {/* Document list */}
+            {docsLoading ? (
+              <p className="text-sm text-gray-500 py-4 text-center">Loading documents…</p>
+            ) : documents.length === 0 ? (
+              <p className="text-sm text-gray-500 py-4 text-center">No documents uploaded yet.</p>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {documents.map((doc) => {
+                  const typeLabels = { demographics: 'Demographics Form', sliding_fee: 'Sliding Fee Application', other: 'Document' };
+                  return (
+                    <div key={doc._id} className="flex items-center justify-between py-3">
+                      <div className="flex items-center gap-3">
+                        <FileText size={18} className="text-blue-500 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{doc.fileName}</p>
+                          <p className="text-xs text-gray-500">
+                            {typeLabels[doc.type] || doc.type} &middot; {(doc.fileSize / 1024).toFixed(1)} KB &middot; {formatDate(doc.uploadedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={leadsApi.downloadDocumentUrl(params.id, doc._id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                      >
+                        <Download size={14} /> Download
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
