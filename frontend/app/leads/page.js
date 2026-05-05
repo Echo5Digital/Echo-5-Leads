@@ -19,7 +19,9 @@ export default function LeadsListPage() {
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
   const { user, hasPermission, isExecutive } = useAuth();
-  const { getStages, selectedTenant } = useTenant();
+  const { getStages, selectedTenant, tenantConfig } = useTenant();
+  const [tenantFeatures, setTenantFeatures] = useState({});
+  const [sendingForms, setSendingForms] = useState({});
   const [teamMembers, setTeamMembers] = useState([]);
   const assignableMembers = teamMembers.filter(m => m.role === 'staff' || m.role === 'manager');
   const [filters, setFilters] = useState({
@@ -134,6 +136,27 @@ export default function LeadsListPage() {
       ]).then(([w, m]) => setArchivedCount((w.total || 0) + (m.total || 0)));
     }
   }, [selectedTenant, user]);
+
+  // Load tenant features (Initiative vs Foster Care detection)
+  useEffect(() => {
+    async function loadFeatures() {
+      try {
+        // For SuperAdmin use tenantConfig from context; otherwise fetch directly
+        const features = tenantConfig?.features || null;
+        if (features !== null) {
+          setTenantFeatures(features);
+          return;
+        }
+        if (user?.role !== 'super_admin') {
+          const config = await leadsApi.getTenantConfig();
+          setTenantFeatures(config.features || {});
+        }
+      } catch (err) {
+        console.error('Failed to load tenant features:', err);
+      }
+    }
+    loadFeatures();
+  }, [tenantConfig, user?.role]);
 
   async function loadTeamMembers(tenantId) {
     try {
@@ -329,6 +352,24 @@ export default function LeadsListPage() {
       loadArchivedLeads();
     } catch (err) {
       alert('Error unarchiving lead: ' + err.message);
+    }
+  }
+
+  async function handleSendInitiativeForm(lead, formType) {
+    if (!lead.email) {
+      alert('This lead has no email address. Please open the lead and add one first.');
+      return;
+    }
+    const key = `${lead._id}_${formType}`;
+    setSendingForms(prev => ({ ...prev, [key]: true }));
+    try {
+      await leadsApi.sendInitiativeForm(lead._id, formType);
+      const label = formType === 'demographics' ? 'Demographics Form' : 'Sliding Fee Application';
+      alert(`✓ ${label} sent to ${lead.email}`);
+    } catch (err) {
+      alert('Error sending form: ' + err.message);
+    } finally {
+      setSendingForms(prev => ({ ...prev, [key]: false }));
     }
   }
 
@@ -966,13 +1007,34 @@ export default function LeadsListPage() {
                       <td className="px-4 py-4 w-52 text-sm">
                         <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
-                            <button
-                              onClick={() => handleSendForm(lead)}
-                              className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
-                              title="Send application form"
-                            >
-                              {lead.formSentAt ? 'Resend Form' : 'Send Form'}
-                            </button>
+                            tenantFeatures.initiativeForms ? (
+                              <>
+                                <button
+                                  onClick={() => handleSendInitiativeForm(lead, 'demographics')}
+                                  disabled={sendingForms[`${lead._id}_demographics`]}
+                                  className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  title="Send blank Demographics Form PDF"
+                                >
+                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : 'Demographics'}
+                                </button>
+                                <button
+                                  onClick={() => handleSendInitiativeForm(lead, 'sliding-fee')}
+                                  disabled={sendingForms[`${lead._id}_sliding-fee`]}
+                                  className="text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  title="Send blank Sliding Fee Application PDF"
+                                >
+                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : 'Sliding Fee'}
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleSendForm(lead)}
+                                className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
+                                title="Send application form"
+                              >
+                                {lead.formSentAt ? 'Resend Form' : 'Send Form'}
+                              </button>
+                            )
                           )}
                           {lead.customFields?.applicationId && (
                             <button
@@ -1198,13 +1260,34 @@ export default function LeadsListPage() {
                       <td className="px-4 py-4 w-52 text-sm">
                         <div className="flex gap-2 flex-wrap">
                           {hasPermission('canEditLeads') && (
-                            <button
-                              onClick={() => handleSendForm(lead)}
-                              className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
-                              title="Send application form"
-                            >
-                              {lead.formSentAt ? 'Resend Form' : 'Send Form'}
-                            </button>
+                            tenantFeatures.initiativeForms ? (
+                              <>
+                                <button
+                                  onClick={() => handleSendInitiativeForm(lead, 'demographics')}
+                                  disabled={sendingForms[`${lead._id}_demographics`]}
+                                  className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  title="Send blank Demographics Form PDF"
+                                >
+                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : 'Demographics'}
+                                </button>
+                                <button
+                                  onClick={() => handleSendInitiativeForm(lead, 'sliding-fee')}
+                                  disabled={sendingForms[`${lead._id}_sliding-fee`]}
+                                  className="text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  title="Send blank Sliding Fee Application PDF"
+                                >
+                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : 'Sliding Fee'}
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleSendForm(lead)}
+                                className={lead.formSentAt ? "text-green-600 hover:text-green-700 font-medium transition-colors duration-200" : "text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"}
+                                title="Send application form"
+                              >
+                                {lead.formSentAt ? 'Resend Form' : 'Send Form'}
+                              </button>
+                            )
                           )}
                           {lead.customFields?.applicationId && (
                             <button
