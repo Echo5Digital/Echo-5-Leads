@@ -109,9 +109,36 @@ async function getLeads(req, res) {
       if (dateTo) filter.createdAt.$lte = new Date(dateTo);
     }
 
-    // Gala Zelle filter — matches leads from the Gala Zelle Payment Form campaign
+    // Gala Zelle filter — matches leads whose originalPayload contains an
+    // "Amount Sent" field (either a key named "amount..." or a label value
+    // of "Amount Sent", which is how Pro Forms / Elementor store field labels).
     if (req.query.gala === 'true') {
-      filter.campaignName = { $regex: /gala|zelle/i };
+      filter.$expr = {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $objectToArray: { $ifNull: ['$originalPayload', {}] } },
+                as: 'f',
+                cond: {
+                  $or: [
+                    // Key name itself contains "amount" (e.g. amount_sent)
+                    { $regexMatch: { input: { $toLower: '$$f.k' }, regex: 'amount' } },
+                    // Or the VALUE is the label text "Amount Sent" (Pro Forms / Elementor)
+                    {
+                      $regexMatch: {
+                        input: { $toLower: { $ifNull: [{ $toString: '$$f.v' }, ''] } },
+                        regex: 'amount sent'
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          0
+        ]
+      };
     }
 
     console.log('Final filter:', JSON.stringify(filter, null, 2));

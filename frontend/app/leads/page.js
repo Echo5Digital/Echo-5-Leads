@@ -749,7 +749,7 @@ export default function LeadsListPage() {
               </span>
             )}
           </button>
-          {tenantFeatures.initiativeForms && (
+          {tenantFeatures.initiativeForms && tenantFeatures.galaTab && (
             <button
               onClick={() => {setActiveTab('gala'); setFilters({...filters, page: 1});}}
               className={`px-6 py-3 font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
