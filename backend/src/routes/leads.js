@@ -109,6 +109,11 @@ async function getLeads(req, res) {
       if (dateTo) filter.createdAt.$lte = new Date(dateTo);
     }
 
+    // Gala Zelle filter — matches leads from the Gala Zelle Payment Form campaign
+    if (req.query.gala === 'true') {
+      filter.campaignName = { $regex: /gala|zelle/i };
+    }
+
     console.log('Final filter:', JSON.stringify(filter, null, 2));
     console.log('User role:', req.user?.role);
     console.log('User tenantId:', req.user?.tenantId);

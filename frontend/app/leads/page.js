@@ -15,6 +15,8 @@ export default function LeadsListPage() {
   const [metaLeads, setMetaLeads] = useState([]);
   const [archivedLeads, setArchivedLeads] = useState([]);
   const [archivedCount, setArchivedCount] = useState(0);
+  const [galaLeads, setGalaLeads] = useState([]);
+  const [galaTotal, setGalaTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLeads, setSelectedLeads] = useState([]);
@@ -105,6 +107,8 @@ export default function LeadsListPage() {
           loadMetaLeads();
         } else if (activeTab === 'archived') {
           loadArchivedLeads();
+        } else if (activeTab === 'gala') {
+          loadGalaLeads();
         }
       }
     } else {
@@ -114,6 +118,8 @@ export default function LeadsListPage() {
         loadMetaLeads();
       } else if (activeTab === 'archived') {
         loadArchivedLeads();
+      } else if (activeTab === 'gala') {
+        loadGalaLeads();
       }
     }
   }, [filters, selectedTenant, user, activeTab]);
@@ -259,6 +265,44 @@ export default function LeadsListPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadGalaLeads() {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = { gala: true, page: filters.page, limit: filters.limit };
+      if (filters.q) params.q = filters.q;
+      if (filters.stage) params.stage = filters.stage;
+      if (user?.role === 'super_admin' && selectedTenant) params.tenantId = selectedTenant._id;
+      const data = await leadsApi.getLeads(params);
+      setGalaLeads(data.items);
+      setGalaTotal(data.total);
+      setTotal(data.total);
+      setTotalPages(Math.ceil(data.total / data.limit));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Extract "Amount Sent" value from a lead's originalPayload
+  function getAmountSent(lead) {
+    if (!lead.originalPayload) return null;
+    const payload = lead.originalPayload;
+    // Look for any key whose label contains "amount" (case-insensitive)
+    for (const [key, value] of Object.entries(payload)) {
+      if (!value || typeof value === 'object') continue;
+      const label = (
+        payload[key.replace('pro_field_', 'pro_field_label_')] ||
+        payload[key.replace('elementor_field_', 'elementor_field_label_')] ||
+        payload[`cf7_label_${key.replace('cf7_', '')}`] ||
+        key
+      ).toLowerCase();
+      if (label.includes('amount')) return String(value);
+    }
+    return null;
   }
 
   function handleFilterChange(key, value) {
@@ -705,6 +749,25 @@ export default function LeadsListPage() {
               </span>
             )}
           </button>
+          {tenantFeatures.initiativeForms && (
+            <button
+              onClick={() => {setActiveTab('gala'); setFilters({...filters, page: 1});}}
+              className={`px-6 py-3 font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                activeTab === 'gala'
+                  ? 'text-emerald-600 border-b-2 border-emerald-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <span className="text-base leading-none">$</span> Gala Zelle
+              {galaTotal > 0 && (
+                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                  activeTab === 'gala' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
+                }`}>
+                  {galaTotal}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Filters */}
@@ -1749,6 +1812,69 @@ export default function LeadsListPage() {
           </div>
         )}
 
+
+        {/* ── Gala Zelle Tab (Initiative only) ── */}
+        {!loading && activeTab === 'gala' && tenantFeatures.initiativeForms && galaLeads.length === 0 && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center border border-white/20">
+            <div className="mb-3 flex justify-center">
+              <span className="text-4xl text-emerald-400 font-bold">$</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-1">No Gala Zelle payments yet</h3>
+            <p className="text-gray-500 text-sm">Leads from the Gala Zelle Payment Form will appear here.</p>
+          </div>
+        )}
+
+        {!loading && activeTab === 'gala' && tenantFeatures.initiativeForms && galaLeads.length > 0 && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-emerald-100">
+            <div className="px-6 py-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-emerald-600">$</span>
+                <h3 className="text-base font-semibold text-emerald-800">
+                  Gala Zelle Payments — {galaTotal} submission{galaTotal !== 1 ? 's' : ''}
+                </h3>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-emerald-50 to-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-emerald-600 uppercase tracking-wider">Amount Sent</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {galaLeads.map((lead) => {
+                    const amount = getAmountSent(lead);
+                    return (
+                      <tr key={lead._id} className="hover:bg-emerald-50/30 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          <Link href={`/leads/${lead._id}`} className="hover:text-emerald-700 hover:underline">
+                            {lead.firstName} {lead.lastName}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{lead.email || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{lead.phoneE164 || '—'}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-emerald-700">
+                          {amount ? `$${amount}` : <span className="text-gray-400 font-normal">—</span>}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">{formatDate(lead.createdAt)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <Link href={`/leads/${lead._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                            View
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
