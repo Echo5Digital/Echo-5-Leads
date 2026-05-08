@@ -748,14 +748,12 @@ export default function LeadDetail() {
                           </p>
                         </div>
                       </div>
-                      <a
-                        href={leadsApi.downloadDocumentUrl(params.id, doc._id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => leadsApi.downloadDocument(params.id, doc._id, doc.fileName)}
                         className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
                       >
                         <Download size={14} /> Download
-                      </a>
+                      </button>
                     </div>
                   );
                 })}

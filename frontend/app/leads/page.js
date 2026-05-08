@@ -24,6 +24,7 @@ export default function LeadsListPage() {
   const { getStages, selectedTenant, tenantConfig } = useTenant();
   const [tenantFeatures, setTenantFeatures] = useState({});
   const [sendingForms, setSendingForms] = useState({});
+  const [sentForms, setSentForms] = useState({});
   const [teamMembers, setTeamMembers] = useState([]);
   const assignableMembers = teamMembers.filter(m => m.role === 'staff' || m.role === 'manager');
   const [filters, setFilters] = useState({
@@ -408,8 +409,8 @@ export default function LeadsListPage() {
     setSendingForms(prev => ({ ...prev, [key]: true }));
     try {
       await leadsApi.sendInitiativeForm(lead._id, formType);
-      const label = formType === 'demographics' ? 'Demographics Form' : 'Sliding Fee Application';
-      alert(`✓ ${label} sent to ${lead.email}`);
+      setSentForms(prev => ({ ...prev, [key]: true }));
+      setTimeout(() => setSentForms(prev => { const n = { ...prev }; delete n[key]; return n; }), 5000);
     } catch (err) {
       alert('Error sending form: ' + err.message);
     } finally {
@@ -1074,19 +1075,19 @@ export default function LeadsListPage() {
                               <>
                                 <button
                                   onClick={() => handleSendInitiativeForm(lead, 'demographics')}
-                                  disabled={sendingForms[`${lead._id}_demographics`]}
-                                  className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  disabled={sendingForms[`${lead._id}_demographics`] || sentForms[`${lead._id}_demographics`]}
+                                  className={sentForms[`${lead._id}_demographics`] ? 'text-green-600 font-medium transition-colors duration-200' : 'text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50'}
                                   title="Send blank Demographics Form PDF"
                                 >
-                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : 'Demographics'}
+                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : sentForms[`${lead._id}_demographics`] ? '✓ Sent' : 'Demographics'}
                                 </button>
                                 <button
                                   onClick={() => handleSendInitiativeForm(lead, 'sliding-fee')}
-                                  disabled={sendingForms[`${lead._id}_sliding-fee`]}
-                                  className="text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  disabled={sendingForms[`${lead._id}_sliding-fee`] || sentForms[`${lead._id}_sliding-fee`]}
+                                  className={sentForms[`${lead._id}_sliding-fee`] ? 'text-green-600 font-medium transition-colors duration-200' : 'text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50'}
                                   title="Send blank Sliding Fee Application PDF"
                                 >
-                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : 'Sliding Fee'}
+                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : sentForms[`${lead._id}_sliding-fee`] ? '✓ Sent' : 'Sliding Fee'}
                                 </button>
                               </>
                             ) : (
@@ -1327,19 +1328,19 @@ export default function LeadsListPage() {
                               <>
                                 <button
                                   onClick={() => handleSendInitiativeForm(lead, 'demographics')}
-                                  disabled={sendingForms[`${lead._id}_demographics`]}
-                                  className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  disabled={sendingForms[`${lead._id}_demographics`] || sentForms[`${lead._id}_demographics`]}
+                                  className={sentForms[`${lead._id}_demographics`] ? 'text-green-600 font-medium transition-colors duration-200' : 'text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-200 disabled:opacity-50'}
                                   title="Send blank Demographics Form PDF"
                                 >
-                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : 'Demographics'}
+                                  {sendingForms[`${lead._id}_demographics`] ? 'Sending…' : sentForms[`${lead._id}_demographics`] ? '✓ Sent' : 'Demographics'}
                                 </button>
                                 <button
                                   onClick={() => handleSendInitiativeForm(lead, 'sliding-fee')}
-                                  disabled={sendingForms[`${lead._id}_sliding-fee`]}
-                                  className="text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50"
+                                  disabled={sendingForms[`${lead._id}_sliding-fee`] || sentForms[`${lead._id}_sliding-fee`]}
+                                  className={sentForms[`${lead._id}_sliding-fee`] ? 'text-green-600 font-medium transition-colors duration-200' : 'text-violet-600 hover:text-violet-700 font-medium transition-colors duration-200 disabled:opacity-50'}
                                   title="Send blank Sliding Fee Application PDF"
                                 >
-                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : 'Sliding Fee'}
+                                  {sendingForms[`${lead._id}_sliding-fee`] ? 'Sending…' : sentForms[`${lead._id}_sliding-fee`] ? '✓ Sent' : 'Sliding Fee'}
                                 </button>
                               </>
                             ) : (

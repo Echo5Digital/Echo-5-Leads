@@ -213,9 +213,20 @@ export const leadsApi = {
     return apiRequest(`/api/leads/${leadId}/documents`);
   },
 
-  // Returns a URL to download a specific document
-  downloadDocumentUrl(leadId, docId) {
-    return `${API_URL}/api/leads/${leadId}/documents/${docId}/download`;
+  // Authenticated download — fetches with Bearer token and triggers browser save
+  async downloadDocument(leadId, docId, fileName) {
+    const token = Cookies.get('accessToken');
+    const response = await fetch(`${API_URL}/api/leads/${leadId}/documents/${docId}/download`, {
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+    });
+    if (!response.ok) throw new Error('Download failed');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName || 'document';
+    a.click();
+    URL.revokeObjectURL(url);
   },
 };
 
