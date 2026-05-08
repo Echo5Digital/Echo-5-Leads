@@ -24,7 +24,9 @@ export default function LeadsListPage() {
   const { getStages, selectedTenant, tenantConfig } = useTenant();
   const [tenantFeatures, setTenantFeatures] = useState({});
   const [sendingForms, setSendingForms] = useState({});
-  const [sentForms, setSentForms] = useState({});
+  const [sentForms, setSentForms] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('sentForms') || '{}'); } catch { return {}; }
+  });
   const [teamMembers, setTeamMembers] = useState([]);
   const assignableMembers = teamMembers.filter(m => m.role === 'staff' || m.role === 'manager');
   const [filters, setFilters] = useState({
@@ -409,8 +411,11 @@ export default function LeadsListPage() {
     setSendingForms(prev => ({ ...prev, [key]: true }));
     try {
       await leadsApi.sendInitiativeForm(lead._id, formType);
-      setSentForms(prev => ({ ...prev, [key]: true }));
-      setTimeout(() => setSentForms(prev => { const n = { ...prev }; delete n[key]; return n; }), 5000);
+      setSentForms(prev => {
+        const next = { ...prev, [key]: true };
+        try { sessionStorage.setItem('sentForms', JSON.stringify(next)); } catch {}
+        return next;
+      });
     } catch (err) {
       alert('Error sending form: ' + err.message);
     } finally {
