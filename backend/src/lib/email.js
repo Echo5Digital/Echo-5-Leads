@@ -35,7 +35,7 @@ function getTransporter() {
  * @param {string} options.html - HTML body (optional)
  * @param {Array}  options.attachments - Nodemailer attachment objects (optional)
  */
-export async function sendEmail({ to, subject, text, html, attachments }) {
+export async function sendEmail({ to, subject, text, html, attachments, replyTo }) {
   // Check if in test mode
   const testMode = process.env.EMAIL_TEST_MODE === 'true';
 
@@ -61,6 +61,7 @@ export async function sendEmail({ to, subject, text, html, attachments }) {
     const info = await transport.sendMail({
       from: `"Echo5 Leads" <${process.env.MAIL_USER}>`,
       to: Array.isArray(to) ? to.join(', ') : to,
+      ...(replyTo && { replyTo }),
       subject,
       text,
       html: html || text,

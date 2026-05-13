@@ -86,7 +86,7 @@ async function handler(req, res) {
 
     const recipientName = [lead.firstName, lead.lastName].filter(Boolean).join(' ') || 'there';
 
-    const text = `Hi ${recipientName},\n\nPlease find your ${form.label} attached to this email.\n\nOnce completed, please send the form back to us at: info@openarmsinitiative.com\n\nIf you have any questions, feel free to contact us at info@openarmsinitiative.com or visit us at https://www.openarmsinitiative.com/contact-us/\n\nThank you,\nOpen Arms Initiative`;
+    const text = `Hi ${recipientName},\n\nPlease find your ${form.label} attached to this email.\n\nOnce completed, please reply to this email with the form attached, or send it directly to: kamryn.bass@openarmsfostercare.com\n\nIf you have any questions, feel free to contact us at info@openarmsinitiative.com or visit us at https://www.openarmsinitiative.com/contact-us/\n\nThank you,\nOpen Arms Initiative`;
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#333;">
@@ -96,8 +96,8 @@ async function handler(req, res) {
         <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
           <p style="font-size:16px;">Hi ${recipientName},</p>
           <p>Please find your <strong>${form.label}</strong> attached to this email.</p>
-          <p>Once completed, please send the form back to us at:<br/>
-            <a href="mailto:info@openarmsinitiative.com" style="color:#1a56db;font-weight:bold;">info@openarmsinitiative.com</a>
+          <p>Once completed, please <strong>reply to this email</strong> with the form attached, or send it directly to:<br/>
+            <a href="mailto:kamryn.bass@openarmsfostercare.com" style="color:#1a56db;font-weight:bold;">kamryn.bass@openarmsfostercare.com</a>
           </p>
           <p>If you have any questions, feel free to reach out at <a href="mailto:info@openarmsinitiative.com" style="color:#1a56db;">info@openarmsinitiative.com</a> or visit our <a href="https://www.openarmsinitiative.com/contact-us/" style="color:#1a56db;">contact page</a>.</p>
           <br/>
@@ -111,6 +111,7 @@ async function handler(req, res) {
 
     const emailResult = await sendEmail({
       to: lead.email,
+      replyTo: 'kamryn.bass@openarmsfostercare.com',
       subject: form.subject,
       text,
       html,
