@@ -11,7 +11,7 @@ export default function SettingsPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   
-  const { selectedTenant, switchTenant, tenants } = useTenant();
+  const { selectedTenant, switchTenant, tenants, refreshTenantConfig } = useTenant();
   const { isSuperAdmin, user } = useAuth();
 
   const [settings, setSettings] = useState({
@@ -104,9 +104,10 @@ export default function SettingsPage() {
       }, selectedTenant?._id);
       
       setSuccess(true);
-      
-      // Reload settings to confirm changes
+
+      // Reload settings and refresh shared context so leads page picks up new stages
       await loadSettings();
+      refreshTenantConfig(selectedTenant?._id || null);
       
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
