@@ -11,38 +11,38 @@ export function TenantProvider({ children }) {
   const [tenantConfig, setTenantConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load selected tenant from localStorage on mount
+  // Load selected tenant from localStorage on mount, then load config
   useEffect(() => {
     const stored = localStorage.getItem('selectedTenant');
+    let parsed = null;
     if (stored) {
       try {
-        setSelectedTenant(JSON.parse(stored));
+        parsed = JSON.parse(stored);
+        setSelectedTenant(parsed);
       } catch (e) {
         console.error('Failed to parse stored tenant:', e);
       }
     }
+    // Always load tenant config on mount — regular users get it via JWT,
+    // SuperAdmin gets it via the selectedTenant id
+    loadTenantConfig(parsed?._id || null);
     setLoading(false);
   }, []);
 
-  // Save to localStorage when tenant changes
+  // Save to localStorage and reload config when SuperAdmin switches tenant
   useEffect(() => {
     if (selectedTenant) {
       localStorage.setItem('selectedTenant', JSON.stringify(selectedTenant));
-      // Load tenant config when tenant changes
-      loadTenantConfig();
-    } else {
-      setTenantConfig(null);
+      loadTenantConfig(selectedTenant._id);
     }
   }, [selectedTenant]);
 
-  const loadTenantConfig = async () => {
-    if (!selectedTenant?._id) return;
+  const loadTenantConfig = async (tenantId = null) => {
     try {
-      const config = await leadsApi.getTenantConfig(selectedTenant._id);
+      const config = await leadsApi.getTenantConfig(tenantId);
       setTenantConfig(config);
     } catch (error) {
       console.error('Failed to load tenant config:', error);
-      // Fallback to default config
       setTenantConfig({ stages: DEFAULT_STAGES });
     }
   };
